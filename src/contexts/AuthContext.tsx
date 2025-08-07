@@ -7,15 +7,17 @@ interface User {
   id: number;
   email: string;
   name: string;
+  avatar?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string) => Promise<boolean>;
+  signup: (email: string, password: string, name: string, avatar?: File) => Promise<boolean>;
   logout: () => void;
   updateProfile: (name: string) => Promise<boolean>;
+  updateAvatar: (avatar: File) => Promise<boolean>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
 }
 
@@ -71,19 +73,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signup = async (email: string, password: string, name: string): Promise<boolean> => {
+  const signup = async (email: string, password: string, name: string, avatar?: File): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await authAPI.signup({ email, password, name });
 
-      if (response.data.success) {
-        const userData = response.data.user;
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', response.data.token);
-        return true;
+      let data: any = { email, password, name };
+
+      if (avatar) {
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('name', name);
+        formData.append('avatar', avatar);
+
+        const response = await authAPI.signup(formData);
+
+        if (response.data.success) {
+          const userData = response.data.user;
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('token', response.data.token);
+          return true;
+        }
+        return false;
+      } else {
+        const response = await authAPI.signup(data);
+
+        if (response.data.success) {
+          const userData = response.data.user;
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('token', response.data.token);
+          return true;
+        }
+        return false;
       }
-      return false;
     } catch (error) {
       console.error('Signup error:', error);
       return false;
@@ -118,6 +142,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateAvatar = async (avatar: File): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      const response = await authAPI.updateAvatar({ avatar });
+      if (response.data.success && user) {
+        const updatedUser = { ...user, avatar: response.data.avatar };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Update avatar error:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const changePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -141,6 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signup,
     logout,
     updateProfile,
+    updateAvatar,
     changePassword,
   };
 

@@ -7,12 +7,14 @@ import { activityAPI, leaguesAPI } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import PageTitle from '@/components/PageTitle';
 import BackToLeagueButton from '@/components/BackToLeagueButton';
+import Avatar from '@/components/Avatar';
 
 interface Activity {
     id: number;
     leagueId: number;
     userId: number | null;
     userName: string | null;
+    userAvatar?: string;
     activityType: string;
     weekNumber: number | null;
     driverId: number | null;
@@ -225,9 +227,18 @@ export default function LeagueActivityPage() {
                                     <div key={activity.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                                         <div className="flex items-start space-x-3">
                                             <div className="flex-shrink-0">
-                                                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getActivityIconBg(activity.activityType)}`}>
-                                                    {getActivityIcon(activity.activityType)}
-                                                </div>
+                                                {activity.userId && activity.userName ? (
+                                                    <Avatar
+                                                        src={activity.userAvatar}
+                                                        alt={`${activity.userName}'s avatar`}
+                                                        size="md"
+                                                        className="flex-shrink-0"
+                                                    />
+                                                ) : (
+                                                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getActivityIconBg(activity.activityType)}`}>
+                                                        {getActivityIcon(activity.activityType)}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-semibold text-gray-900">

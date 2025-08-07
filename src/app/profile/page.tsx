@@ -3,15 +3,17 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Avatar from '@/components/Avatar';
 
 export default function ProfilePage() {
-  const { user, logout, updateProfile, changePassword } = useAuth();
+  const { user, logout, updateProfile, changePassword, updateAvatar } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showAvatarUpload, setShowAvatarUpload] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -24,11 +26,84 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Avatar Upload State
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
       logout();
       // Redirect to login page after logout
       window.location.href = '/login';
+    }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+
+      setAvatar(file);
+      setError('');
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatar(null);
+    setAvatarPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!avatar) {
+      setError('Please select an image to upload');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const success = await updateAvatar(avatar);
+      if (success) {
+        setSuccess('Avatar updated successfully!');
+        showToast('Avatar updated successfully!', 'success');
+        setShowAvatarUpload(false);
+        setAvatar(null);
+        setAvatarPreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        setError('Failed to update avatar. Please try again.');
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,8 +122,12 @@ export default function ProfilePage() {
       } else {
         setError('Failed to update profile. Please try again.');
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.');
+    } catch (error: any) {
+      if (error?.response?.data?.errors?.some((e: any) => e.message === 'Username already taken')) {
+        setError('Username already taken. Please choose a different username.');
+      } else {
+        setError('An error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -110,9 +189,12 @@ export default function ProfilePage() {
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Account Information</h3>
               <div className="flex items-center space-x-4 mb-6">
-                <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-blue-600 font-bold text-xl">{user?.name?.charAt(0).toUpperCase()}</span>
-                </div>
+                <Avatar
+                  src={user?.avatar}
+                  alt={`${user?.name}'s avatar`}
+                  size="lg"
+                  className="flex-shrink-0"
+                />
                 <div>
                   <h4 className="text-xl font-medium text-gray-900">{user?.name}</h4>
                   <p className="text-gray-500">{user?.email}</p>
@@ -126,6 +208,21 @@ export default function ProfilePage() {
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Account Settings</h3>
               <div className="space-y-4">
+                <button
+                  onClick={() => setShowAvatarUpload(true)}
+                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Update Avatar</p>
+                      <p className="text-sm text-gray-800">Change your profile picture</p>
+                    </div>
+                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </button>
+
                 <button
                   onClick={() => setShowEditProfile(true)}
                   className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
@@ -264,6 +361,85 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+
+      {/* Avatar Upload Modal */}
+      {showAvatarUpload && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Update Avatar</h3>
+              <form onSubmit={handleAvatarUpload}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profile Picture
+                  </label>
+                  <div className="flex items-center space-x-4 mb-4">
+                    <Avatar
+                      src={avatarPreview || user?.avatar}
+                      alt="Avatar preview"
+                      size="lg"
+                      className="flex-shrink-0"
+                    />
+                    <div className="flex-1">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                        id="avatar-upload-profile"
+                      />
+                      <label
+                        htmlFor="avatar-upload-profile"
+                        className="cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Choose Image
+                      </label>
+                      {avatar && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveAvatar}
+                          className="ml-2 inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    JPEG, PNG, GIF, or WebP. Max 5MB.
+                  </p>
+                </div>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAvatarUpload(false);
+                      setAvatar(null);
+                      setAvatarPreview(null);
+                      setError('');
+                      setSuccess('');
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading || !avatar}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {isLoading ? 'Uploading...' : 'Upload Avatar'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Profile Modal */}
       {showEditProfile && (

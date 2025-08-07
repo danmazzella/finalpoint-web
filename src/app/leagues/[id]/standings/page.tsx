@@ -7,6 +7,7 @@ import { leaguesAPI } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import BackToLeagueButton from '@/components/BackToLeagueButton';
 import PageTitle from '@/components/PageTitle';
+import Avatar from '@/components/Avatar';
 
 interface DetailedStanding {
     id: number;
@@ -21,6 +22,7 @@ interface DetailedStanding {
     averageDistanceFromCorrect: number;
     perfectPicks: number;
     averagePointsPerRace: number;
+    avatar: string;
 }
 
 interface League {
@@ -325,11 +327,12 @@ export default function StandingsPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                    <span className="text-blue-600 font-medium text-sm">
-                                                        {cleanName(member.name).charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
+                                                <Avatar
+                                                    src={member.avatar}
+                                                    alt={`${member.name}'s avatar`}
+                                                    size="md"
+                                                    className="flex-shrink-0"
+                                                />
                                                 <div className="ml-4">
                                                     <div className="flex items-center space-x-2">
                                                         <div className="text-sm font-medium text-gray-900">
@@ -398,11 +401,12 @@ export default function StandingsPage() {
                                                 </span>
                                             </div>
                                             <div className="flex items-center flex-1">
-                                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                                                    <span className="text-blue-600 font-medium text-sm">
-                                                        {cleanName(member.name).charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
+                                                <Avatar
+                                                    src={member.avatar}
+                                                    alt={`${member.name}'s avatar`}
+                                                    size="md"
+                                                    className="flex-shrink-0 mr-3"
+                                                />
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center space-x-2 mb-2">
                                                         <div className="text-base font-semibold text-gray-900 truncate">

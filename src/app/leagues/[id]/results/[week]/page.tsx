@@ -8,6 +8,7 @@ import { picksAPI, f1racesAPI, leaguesAPI, RaceResultV2 } from '@/lib/api';
 import Link from 'next/link';
 import BackToLeagueButton from '@/components/BackToLeagueButton';
 import PageTitle from '@/components/PageTitle';
+import Avatar from '@/components/Avatar';
 
 interface Race {
     id: number;
@@ -618,7 +619,15 @@ export default function RaceResultsPage() {
                                             </td>
                                         )}
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">{result.userName}</div>
+                                            <div className="flex items-center">
+                                                <Avatar
+                                                    src={result.userAvatar}
+                                                    alt={`${result.userName}'s avatar`}
+                                                    size="md"
+                                                    className="flex-shrink-0 mr-3"
+                                                />
+                                                <div className="text-sm font-medium text-gray-900">{result.userName}</div>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900">
@@ -676,7 +685,15 @@ export default function RaceResultsPage() {
                                                 </div>
                                             )}
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-base font-semibold text-gray-900 truncate">{result.userName}</div>
+                                                <div className="flex items-center mb-2">
+                                                    <Avatar
+                                                        src={result.userAvatar}
+                                                        alt={`${result.userName}'s avatar`}
+                                                        size="sm"
+                                                        className="flex-shrink-0 mr-2"
+                                                    />
+                                                    <div className="text-base font-semibold text-gray-900 truncate">{result.userName}</div>
+                                                </div>
                                                 <div className="text-sm text-gray-600 mt-1">
                                                     {result.hasMadeAllPicks ? (
                                                         <span className="inline-flex items-center text-green-600 font-medium">

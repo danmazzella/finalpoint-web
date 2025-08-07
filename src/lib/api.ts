@@ -32,6 +32,20 @@ const getApiBaseUrl = () => {
 const API_BASE_URL = getApiBaseUrl();
 console.log('🔧 Final API Base URL:', API_BASE_URL);
 
+// Helper function to get full avatar URL
+export const getAvatarUrl = (avatarPath: string | null | undefined): string | null => {
+  if (!avatarPath) return null;
+
+  // If it's already a full URL, return as is
+  if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+    return avatarPath;
+  }
+
+  // Remove /api from the base URL since avatar paths don't include it
+  const baseUrl = API_BASE_URL.replace('/api', '');
+  return `${baseUrl}${avatarPath}`;
+};
+
 export const apiService = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -110,12 +124,27 @@ apiService.interceptors.response.use(
 
 // API methods
 export const authAPI = {
-  signup: (data: SignupData) => apiService.post('/users/signup', data),
+  signup: (data: SignupData | FormData) => {
+    if (data instanceof FormData) {
+      return apiService.post('/users/signup', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    } else {
+      return apiService.post('/users/signup', data);
+    }
+  },
   login: (data: LoginData) => apiService.post('/users/login', data),
   getUserStats: () => apiService.get('/users/stats'),
   getGlobalStats: () => apiService.get('/users/global-stats'),
   getMonthlyStats: () => apiService.get('/users/monthly-stats'),
   updateProfile: (data: { name: string }) => apiService.put('/users/profile', data),
+  updateAvatar: (data: FormData) => apiService.put('/users/avatar', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
   changePassword: (data: { currentPassword: string; newPassword: string }) => apiService.put('/users/password', data),
 };
 
@@ -206,6 +235,7 @@ export interface User {
   id: number;
   email: string;
   name: string;
+  avatar?: string;
 }
 
 export interface SignupData {
@@ -272,6 +302,7 @@ export interface UserPickV2 {
 export interface RaceResultV2 {
   userId: number;
   userName: string;
+  userAvatar?: string;
   picks: {
     position: number;
     driverId: number | null;
