@@ -41,14 +41,12 @@ export const getAvatarUrl = (avatarPath: string | null | undefined): string | nu
     return avatarPath;
   }
 
-  // For production (finalpoint.app), use the same domain as the current page
+  // For production (finalpoint.app), use the API domain for avatars
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'finalpoint.app' || hostname === 'www.finalpoint.app') {
-      // Use the same domain as the current page for avatars
-      const protocol = window.location.protocol;
-      const domain = window.location.hostname;
-      return `${protocol}//${domain}${avatarPath}`;
+      // Use the API domain for avatars in production
+      return `https://api.finalpoint.app${avatarPath}`;
     }
   }
 
