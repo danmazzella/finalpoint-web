@@ -16,6 +16,8 @@ export default function Avatar({
     className = '',
     fallback = '👤'
 }: AvatarProps) {
+    const [imageError, setImageError] = React.useState(false);
+
     const sizeClasses = {
         sm: 'w-8 h-8',
         md: 'w-12 h-12',
@@ -27,7 +29,8 @@ export default function Avatar({
     const sizeClass = sizeClasses[size];
     const avatarUrl = getAvatarUrl(src);
 
-    if (!avatarUrl) {
+    // If no URL or image failed to load, show fallback
+    if (!avatarUrl || imageError) {
         return (
             <div className={`${baseClasses} ${sizeClass} ${className}`}>
                 <span className="text-lg">{fallback}</span>
@@ -40,15 +43,7 @@ export default function Avatar({
             src={avatarUrl}
             alt={alt}
             className={`${baseClasses} ${sizeClass} ${className}`}
-            onError={(e) => {
-                // Fallback to default avatar on error
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const parent = target.parentElement;
-                if (parent) {
-                    parent.innerHTML = `<span class="text-lg">${fallback}</span>`;
-                }
-            }}
+            onError={() => setImageError(true)}
         />
     );
 }
