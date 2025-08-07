@@ -191,22 +191,37 @@ export default function DashboardPage() {
         {/* Global Stats Section */}
         <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
           <h2 className="text-lg font-medium text-gray-900 mb-6">Platform Statistics</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{globalStats.totalUsers}</div>
-              <div className="text-sm text-gray-500">Total Users</div>
+
+          {/* Lifetime Stats */}
+          <div className="mb-6">
+            <h3 className="text-md font-medium text-gray-700 mb-4">Lifetime Performance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{globalStats.lifetimeAccuracy || 0}%</div>
+                <div className="text-sm text-gray-500">Global Accuracy</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{globalStats.lifetimeAvgDistance || 0}</div>
+                <div className="text-sm text-gray-500">Avg Distance from Correct</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{globalStats.totalLeagues}</div>
-              <div className="text-sm text-gray-500">Active Leagues</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{globalStats.totalPicks}</div>
-              <div className="text-sm text-gray-500">Total Picks</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{globalStats.accuracy}%</div>
-              <div className="text-sm text-gray-500">Global Accuracy</div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-200 my-6"></div>
+
+          {/* Past Week Stats */}
+          <div>
+            <h3 className="text-md font-medium text-gray-700 mb-4">Past Week Performance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{globalStats.weekAccuracy || 0}%</div>
+                <div className="text-sm text-gray-500">Global Accuracy</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{globalStats.weekAvgDistance || 0}</div>
+                <div className="text-sm text-gray-500">Avg Distance from Correct</div>
+              </div>
             </div>
           </div>
         </div>
