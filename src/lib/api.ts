@@ -120,8 +120,8 @@ export const authAPI = {
 };
 
 export const leaguesAPI = {
-  createLeague: (name: string) => apiService.post('/leagues/create', { name }),
   getLeagues: () => apiService.get('/leagues/get'),
+  createLeague: (name: string, positions: number[] = []) => apiService.post('/leagues/create', { name, positions }),
   getLeague: (leagueId: number) => apiService.get(`/leagues/get/${leagueId}`),
   joinLeague: (leagueId: number) => apiService.post(`/leagues/${leagueId}/join`),
   joinByCode: (joinCode: string) => apiService.post('/leagues/join-by-code', { joinCode }),

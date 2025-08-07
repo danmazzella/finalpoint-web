@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import Logo from './Logo';
 
 export default function Navigation() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -11,10 +12,43 @@ export default function Navigation() {
     const { user, logout } = useAuth();
 
     const navigationItems = [
-        { name: 'Dashboard', href: '/dashboard', icon: '🏠' },
-        { name: 'Leagues', href: '/leagues', icon: '🏆' },
-        { name: 'Picks', href: '/picks', icon: '📅' },
-        { name: 'Profile', href: '/profile', icon: '👤' },
+        {
+            name: 'Dashboard',
+            href: '/dashboard',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
+                </svg>
+            )
+        },
+        {
+            name: 'Leagues',
+            href: '/leagues',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+            )
+        },
+        {
+            name: 'Picks',
+            href: '/picks',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            )
+        },
+        {
+            name: 'Profile',
+            href: '/profile',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            )
+        },
     ];
 
     const isActive = (href: string) => {
@@ -28,8 +62,12 @@ export default function Navigation() {
         logout();
     };
 
-    // Hide navigation on standings, results, and activity pages
-    const shouldHideNavigation = pathname.includes('/standings') || pathname.includes('/results') || pathname.includes('/activity');
+    // Hide navigation on standings, results, activity, login, and signup pages
+    const shouldHideNavigation = pathname.includes('/standings') ||
+        pathname.includes('/results') ||
+        pathname.includes('/activity') ||
+        pathname === '/login' ||
+        pathname === '/signup';
 
     if (shouldHideNavigation) {
         return null;
@@ -43,12 +81,9 @@ export default function Navigation() {
                     <div className="flex justify-between items-center py-4">
                         {/* Logo */}
                         <div className="flex items-center">
-                            <Link href="/dashboard" className="flex items-center space-x-2">
-                                <span className="text-2xl">🏎️</span>
-                                <div>
-                                    <h1 className="text-xl font-bold text-gray-900">FinalPoint</h1>
-                                    <p className="text-xs text-gray-600">F1 Prediction Game</p>
-                                </div>
+                            <Link href="/dashboard" className="flex items-center space-x-3">
+                                <Logo size="md" />
+                                <span className="text-xl font-bold text-gray-900">FinalPoint</span>
                             </Link>
                         </div>
 
@@ -59,11 +94,11 @@ export default function Navigation() {
                                     key={item.name}
                                     href={item.href}
                                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href)
-                                        ? 'text-pink-600 bg-pink-50'
-                                        : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
+                                        ? 'text-blue-600 bg-blue-50'
+                                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                                         }`}
                                 >
-                                    <span className="text-lg">{item.icon}</span>
+                                    {item.icon}
                                     <span>{item.name}</span>
                                 </Link>
                             ))}
@@ -80,10 +115,8 @@ export default function Navigation() {
                         <div className="flex items-center justify-between">
                             {/* Logo */}
                             <Link href="/dashboard" className="flex items-center space-x-2">
-                                <span className="text-xl">🏎️</span>
-                                <div>
-                                    <h1 className="text-lg font-bold text-gray-900">FinalPoint</h1>
-                                </div>
+                                <Logo size="sm" />
+                                <span className="text-lg font-bold text-gray-900">FinalPoint</span>
                             </Link>
 
                             {/* Hamburger Menu */}
@@ -108,11 +141,11 @@ export default function Navigation() {
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className={`flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href)
-                                            ? 'text-pink-600 bg-pink-50'
-                                            : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
+                                            ? 'text-blue-600 bg-blue-50'
+                                            : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                                             }`}
                                     >
-                                        <span className="text-lg">{item.icon}</span>
+                                        {item.icon}
                                         <span>{item.name}</span>
                                     </Link>
                                 ))}
@@ -124,7 +157,9 @@ export default function Navigation() {
                                         }}
                                         className="flex items-center space-x-3 px-3 py-2 w-full text-left text-sm font-medium text-gray-700 hover:text-gray-800 hover:bg-gray-50 rounded-md"
                                     >
-                                        <span className="text-lg">🚪</span>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
                                         <span>Logout</span>
                                     </button>
                                 </div>
@@ -141,11 +176,11 @@ export default function Navigation() {
                                 key={item.name}
                                 href={item.href}
                                 className={`flex flex-col items-center py-2 px-3 min-w-0 flex-1 ${isActive(item.href)
-                                    ? 'text-pink-600'
+                                    ? 'text-blue-600'
                                     : 'text-gray-600 hover:text-gray-800'
                                     }`}
                             >
-                                <span className="text-xl mb-1">{item.icon}</span>
+                                <div className="mb-1">{item.icon}</div>
                                 <span className="text-xs font-medium truncate">{item.name}</span>
                             </Link>
                         ))}

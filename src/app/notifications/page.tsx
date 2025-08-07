@@ -208,7 +208,7 @@ export default function NotificationsPage() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                     <p className="mt-4 text-gray-600">Loading notification settings...</p>
                 </div>
             </div>
@@ -231,6 +231,19 @@ export default function NotificationsPage() {
                         </div>
                     )}
 
+                    {/* Back to Profile Button */}
+                    <div className="mb-6">
+                        <Link
+                            href="/profile"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Profile
+                        </Link>
+                    </div>
+
                     {/* Email Notifications */}
                     <div className="bg-white shadow rounded-lg mb-6">
                         <div className="px-4 py-5 sm:p-6">
@@ -247,7 +260,7 @@ export default function NotificationsPage() {
                                     </div>
                                     <button
                                         onClick={() => handlePreferenceChange('emailReminders')}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailReminders ? 'bg-pink-600' : 'bg-gray-200'
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailReminders ? 'bg-blue-600' : 'bg-gray-200'
                                             }`}
                                     >
                                         <span
@@ -266,7 +279,7 @@ export default function NotificationsPage() {
                                     </div>
                                     <button
                                         onClick={() => handlePreferenceChange('emailScoreUpdates')}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailScoreUpdates ? 'bg-pink-600' : 'bg-gray-200'
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailScoreUpdates ? 'bg-blue-600' : 'bg-gray-200'
                                             }`}
                                     >
                                         <span
@@ -290,7 +303,7 @@ export default function NotificationsPage() {
                                     {pushSupported && pushPermission === 'default' && (
                                         <button
                                             onClick={requestPushPermission}
-                                            className="px-3 py-1 text-sm font-medium text-pink-600 bg-pink-100 rounded-md hover:bg-pink-200"
+                                            className="px-3 py-1 text-sm font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200"
                                         >
                                             Enable Push
                                         </button>
@@ -353,7 +366,7 @@ export default function NotificationsPage() {
                                     <button
                                         onClick={() => handlePreferenceChange('pushReminders')}
                                         disabled={!pushSupported || pushPermission !== 'granted'}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushReminders && pushPermission === 'granted' ? 'bg-pink-600' : 'bg-gray-200'
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushReminders && pushPermission === 'granted' ? 'bg-blue-600' : 'bg-gray-200'
                                             } ${(!pushSupported || pushPermission !== 'granted') ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <span
@@ -373,7 +386,7 @@ export default function NotificationsPage() {
                                     <button
                                         onClick={() => handlePreferenceChange('pushScoreUpdates')}
                                         disabled={!pushSupported || pushPermission !== 'granted'}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushScoreUpdates && pushPermission === 'granted' ? 'bg-pink-600' : 'bg-gray-200'
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushScoreUpdates && pushPermission === 'granted' ? 'bg-blue-600' : 'bg-gray-200'
                                             } ${(!pushSupported || pushPermission !== 'granted') ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <span
@@ -422,7 +435,7 @@ export default function NotificationsPage() {
                             <button
                                 onClick={savePreferences}
                                 disabled={isSaving}
-                                className="w-full px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50"
+                                className="w-full px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                             >
                                 {isSaving ? 'Saving...' : 'Save Preferences'}
                             </button>

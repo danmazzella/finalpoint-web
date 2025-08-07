@@ -9,7 +9,7 @@ export default function BackToLeagueButton({ leagueId, className = '' }: BackToL
     return (
         <Link
             href={`/leagues/${leagueId}`}
-            className={`inline-flex items-center text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 transition-colors ${className}`}
+            className={`inline-flex items-center text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors ${className}`}
         >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

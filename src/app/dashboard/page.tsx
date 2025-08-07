@@ -79,7 +79,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function DashboardPage() {
               <h3 className="text-lg font-medium text-gray-900">Your Leagues</h3>
               <Link
                 href="/leagues"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 shadow-sm"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm"
               >
                 Manage Leagues
               </Link>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
                   </Link>
                   <Link
                     href="/leagues"
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                   >
                     Create League
                   </Link>
@@ -141,7 +141,7 @@ export default function DashboardPage() {
                     </div>
                     <Link
                       href={`/leagues/${league.id}`}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-pink-600 bg-pink-50 hover:bg-pink-100"
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100"
                     >
                       View League
                     </Link>

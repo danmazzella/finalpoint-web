@@ -330,7 +330,7 @@ function PicksV2Form() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
             </div>
         );
     }
@@ -367,7 +367,7 @@ function PicksV2Form() {
                         {selectedLeague && (
                             <Link
                                 href={`/leagues/${selectedLeague}`}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
                                 <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -379,7 +379,7 @@ function PicksV2Form() {
                     <select
                         value={selectedLeague}
                         onChange={(e) => handleLeagueChange(e.target.value)}
-                        className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-gray-900"
+                        className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                     >
                         <option value="" className="text-gray-500">Choose a league</option>
                         {leagues.map((league) => (
@@ -433,8 +433,8 @@ function PicksV2Form() {
                             </h2>
 
                             {selectedPosition && (
-                                <div className="mb-4 p-3 bg-pink-50 border border-pink-200 rounded-md">
-                                    <p className="text-sm text-pink-800">
+                                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                    <p className="text-sm text-blue-800">
                                         <span className="font-medium">Selected:</span> {getPositionLabel(selectedPosition)} -
                                         Click on a driver below to assign them to this position
                                     </p>
@@ -452,7 +452,7 @@ function PicksV2Form() {
                                         <div
                                             key={position}
                                             className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${isSelected
-                                                ? 'border-pink-500 bg-pink-50'
+                                                ? 'border-blue-500 bg-blue-50'
                                                 : pickedDriver
                                                     ? 'border-green-500 bg-green-50'
                                                     : 'border-gray-200 bg-gray-50 hover:border-gray-300'
@@ -535,11 +535,11 @@ function PicksV2Form() {
                                             disabled={isDisabled}
                                             className={`p-4 border rounded-lg text-left transition-colors ${pickedPosition
                                                 ? pickedPosition === selectedPosition
-                                                    ? 'border-pink-500 bg-pink-50'
+                                                    ? 'border-blue-500 bg-blue-50'
                                                     : 'border-green-500 bg-green-50'
                                                 : isAlreadyPicked
                                                     ? 'border-gray-300 bg-gray-100 opacity-50'
-                                                    : 'border-gray-200 hover:border-pink-300 hover:bg-gray-50'
+                                                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                                                 } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
                                             <div className="flex items-center justify-between mb-2">
@@ -573,7 +573,7 @@ export default function PicksV2Page() {
             <div className="min-h-screen bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                         <p className="mt-4 text-gray-600">Loading picks...</p>
                     </div>
                 </div>

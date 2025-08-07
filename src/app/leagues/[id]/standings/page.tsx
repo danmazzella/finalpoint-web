@@ -151,7 +151,7 @@ export default function StandingsPage() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                     <p className="mt-4 text-gray-600">Loading standings...</p>
                 </div>
             </div>
@@ -173,8 +173,8 @@ export default function StandingsPage() {
                     <div className="bg-white shadow-lg rounded-lg p-4">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                     </svg>
                                 </div>
@@ -325,8 +325,8 @@ export default function StandingsPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center">
-                                                    <span className="text-pink-600 font-medium text-sm">
+                                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <span className="text-blue-600 font-medium text-sm">
                                                         {cleanName(member.name).charAt(0).toUpperCase()}
                                                     </span>
                                                 </div>
@@ -398,8 +398,8 @@ export default function StandingsPage() {
                                                 </span>
                                             </div>
                                             <div className="flex items-center flex-1">
-                                                <div className="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center mr-3">
-                                                    <span className="text-pink-600 font-medium text-sm">
+                                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                                    <span className="text-blue-600 font-medium text-sm">
                                                         {cleanName(member.name).charAt(0).toUpperCase()}
                                                     </span>
                                                 </div>

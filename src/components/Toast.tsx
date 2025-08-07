@@ -74,7 +74,7 @@ export default function Toast({ message, type, isVisible, onClose }: ToastProps)
                         <div className="flex-shrink-0">
                             <button
                                 onClick={onClose}
-                                className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+                                className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
                                 <span className="sr-only">Close</span>
                                 <svg className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">

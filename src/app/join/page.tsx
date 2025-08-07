@@ -55,7 +55,7 @@ export default function JoinLeaguePage() {
                         <div className="flex items-center space-x-4">
                             <Link
                                 href="/dashboard"
-                                className="text-pink-600 hover:text-pink-700 font-medium"
+                                className="text-blue-600 hover:text-blue-700 font-medium"
                             >
                                 Dashboard
                             </Link>
@@ -82,7 +82,7 @@ export default function JoinLeaguePage() {
                                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                                     placeholder="Enter 6-character code"
                                     maxLength={6}
-                                    className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-gray-900 text-center text-lg font-mono tracking-widest"
+                                    className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-center text-lg font-mono tracking-widest"
                                     disabled={loading}
                                 />
                                 <p className="mt-1 text-sm text-gray-500">
@@ -123,7 +123,7 @@ export default function JoinLeaguePage() {
                             <button
                                 type="submit"
                                 disabled={loading || !joinCode.trim()}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? 'Joining...' : 'Join League'}
                             </button>
@@ -147,7 +147,7 @@ export default function JoinLeaguePage() {
                         <div className="space-y-2">
                             <Link
                                 href="/leagues"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-pink-600 bg-pink-50 hover:bg-pink-100"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100"
                             >
                                 Create Your Own League
                             </Link>

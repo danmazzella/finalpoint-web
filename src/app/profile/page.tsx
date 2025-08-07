@@ -107,8 +107,8 @@ export default function ProfilePage() {
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Account Information</h3>
               <div className="flex items-center space-x-4 mb-6">
-                <div className="h-16 w-16 rounded-full bg-pink-100 flex items-center justify-center">
-                  <span className="text-pink-600 font-bold text-xl">{user?.name?.charAt(0).toUpperCase()}</span>
+                <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span className="text-blue-600 font-bold text-xl">{user?.name?.charAt(0).toUpperCase()}</span>
                 </div>
                 <div>
                   <h4 className="text-xl font-medium text-gray-900">{user?.name}</h4>
@@ -232,7 +232,7 @@ export default function ProfilePage() {
             <div className="px-4 py-5 sm:p-6">
               <button
                 onClick={handleLogout}
-                className="w-full px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="w-full px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Logout
               </button>
@@ -263,7 +263,7 @@ export default function ProfilePage() {
                     id="name"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
                     required
                     minLength={2}
                   />
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-md hover:bg-pink-700 disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
                   >
                     {isLoading ? 'Updating...' : 'Update Profile'}
                   </button>
@@ -311,7 +311,7 @@ export default function ProfilePage() {
                     id="currentPassword"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
                     required
                   />
                 </div>
@@ -324,7 +324,7 @@ export default function ProfilePage() {
                     id="newPassword"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
                     required
                     minLength={6}
                   />
@@ -338,7 +338,7 @@ export default function ProfilePage() {
                     id="confirmPassword"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 placeholder-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
                     required
                     minLength={6}
                   />
@@ -361,7 +361,7 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-md hover:bg-pink-700 disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
                   >
                     {isLoading ? 'Changing...' : 'Change Password'}
                   </button>

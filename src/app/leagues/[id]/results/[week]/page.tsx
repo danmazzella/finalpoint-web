@@ -178,7 +178,7 @@ export default function RaceResultsPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
             </div>
         );
     }
@@ -194,7 +194,7 @@ export default function RaceResultsPage() {
                         </svg>
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">No Race Results Available</h2>
                         <div className="mb-4">
-                            <p className="text-pink-600 font-semibold text-lg">
+                            <p className="text-blue-600 font-semibold text-lg">
                                 {league?.name || 'Loading...'}
                             </p>
                         </div>
@@ -214,7 +214,7 @@ export default function RaceResultsPage() {
                             </Link>
                             <button
                                 onClick={() => handleWeekChange(1)}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                             >
                                 View Week 1
                             </button>
@@ -243,7 +243,7 @@ export default function RaceResultsPage() {
                     title="Race Results"
                     subtitle={
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
-                            <span className="text-pink-600 font-semibold">
+                            <span className="text-blue-600 font-semibold">
                                 {league?.name || 'Loading...'}
                             </span>
                             <span className="hidden sm:inline">•</span>
@@ -292,10 +292,10 @@ export default function RaceResultsPage() {
                         <div className="relative">
                             <button
                                 onClick={() => setShowWeekSelector(!showWeekSelector)}
-                                className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <div className="flex items-center">
-                                    <span className="text-lg font-bold text-pink-600 mr-2">Week {selectedWeek}</span>
+                                    <span className="text-lg font-bold text-blue-600 mr-2">Week {selectedWeek}</span>
                                     <span className="text-gray-600 truncate">{currentRace?.raceName}</span>
                                 </div>
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,7 +311,7 @@ export default function RaceResultsPage() {
                                             key={race.weekNumber}
                                             ref={race.weekNumber === selectedWeek ? selectedWeekRef : null}
                                             onClick={() => handleWeekChange(race.weekNumber)}
-                                            className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-pink-50 text-pink-700' : 'text-gray-700'
+                                            className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between">
@@ -320,7 +320,7 @@ export default function RaceResultsPage() {
                                                     <span className="text-gray-500 ml-2">- {race.raceName}</span>
                                                 </div>
                                                 {race.weekNumber === selectedWeek && (
-                                                    <svg className="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                     </svg>
                                                 )}
@@ -339,7 +339,7 @@ export default function RaceResultsPage() {
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                                 <div
-                                    className="bg-pink-600 h-2 rounded-full transition-all duration-300"
+                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                                     style={{ width: `${(selectedWeek / races.length) * 100}%` }}
                                 ></div>
                             </div>
@@ -368,10 +368,10 @@ export default function RaceResultsPage() {
                             <div className="relative">
                                 <button
                                     onClick={() => setShowWeekSelector(!showWeekSelector)}
-                                    className="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    className="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     <span className="flex items-center">
-                                        <span className="text-lg font-bold text-pink-600 mr-2">Week {selectedWeek}</span>
+                                        <span className="text-lg font-bold text-blue-600 mr-2">Week {selectedWeek}</span>
                                         <span className="text-gray-600">{currentRace?.raceName}</span>
                                     </span>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,7 +387,7 @@ export default function RaceResultsPage() {
                                                 key={race.weekNumber}
                                                 ref={race.weekNumber === selectedWeek ? selectedWeekRef : null}
                                                 onClick={() => handleWeekChange(race.weekNumber)}
-                                                className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-pink-50 text-pink-700' : 'text-gray-700'
+                                                className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                                                     }`}
                                             >
                                                 <div className="flex items-center justify-between">
@@ -396,7 +396,7 @@ export default function RaceResultsPage() {
                                                         <span className="text-gray-500 ml-2">- {race.raceName}</span>
                                                     </div>
                                                     {race.weekNumber === selectedWeek && (
-                                                        <svg className="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                                                        <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                         </svg>
                                                     )}
@@ -441,16 +441,16 @@ export default function RaceResultsPage() {
                                 <Link
                                     key={position}
                                     href={`/leagues/${leagueId}/results/${selectedWeek}/position/${position}`}
-                                    className="group relative bg-gradient-to-r from-pink-50 to-pink-100 border border-pink-200 rounded-lg p-4 hover:from-pink-100 hover:to-pink-200 hover:border-pink-300 transition-all duration-200"
+                                    className="group relative bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 hover:from-blue-100 hover:to-blue-200 hover:border-blue-300 transition-all duration-200"
                                 >
                                     <div className="text-center">
-                                        <div className="text-2xl font-bold text-pink-600 mb-1">
+                                        <div className="text-2xl font-bold text-blue-600 mb-1">
                                             P{position}
                                         </div>
-                                        <div className="text-xs text-pink-700 font-medium">
+                                        <div className="text-xs text-blue-700 font-medium">
                                             {getPositionLabel(position).split(' ')[1] || 'Position'}
                                         </div>
-                                        <div className="mt-2 text-xs text-pink-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="mt-2 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                             View Results →
                                         </div>
                                     </div>
@@ -644,7 +644,7 @@ export default function RaceResultsPage() {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <Link
                                                 href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}`}
-                                                className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-pink-700 bg-pink-100 hover:bg-pink-200"
+                                                className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
                                             >
                                                 View All Picks
                                             </Link>
@@ -714,7 +714,7 @@ export default function RaceResultsPage() {
                                     <div className="flex justify-end">
                                         <Link
                                             href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}`}
-                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-sm"
+                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
                                         >
                                             View All Picks
                                             <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

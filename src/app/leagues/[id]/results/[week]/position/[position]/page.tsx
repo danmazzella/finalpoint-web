@@ -78,7 +78,7 @@ export default function PositionResultsPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
             </div>
         );
     }
@@ -91,7 +91,7 @@ export default function PositionResultsPage() {
                     <p className="text-gray-600 mb-4">{error}</p>
                     <Link
                         href={`/leagues/${leagueId}/results/${weekNumber}`}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                     >
                         Back to Results
                     </Link>
@@ -108,7 +108,7 @@ export default function PositionResultsPage() {
                     <p className="text-gray-600 mb-4">No results available for this position.</p>
                     <Link
                         href={`/leagues/${leagueId}/results/${weekNumber}`}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                     >
                         Back to Results
                     </Link>
@@ -126,7 +126,7 @@ export default function PositionResultsPage() {
                 >
                     <Link
                         href={`/leagues/${leagueId}/results/${weekNumber}`}
-                        className="inline-flex items-center text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2 font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 transition-colors"
+                        className="inline-flex items-center text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
                     >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
