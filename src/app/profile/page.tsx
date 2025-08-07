@@ -1,12 +1,14 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const { user, logout, updateProfile, changePassword } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -68,6 +70,7 @@ export default function ProfilePage() {
       const success = await changePassword(currentPassword, newPassword);
       if (success) {
         setSuccess('Password changed successfully!');
+        showToast('Password changed successfully!', 'success');
         setShowChangePassword(false);
         setCurrentPassword('');
         setNewPassword('');

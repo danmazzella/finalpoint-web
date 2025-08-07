@@ -29,7 +29,14 @@ export default function NotificationsPage() {
         try {
             const response = await notificationsAPI.getPreferences();
             if (response.data.success) {
-                setPreferences(response.data.data);
+                // Convert database values (1/0) to proper booleans
+                const rawData = response.data.data;
+                setPreferences({
+                    emailReminders: Boolean(rawData.emailReminders),
+                    emailScoreUpdates: Boolean(rawData.emailScoreUpdates),
+                    pushReminders: Boolean(rawData.pushReminders),
+                    pushScoreUpdates: Boolean(rawData.pushScoreUpdates)
+                });
             }
         } catch (error) {
             console.error('Error loading preferences:', error);
