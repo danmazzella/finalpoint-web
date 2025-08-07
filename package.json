@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "pm2:start": "pm2 start npm --time --name 'finalpoint-web' -- start",
+    "pm2:start": "PORT=3001 pm2 start npm --time --name 'finalpoint-web' -- start",
     "lint": "next lint"
   },
   "dependencies": {
