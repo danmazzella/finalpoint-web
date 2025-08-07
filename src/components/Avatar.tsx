@@ -29,8 +29,11 @@ export default function Avatar({
     const sizeClass = sizeClasses[size];
     const avatarUrl = getAvatarUrl(src);
 
+    console.log('🔧 Avatar component - src:', src, 'avatarUrl:', avatarUrl, 'imageError:', imageError);
+
     // If no URL or image failed to load, show fallback
     if (!avatarUrl || imageError) {
+        console.log('🔧 Avatar showing fallback for src:', src);
         return (
             <div className={`${baseClasses} ${sizeClass} ${className}`}>
                 <span className="text-lg">{fallback}</span>
@@ -38,12 +41,16 @@ export default function Avatar({
         );
     }
 
+    console.log('🔧 Avatar rendering image with URL:', avatarUrl);
     return (
         <img
             src={avatarUrl}
             alt={alt}
             className={`${baseClasses} ${sizeClass} ${className}`}
-            onError={() => setImageError(true)}
+            onError={() => {
+                console.log('🔧 Avatar image failed to load:', avatarUrl);
+                setImageError(true);
+            }}
         />
     );
 }

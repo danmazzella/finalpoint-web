@@ -34,11 +34,17 @@ console.log('🔧 Final API Base URL:', API_BASE_URL);
 
 // Helper function to get full avatar URL
 export const getAvatarUrl = (avatarPath: string | null | undefined): string | null => {
+  console.log('🔧 getAvatarUrl called with:', avatarPath, 'type:', typeof avatarPath);
+
   // Handle null, undefined, empty string, or the string "null"
-  if (!avatarPath || avatarPath === 'null' || avatarPath.trim() === '') return null;
+  if (!avatarPath || avatarPath === 'null' || avatarPath.trim() === '') {
+    console.log('🔧 getAvatarUrl returning null for:', avatarPath);
+    return null;
+  }
 
   // If it's already a full URL, return as is
   if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+    console.log('🔧 getAvatarUrl returning full URL:', avatarPath);
     return avatarPath;
   }
 
@@ -47,13 +53,17 @@ export const getAvatarUrl = (avatarPath: string | null | undefined): string | nu
     const hostname = window.location.hostname;
     if (hostname === 'finalpoint.app' || hostname === 'www.finalpoint.app') {
       // Use the API domain for avatars in production
-      return `https://api.finalpoint.app${avatarPath}`;
+      const url = `https://api.finalpoint.app/uploads/avatars/${avatarPath}`;
+      console.log('🔧 getAvatarUrl returning production URL:', url);
+      return url;
     }
   }
 
   // For development, remove /api from the base URL since avatar paths don't include it
   const baseUrl = API_BASE_URL.replace('/api', '');
-  return `${baseUrl}${avatarPath}`;
+  const url = `${baseUrl}/uploads/avatars/${avatarPath}`;
+  console.log('🔧 getAvatarUrl returning development URL:', url);
+  return url;
 };
 
 export const apiService = axios.create({
