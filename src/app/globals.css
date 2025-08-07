@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Simple text size reductions */
+.text-xs {
+  font-size: 11px !important;
+}
+
+.text-sm {
+  font-size: 13px !important;
+}
+
+.text-base {
+  font-size: 14px !important;
+}
+
+.text-lg {
+  font-size: 16px !important;
+}
+
+.text-xl {
+  font-size: 18px !important;
+}
+
+.text-2xl {
+  font-size: 20px !important;
+}
+
+.text-3xl {
+  font-size: 24px !important;
+}
+
+.text-4xl {
+  font-size: 28px !important;
+}
+
+/* Reduce spacing slightly */
+.p-4 {
+  padding: 14px !important;
+}
+
+.p-5 {
+  padding: 16px !important;
+}
+
+.p-6 {
+  padding: 18px !important;
+}
+
+.p-8 {
+  padding: 24px !important;
+}
+
+.p-10 {
+  padding: 28px !important;
+}
+
+.p-12 {
+  padding: 32px !important;
+}
+
+.px-4 {
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+}
+
+.px-6 {
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+}
+
+.px-8 {
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+.px-10 {
+  padding-left: 28px !important;
+  padding-right: 28px !important;
+}
+
+.py-4 {
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+}
+
+.py-6 {
+  padding-top: 18px !important;
+  padding-bottom: 18px !important;
+}
+
+.py-8 {
+  padding-top: 24px !important;
+  padding-bottom: 24px !important;
+}
+
+.py-12 {
+  padding-top: 32px !important;
+  padding-bottom: 32px !important;
+}
+
+/* Reduce margins slightly */
+.m-4 {
+  margin: 14px !important;
+}
+
+.m-6 {
+  margin: 18px !important;
+}
+
+.m-8 {
+  margin: 24px !important;
+}
+
+.mx-4 {
+  margin-left: 14px !important;
+  margin-right: 14px !important;
+}
+
+.mx-6 {
+  margin-left: 18px !important;
+  margin-right: 18px !important;
+}
+
+.mx-8 {
+  margin-left: 24px !important;
+  margin-right: 24px !important;
+}
+
+.my-4 {
+  margin-top: 14px !important;
+  margin-bottom: 14px !important;
+}
+
+.my-6 {
+  margin-top: 18px !important;
+  margin-bottom: 18px !important;
+}
+
+.my-8 {
+  margin-top: 24px !important;
+  margin-bottom: 24px !important;
+}
+
+.mt-4 {
+  margin-top: 14px !important;
+}
+
+.mt-6 {
+  margin-top: 18px !important;
+}
+
+.mt-8 {
+  margin-top: 24px !important;
+}
+
+.mb-4 {
+  margin-bottom: 14px !important;
+}
+
+.mb-6 {
+  margin-bottom: 18px !important;
+}
+
+.mb-8 {
+  margin-bottom: 24px !important;
+}
+
+/* Reduce component sizes slightly */
+.h-8 {
+  height: 28px !important;
+}
+
+.h-10 {
+  height: 36px !important;
+}
+
+.h-12 {
+  height: 40px !important;
+}
+
+.h-16 {
+  height: 56px !important;
+}
+
+.h-32 {
+  height: 112px !important;
+}
+
+.w-8 {
+  width: 28px !important;
+}
+
+.w-10 {
+  width: 36px !important;
+}
+
+.w-12 {
+  width: 40px !important;
+}
+
+.w-16 {
+  width: 56px !important;
+}
+
+.w-32 {
+  width: 112px !important;
+}
+
+/* Reduce gaps slightly */
+.gap-2 {
+  gap: 6px !important;
+}
+
+.gap-4 {
+  gap: 12px !important;
+}
+
+.gap-6 {
+  gap: 18px !important;
+}
+
+.gap-8 {
+  gap: 24px !important;
+}
+
+/* Specific fixes for notification toggles */
+.relative.inline-flex.h-6.w-11 {
+  width: 36px !important;
+  height: 20px !important;
+}
+
+.inline-block.h-4.w-4 {
+  width: 12px !important;
+  height: 12px !important;
+}
