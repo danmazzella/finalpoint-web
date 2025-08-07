@@ -22,6 +22,10 @@ interface GlobalStats {
   accuracy: number;
   averagePoints: number;
   averageDistanceFromTarget: number;
+  lifetimeAccuracy: number;
+  lifetimeAvgDistance: number;
+  weekAccuracy: number;
+  weekAvgDistance: number;
 }
 
 export default function DashboardPage() {
@@ -41,7 +45,11 @@ export default function DashboardPage() {
     correctPicks: 0,
     accuracy: 0,
     averagePoints: 0,
-    averageDistanceFromTarget: 0
+    averageDistanceFromTarget: 0,
+    lifetimeAccuracy: 0,
+    lifetimeAvgDistance: 0,
+    weekAccuracy: 0,
+    weekAvgDistance: 0
   });
   const [loading, setLoading] = useState(true);
 
