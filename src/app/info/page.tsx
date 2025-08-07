@@ -73,6 +73,17 @@ export default function MarketingPage() {
                             Join the ultimate F1 prediction game. Make weekly predictions on race outcomes,
                             compete in private leagues, and track your performance against friends.
                         </p>
+
+                        {/* Name Explanation */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
+                            <h2 className="text-2xl font-bold text-blue-900 mb-3">Why "FinalPoint"?</h2>
+                            <p className="text-blue-800 text-lg">
+                                In Formula 1, P10 is the last position that earns points - the <strong>final point</strong> available in a race.
+                                Just like in F1 where every point matters, your predictions can make the difference between
+                                victory and defeat in our prediction game.
+                            </p>
+                        </div>
+
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             {!isLoading && (
                                 <>
