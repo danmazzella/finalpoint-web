@@ -28,8 +28,8 @@ export default function Navigation() {
         logout();
     };
 
-    // Hide navigation on standings and results pages
-    const shouldHideNavigation = pathname.includes('/standings') || pathname.includes('/results');
+    // Hide navigation on standings, results, and activity pages
+    const shouldHideNavigation = pathname.includes('/standings') || pathname.includes('/results') || pathname.includes('/activity');
 
     if (shouldHideNavigation) {
         return null;

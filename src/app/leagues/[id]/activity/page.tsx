@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { activityAPI } from '@/lib/api';
+import { activityAPI, leaguesAPI } from '@/lib/api';
+import { useToast } from '@/contexts/ToastContext';
+import PageTitle from '@/components/PageTitle';
+import BackToLeagueButton from '@/components/BackToLeagueButton';
 
 interface Activity {
     id: number;
@@ -63,15 +66,15 @@ export default function LeagueActivityPage() {
 
     const loadLeagueName = async () => {
         try {
-            const response = await fetch(`/api/leagues/${leagueId}`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setLeagueName(data.data.name);
-                }
+            const response = await leaguesAPI.getLeague(parseInt(leagueId));
+            if (response.data.success) {
+                setLeagueName(response.data.data.name);
+            } else {
+                setError('Failed to load league name');
             }
         } catch (error) {
             console.error('Error loading league name:', error);
+            setError('Failed to load league name');
         }
     };
 
@@ -100,22 +103,22 @@ export default function LeagueActivityPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                 );
-            case 'user_joined':
+            case 'member_joined':
                 return (
                     <svg className="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
                 );
-            case 'race_result_processed':
+            case 'member_left':
                 return (
-                    <svg className="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                 );
             default:
                 return (
-                    <svg className="h-4 w-4 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 );
         }
@@ -127,59 +130,60 @@ export default function LeagueActivityPage() {
                 return 'bg-green-100';
             case 'pick_changed':
                 return 'bg-blue-100';
-            case 'user_joined':
+            case 'member_joined':
                 return 'bg-purple-100';
-            case 'race_result_processed':
-                return 'bg-yellow-100';
+            case 'member_left':
+                return 'bg-red-100';
             default:
-                return 'bg-pink-100';
+                return 'bg-gray-100';
         }
     };
 
     const getActivityMessage = (activity: Activity) => {
+        if (!activity.userName) return 'System activity';
+
         switch (activity.activityType) {
-            case 'user_joined':
-                return `${activity.userName} joined the league`;
-            case 'race_result_processed':
-                return `Race results processed for Week ${activity.weekNumber}`;
             case 'pick_created':
-                return `${activity.userName || 'System'} made a pick for Week ${activity.weekNumber}`;
+                return `${activity.userName} made a pick`;
             case 'pick_changed':
-                return `${activity.userName || 'System'} changed their pick for Week ${activity.weekNumber}`;
+                return `${activity.userName} changed their pick`;
+            case 'member_joined':
+                return `${activity.userName} joined the league`;
+            case 'member_left':
+                return `${activity.userName} left the league`;
             default:
-                return `${activity.userName || 'System'} made a pick for Week ${activity.weekNumber}`;
+                return `${activity.userName} performed an action`;
         }
     };
 
     const getActivityDetails = (activity: Activity) => {
         switch (activity.activityType) {
             case 'pick_created':
-                return `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`;
             case 'pick_changed':
-                return `Changed P${activity.position} from ${activity.previousDriverName} (${activity.previousDriverTeam}) to ${activity.driverName} (${activity.driverTeam})`;
-            case 'race_result_processed':
-                return `${activity.raceName ? `${activity.raceName} - ` : ''}${activity.driverName} (${activity.driverTeam}) finished in P${activity.position}`;
-            case 'user_joined':
-                return 'Welcome to the league!';
+                if (activity.driverName && activity.position) {
+                    return `P${activity.position}: ${activity.driverName} (${activity.driverTeam})`;
+                }
+                return activity.driverName ? `${activity.driverName} (${activity.driverTeam})` : 'Driver selection';
+            case 'member_joined':
+            case 'member_left':
+                return 'League membership change';
             default:
-                return `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`;
+                return 'Activity recorded';
         }
     };
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-50">
-                <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold text-gray-900">Error</h1>
-                        <p className="text-gray-600 mt-2">{error}</p>
-                        <Link
-                            href={`/leagues/${leagueId}`}
-                            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
-                        >
-                            Back to League
-                        </Link>
-                    </div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Activity</h2>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <Link
+                        href={`/leagues/${leagueId}`}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+                    >
+                        Back to League
+                    </Link>
                 </div>
             </div>
         );
@@ -187,31 +191,16 @@ export default function LeagueActivityPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">
-                                {leagueName ? `${leagueName} Activity` : 'League Activity'}
-                            </h1>
-                            <p className="text-gray-600">All league activity and history</p>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <Link
-                                href={`/leagues/${leagueId}`}
-                                className="text-pink-600 hover:text-pink-700 font-medium"
-                            >
-                                ← Back to League
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                <PageTitle
+                    title={leagueName ? `${leagueName} Activity` : 'League Activity'}
+                    subtitle="All league activity and history"
+                >
+                    <BackToLeagueButton leagueId={leagueId} className="text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2" />
+                </PageTitle>
 
-            {/* Content */}
-            <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="bg-white shadow rounded-lg">
+                {/* Activity List */}
+                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <h2 className="text-lg font-medium text-gray-900">All Activity</h2>
                         <p className="text-sm text-gray-500 mt-1">
@@ -228,28 +217,30 @@ export default function LeagueActivityPage() {
                         ) : activities.length > 0 ? (
                             <div className="space-y-4">
                                 {activities.map((activity, index) => (
-                                    <div key={activity.id} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
-                                        <div className="flex-shrink-0">
-                                            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${getActivityIconBg(activity.activityType)}`}>
-                                                {getActivityIcon(activity.activityType)}
+                                    <div key={activity.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                        <div className="flex items-start space-x-3">
+                                            <div className="flex-shrink-0">
+                                                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getActivityIconBg(activity.activityType)}`}>
+                                                    {getActivityIcon(activity.activityType)}
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900">
-                                                {getActivityMessage(activity)}
-                                            </p>
-                                            <p className="text-sm text-gray-500">
-                                                {getActivityDetails(activity)}
-                                            </p>
-                                        </div>
-                                        <div className="flex-shrink-0 text-sm text-gray-500">
-                                            {new Date(activity.createdAt).toLocaleDateString('en-US', {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-gray-900">
+                                                    {getActivityMessage(activity)}
+                                                </p>
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    {getActivityDetails(activity)}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-2">
+                                                    {new Date(activity.createdAt).toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -283,7 +274,7 @@ export default function LeagueActivityPage() {
                         )}
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

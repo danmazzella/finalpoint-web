@@ -559,13 +559,15 @@ export default function RaceResultsPage() {
                 )}
 
                 {/* Results Table */}
-                <div className="bg-white shadow rounded-lg overflow-hidden">
+                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <h2 className="text-lg font-medium text-gray-900">
                             {hasScoredResults ? 'All Results' : 'All Picks'}
                         </h2>
                     </div>
-                    <div className="overflow-x-auto">
+
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
@@ -651,6 +653,78 @@ export default function RaceResultsPage() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile Cards */}
+                    <div className="md:hidden">
+                        <div className="space-y-4 p-4">
+                            {results.map((result, index) => (
+                                <div key={result.userId} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center flex-1">
+                                            {hasScoredResults && (
+                                                <div className={`h-10 w-10 rounded-full flex items-center justify-center mr-4 flex-shrink-0 ${index === 0 ? 'bg-yellow-100 border-2 border-yellow-200' :
+                                                    index === 1 ? 'bg-gray-100 border-2 border-gray-200' :
+                                                        index === 2 ? 'bg-orange-100 border-2 border-orange-200' : 'bg-gray-100 border-2 border-gray-200'
+                                                    }`}>
+                                                    <span className={`font-bold text-sm ${index === 0 ? 'text-yellow-700' :
+                                                        index === 1 ? 'text-gray-700' :
+                                                            index === 2 ? 'text-orange-700' : 'text-gray-700'
+                                                        }`}>
+                                                        {index + 1}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-base font-semibold text-gray-900 truncate">{result.userName}</div>
+                                                <div className="text-sm text-gray-600 mt-1">
+                                                    {result.hasMadeAllPicks ? (
+                                                        <span className="inline-flex items-center text-green-600 font-medium">
+                                                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                            </svg>
+                                                            All {requiredPositions.length} picks made
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center text-orange-600 font-medium">
+                                                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                            </svg>
+                                                            {result.picks.filter(p => p.driverId !== null).length} of {requiredPositions.length} picks made
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {hasScoredResults && (
+                                        <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                                            <div className="text-center">
+                                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Correct Picks</div>
+                                                <div className="text-xl font-bold text-green-600">{result.totalCorrect}</div>
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Points</div>
+                                                <div className="text-xl font-bold text-blue-600">{result.totalPoints}</div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-end">
+                                        <Link
+                                            href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}`}
+                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-sm"
+                                        >
+                                            View All Picks
+                                            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </main>
