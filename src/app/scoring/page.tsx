@@ -1,8 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function ScoringPage() {
+    const router = useRouter();
+
+    const handleBack = () => {
+        router.back();
+    };
+
     return (
         <>
             {/* Simple Header */}
@@ -10,19 +17,19 @@ export default function ScoringPage() {
                 <div className="max-w-4xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                            <Link href="/dashboard" className="text-blue-600 hover:text-blue-800">
+                            <button onClick={handleBack} className="text-blue-600 hover:text-blue-800">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
-                            </Link>
+                            </button>
                             <h1 className="text-xl font-semibold text-gray-900">Scoring System</h1>
                         </div>
-                        <Link
-                            href="/dashboard"
+                        <button
+                            onClick={handleBack}
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             Back to Main
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </div>

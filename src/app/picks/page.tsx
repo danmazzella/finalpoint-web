@@ -239,14 +239,22 @@ function PicksForm() {
           <>
             {/* Current Pick Status */}
             <div className="bg-white shadow rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Week {currentWeek} - P10 Prediction
-                {currentRace && (
-                  <span className="text-sm font-normal text-gray-500 ml-2">
-                    ({currentRace.raceName})
-                  </span>
-                )}
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium text-gray-900">
+                  Week {currentWeek} - P10 Prediction
+                  {currentRace && (
+                    <span className="text-sm font-normal text-gray-500 ml-2">
+                      ({currentRace.raceName})
+                    </span>
+                  )}
+                </h2>
+                <Link
+                  href="/scoring"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  How scoring works
+                </Link>
+              </div>
               <p className="text-gray-600 mb-4">
                 Select which driver you think will finish in 10th place for this week's race.
                 {currentRace && (

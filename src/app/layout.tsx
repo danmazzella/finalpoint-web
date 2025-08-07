@@ -4,7 +4,6 @@ import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import ConditionalLayout from '@/components/ConditionalLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,9 +23,7 @@ export default function RootLayout({
         <AuthProvider>
           <ToastProvider>
             <ConditionalLayout>
-              <ProtectedRoute>
-                {children}
-              </ProtectedRoute>
+              {children}
             </ConditionalLayout>
           </ToastProvider>
         </AuthProvider>

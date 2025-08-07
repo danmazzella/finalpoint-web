@@ -92,6 +92,19 @@ export default function DashboardPage() {
           subtitle="Welcome to your F1 prediction game"
         />
 
+        {/* Quick Actions */}
+        <div className="mb-6">
+          <Link
+            href="/scoring"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            How Scoring Works
+          </Link>
+        </div>
+
         {/* Your Leagues Section */}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
           <div className="px-6 py-4 border-b border-gray-200">
