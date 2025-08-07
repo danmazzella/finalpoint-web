@@ -23,6 +23,7 @@ interface Activity {
     previousDriverTeam: string | null;
     position: number | null;
     raceName: string | null;
+    leagueName: string | null;
     createdAt: string;
 }
 
@@ -151,6 +152,8 @@ export default function LeagueActivityPage() {
                 return `${activity.userName} joined the league`;
             case 'member_left':
                 return `${activity.userName} left the league`;
+            case 'league_created':
+                return `${activity.userName} created the league ${activity.leagueName}`;
             default:
                 return `${activity.userName} performed an action`;
         }
@@ -167,6 +170,8 @@ export default function LeagueActivityPage() {
             case 'member_joined':
             case 'member_left':
                 return 'League membership change';
+            case 'league_created':
+                return 'League created successfully';
             default:
                 return 'Activity recorded';
         }

@@ -155,7 +155,7 @@ export default function ShareLeaguePage() {
                             </div>
                             <div className="text-center">
                                 <dt className="text-sm font-medium text-gray-500">Members</dt>
-                                <dd className="mt-1 text-lg font-medium text-gray-900">{league?.memberCount || 1}</dd>
+                                <dd className="mt-1 text-lg font-medium text-gray-900">{league?.memberCount ?? 0}</dd>
                             </div>
                         </div>
 

@@ -15,6 +15,25 @@ interface CurrentRace {
   status: string;
 }
 
+interface Activity {
+  id: number;
+  leagueId: number;
+  userId: number | null;
+  userName: string | null;
+  activityType: string;
+  weekNumber: number | null;
+  driverId: number | null;
+  driverName: string | null;
+  driverTeam: string | null;
+  previousDriverId: number | null;
+  previousDriverName: string | null;
+  previousDriverTeam: string | null;
+  position: number | null;
+  raceName: string | null;
+  leagueName: string | null;
+  createdAt: string;
+}
+
 export default function LeagueDetailPage() {
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -24,7 +43,7 @@ export default function LeagueDetailPage() {
 
   const [league, setLeague] = useState<League | null>(null);
   const [loading, setLoading] = useState(true);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [isMember, setIsMember] = useState(false);
@@ -457,6 +476,8 @@ export default function LeagueDetailPage() {
                             `${activity.userName} left the league`
                           ) : activity.activityType === 'league_name_changed' ? (
                             `${activity.userName} changed the league name`
+                          ) : activity.activityType === 'league_created' ? (
+                            `${activity.userName} created the league ${activity.leagueName}`
                           ) : activity.activityType === 'race_result_processed' ? (
                             `Race results processed for Week ${activity.weekNumber}`
                           ) : (
@@ -476,6 +497,8 @@ export default function LeagueDetailPage() {
                             `Goodbye!`
                           ) : activity.activityType === 'league_name_changed' ? (
                             `Changed from "${activity.previousDriverName}" to "${activity.driverName}"`
+                          ) : activity.activityType === 'league_created' ? (
+                            `League created successfully`
                           ) : (
                             `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`
                           )}
