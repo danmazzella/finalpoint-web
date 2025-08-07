@@ -80,13 +80,13 @@ export default function JoinLeaguePage() {
                                     id="joinCode"
                                     value={joinCode}
                                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                                    placeholder="Enter 6-character code"
-                                    maxLength={6}
+                                    placeholder="Enter 8-character code"
+                                    maxLength={8}
                                     className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-center text-lg font-mono tracking-widest"
                                     disabled={loading}
                                 />
                                 <p className="mt-1 text-sm text-gray-500">
-                                    Enter the 6-character join code provided by the league owner
+                                    Enter the 8-character join code provided by the league owner
                                 </p>
                             </div>
 
@@ -134,7 +134,7 @@ export default function JoinLeaguePage() {
                     <div className="mt-6 bg-white shadow rounded-lg p-6">
                         <h3 className="text-lg font-medium text-gray-900 mb-4">How to Join a League</h3>
                         <div className="space-y-3 text-sm text-gray-600">
-                            <p>1. Ask the league owner for the 6-character join code</p>
+                            <p>1. Ask the league owner for the 8-character join code</p>
                             <p>2. Enter the code in the field above</p>
                             <p>3. Click "Join League" to become a member</p>
                             <p>4. You'll be redirected to the league page</p>
