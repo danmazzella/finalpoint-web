@@ -177,8 +177,8 @@ export default function RaceResultsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-600"></div>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
             </div>
         );
     }
@@ -186,19 +186,19 @@ export default function RaceResultsPage() {
     if (!results || results.length === 0) {
         const currentRace = getCurrentRace();
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto">
-                    <div className="bg-white shadow rounded-lg p-8">
-                        <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-8 border border-slate-200">
+                        <svg className="mx-auto h-16 w-16 text-slate-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">No Race Results Available</h2>
+                        <h2 className="text-2xl font-bold text-slate-800 mb-4">No Race Results Available</h2>
                         <div className="mb-4">
-                            <p className="text-pink-600 font-semibold text-lg">
+                            <p className="text-indigo-600 font-semibold text-lg">
                                 {league?.name || 'Loading...'}
                             </p>
                         </div>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-slate-600 mb-6">
                             {currentRace ? (
                                 <>No results are available for <strong>{currentRace.raceName}</strong> (Week {selectedWeek}). The race may not have finished yet or results haven&apos;t been entered.</>
                             ) : (
@@ -208,13 +208,13 @@ export default function RaceResultsPage() {
                         <div className="flex space-x-3 justify-center">
                             <Link
                                 href={`/leagues/${leagueId}`}
-                                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                className="inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50"
                             >
                                 Back to League
                             </Link>
                             <button
                                 onClick={() => handleWeekChange(1)}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
                             >
                                 View Week 1
                             </button>
@@ -237,18 +237,18 @@ export default function RaceResultsPage() {
     const hasScoredResults = results.some(result => result.picks.some(pick => pick.actualDriverName));
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+            <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
                     title="Race Results"
                     subtitle={
                         <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
-                            <span className="text-pink-600 font-semibold">
+                            <span className="text-indigo-600 font-semibold">
                                 {league?.name || 'Loading...'}
                             </span>
                             <span className="hidden sm:inline">•</span>
-                            <span className="text-gray-600">
-                                {currentRace ? currentRace.raceName : `Week ${selectedWeek}`} Results
+                            <span className="text-slate-600">
+                                {getCurrentRace() ? getCurrentRace()?.raceName : `Week ${selectedWeek}`} Results
                             </span>
                         </div>
                     }
@@ -257,16 +257,16 @@ export default function RaceResultsPage() {
                 </PageTitle>
 
                 {/* Week Navigation */}
-                <div className="bg-white shadow rounded-lg p-4 mb-6">
+                <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-6 border border-slate-200">
                     {/* Mobile Week Navigation */}
                     <div className="md:hidden">
                         <div className="flex items-center justify-between mb-3">
                             <button
                                 onClick={goToPreviousWeek}
                                 disabled={!canGoPrevious}
-                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoPrevious
-                                    ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                    : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${canGoPrevious
+                                    ? 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 hover:from-slate-200 hover:to-slate-300 border border-slate-300'
+                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                     }`}
                             >
                                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,9 +277,9 @@ export default function RaceResultsPage() {
                             <button
                                 onClick={goToNextWeek}
                                 disabled={!canGoNext}
-                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoNext
-                                    ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                    : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${canGoNext
+                                    ? 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 hover:from-slate-200 hover:to-slate-300 border border-slate-300'
+                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                     }`}
                             >
                                 Next
@@ -292,11 +292,11 @@ export default function RaceResultsPage() {
                         <div className="relative">
                             <button
                                 onClick={() => setShowWeekSelector(!showWeekSelector)}
-                                className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
                                 <div className="flex items-center">
-                                    <span className="text-lg font-bold text-pink-600 mr-2">Week {selectedWeek}</span>
-                                    <span className="text-gray-600 truncate">{currentRace?.raceName}</span>
+                                    <span className="text-lg font-bold text-indigo-600 mr-2">Week {selectedWeek}</span>
+                                    <span className="text-slate-600 truncate">{getCurrentRace()?.raceName}</span>
                                 </div>
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -305,22 +305,22 @@ export default function RaceResultsPage() {
 
                             {/* Week Selector Dropdown */}
                             {showWeekSelector && (
-                                <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-slate-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                     {races.map((race) => (
                                         <button
                                             key={race.weekNumber}
                                             ref={race.weekNumber === selectedWeek ? selectedWeekRef : null}
                                             onClick={() => handleWeekChange(race.weekNumber)}
-                                            className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-pink-50 text-pink-700' : 'text-gray-700'
+                                            className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 ${race.weekNumber === selectedWeek ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700'
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <span className="font-medium">Week {race.weekNumber}</span>
-                                                    <span className="text-gray-500 ml-2">- {race.raceName}</span>
+                                                    <span className="text-slate-500 ml-2">- {race.raceName}</span>
                                                 </div>
                                                 {race.weekNumber === selectedWeek && (
-                                                    <svg className="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <svg className="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                     </svg>
                                                 )}
@@ -333,13 +333,13 @@ export default function RaceResultsPage() {
 
                         {/* Progress Bar */}
                         <div className="mt-3">
-                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <div className="flex justify-between text-xs text-slate-500 mb-1">
                                 <span>Week {selectedWeek} of {races.length}</span>
                                 <span>{Math.round((selectedWeek / races.length) * 100)}%</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="w-full bg-slate-200 rounded-full h-2">
                                 <div
-                                    className="bg-pink-600 h-2 rounded-full transition-all duration-300"
+                                    className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-300"
                                     style={{ width: `${(selectedWeek / races.length) * 100}%` }}
                                 ></div>
                             </div>
@@ -352,9 +352,9 @@ export default function RaceResultsPage() {
                         <button
                             onClick={goToPreviousWeek}
                             disabled={!canGoPrevious}
-                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoPrevious
-                                ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${canGoPrevious
+                                ? 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 hover:from-slate-200 hover:to-slate-300 border border-slate-300'
+                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                 }`}
                         >
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -368,11 +368,11 @@ export default function RaceResultsPage() {
                             <div className="relative">
                                 <button
                                     onClick={() => setShowWeekSelector(!showWeekSelector)}
-                                    className="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    className="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     <span className="flex items-center">
-                                        <span className="text-lg font-bold text-pink-600 mr-2">Week {selectedWeek}</span>
-                                        <span className="text-gray-600">{currentRace?.raceName}</span>
+                                        <span className="text-lg font-bold text-indigo-600 mr-2">Week {selectedWeek}</span>
+                                        <span className="text-slate-600">{getCurrentRace()?.raceName}</span>
                                     </span>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -381,22 +381,22 @@ export default function RaceResultsPage() {
 
                                 {/* Week Selector Dropdown */}
                                 {showWeekSelector && (
-                                    <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-slate-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                         {races.map((race) => (
                                             <button
                                                 key={race.weekNumber}
                                                 ref={race.weekNumber === selectedWeek ? selectedWeekRef : null}
                                                 onClick={() => handleWeekChange(race.weekNumber)}
-                                                className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-pink-50 text-pink-700' : 'text-gray-700'
+                                                className={`w-full text-left px-4 py-3 text-sm hover:bg-slate-50 ${race.weekNumber === selectedWeek ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700'
                                                     }`}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div>
                                                         <span className="font-medium">Week {race.weekNumber}</span>
-                                                        <span className="text-gray-500 ml-2">- {race.raceName}</span>
+                                                        <span className="text-slate-500 ml-2">- {race.raceName}</span>
                                                     </div>
                                                     {race.weekNumber === selectedWeek && (
-                                                        <svg className="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                                                        <svg className="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                         </svg>
                                                     )}
@@ -412,9 +412,9 @@ export default function RaceResultsPage() {
                         <button
                             onClick={goToNextWeek}
                             disabled={!canGoNext}
-                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoNext
-                                ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${canGoNext
+                                ? 'bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 hover:from-slate-200 hover:to-slate-300 border border-slate-300'
+                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                 }`}
                         >
                             Next
@@ -427,12 +427,12 @@ export default function RaceResultsPage() {
 
                 {/* Multiple Position Notice */}
                 {requiredPositions.length > 1 && hasScoredResults && (
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-6 border border-slate-200">
                         <div className="mb-4">
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            <h3 className="text-lg font-medium text-slate-800 mb-2">
                                 View Results by Position
                             </h3>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-slate-600">
                                 This league requires picks for multiple positions. Click on a position to see all members&apos; picks for that specific position.
                             </p>
                         </div>
@@ -441,16 +441,16 @@ export default function RaceResultsPage() {
                                 <Link
                                     key={position}
                                     href={`/leagues/${leagueId}/results/${selectedWeek}/position/${position}`}
-                                    className="group relative bg-gradient-to-r from-pink-50 to-pink-100 border border-pink-200 rounded-lg p-4 hover:from-pink-100 hover:to-pink-200 hover:border-pink-300 transition-all duration-200"
+                                    className="group relative bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-4 hover:from-indigo-100 hover:to-purple-100 hover:border-indigo-300 transition-all duration-200"
                                 >
                                     <div className="text-center">
-                                        <div className="text-2xl font-bold text-pink-600 mb-1">
+                                        <div className="text-2xl font-bold text-indigo-600 mb-1">
                                             P{position}
                                         </div>
-                                        <div className="text-xs text-pink-700 font-medium">
+                                        <div className="text-xs text-indigo-700 font-medium">
                                             {getPositionLabel(position).split(' ')[1] || 'Position'}
                                         </div>
-                                        <div className="mt-2 text-xs text-pink-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="mt-2 text-xs text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
                                             View Results →
                                         </div>
                                     </div>
@@ -462,8 +462,8 @@ export default function RaceResultsPage() {
 
                 {/* Actual Race Results Section */}
                 {hasScoredResults && (
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Actual Race Results</h2>
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-6 border border-slate-200">
+                        <h2 className="text-lg font-medium text-slate-800 mb-4">Actual Race Results</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {requiredPositions.map((position) => {
                                 // Find the first result that has actual data for this position
@@ -475,21 +475,21 @@ export default function RaceResultsPage() {
                                 const actualPick = positionResult?.picks.find(pick => pick.position === position);
 
                                 return (
-                                    <div key={position} className="border border-gray-200 rounded-lg p-4">
+                                    <div key={position} className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-lg p-4">
                                         <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-medium text-gray-500">
+                                            <span className="text-sm font-medium text-slate-500">
                                                 {getPositionLabel(position)}
                                             </span>
                                         </div>
                                         {actualPick?.actualDriverName ? (
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-900">
+                                                <p className="text-sm font-semibold text-slate-800">
                                                     {actualPick.actualDriverName}
                                                 </p>
-                                                <p className="text-xs text-gray-500">{actualPick.actualDriverTeam}</p>
+                                                <p className="text-xs text-slate-500">{actualPick.actualDriverTeam}</p>
                                             </div>
                                         ) : (
-                                            <p className="text-xs text-gray-400 italic">No result available</p>
+                                            <p className="text-xs text-slate-400 italic">No result available</p>
                                         )}
                                     </div>
                                 );
@@ -499,23 +499,23 @@ export default function RaceResultsPage() {
                 )}
 
                 {/* Summary Stats */}
-                <div className="bg-white shadow rounded-lg p-4 mb-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Summary</h3>
+                <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-4 mb-6 border border-slate-200">
+                    <h3 className="text-lg font-medium text-slate-800 mb-4">Summary</h3>
 
                     {/* Mobile Summary Stats */}
                     <div className="md:hidden">
                         <div className="grid grid-cols-3 gap-4">
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-gray-900">{totalParticipants}</div>
-                                <div className="text-xs text-gray-500">Participants</div>
+                                <div className="text-2xl font-bold text-slate-800">{totalParticipants}</div>
+                                <div className="text-xs text-slate-500">Participants</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-green-600">{totalCorrect}</div>
-                                <div className="text-xs text-gray-500">Correct Picks</div>
+                                <div className="text-xs text-slate-500">Correct Picks</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-blue-600">{totalPoints}</div>
-                                <div className="text-xs text-gray-500">Total Points</div>
+                                <div className="text-xs text-slate-500">Total Points</div>
                             </div>
                         </div>
                     </div>
@@ -523,23 +523,23 @@ export default function RaceResultsPage() {
                     {/* Desktop Summary Stats */}
                     <div className="hidden md:grid grid-cols-3 gap-6">
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-gray-900">{totalParticipants}</div>
-                            <div className="text-sm text-gray-500">Participants</div>
+                            <div className="text-3xl font-bold text-slate-800">{totalParticipants}</div>
+                            <div className="text-sm text-slate-500">Participants</div>
                         </div>
                         <div className="text-center">
                             <div className="text-3xl font-bold text-green-600">{totalCorrect}</div>
-                            <div className="text-sm text-gray-500">Correct Picks</div>
+                            <div className="text-sm text-slate-500">Correct Picks</div>
                         </div>
                         <div className="text-center">
                             <div className="text-3xl font-bold text-blue-600">{totalPoints}</div>
-                            <div className="text-sm text-gray-500">Total Points</div>
+                            <div className="text-sm text-slate-500">Total Points</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Not Scored Message */}
                 {!hasScoredResults && results.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
                                 <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -559,57 +559,57 @@ export default function RaceResultsPage() {
                 )}
 
                 {/* Results Table */}
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-lg font-medium text-gray-900">
+                <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl overflow-hidden border border-slate-200">
+                    <div className="px-6 py-4 border-b border-slate-200">
+                        <h2 className="text-lg font-medium text-slate-800">
                             {hasScoredResults ? 'All Results' : 'All Picks'}
                         </h2>
                     </div>
 
                     {/* Desktop Table */}
                     <div className="hidden md:block overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-slate-50/50">
                                 <tr>
                                     {hasScoredResults && (
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                             Rank
                                         </th>
                                     )}
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                         User
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                         Picks Made
                                     </th>
                                     {hasScoredResults && (
                                         <>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                                 Correct Picks
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                                 Points
                                             </th>
                                         </>
                                     )}
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white/50 divide-y divide-slate-200">
                                 {results.map((result, index) => (
-                                    <tr key={result.userId} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                    <tr key={result.userId} className={index % 2 === 0 ? 'bg-white/50' : 'bg-slate-50/50'}>
                                         {hasScoredResults && (
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <div className={`h-8 w-8 rounded-full flex items-center justify-center ${index === 0 ? 'bg-yellow-100' :
-                                                        index === 1 ? 'bg-gray-100' :
-                                                            index === 2 ? 'bg-orange-100' : 'bg-gray-100'
+                                                        index === 1 ? 'bg-slate-100' :
+                                                            index === 2 ? 'bg-orange-100' : 'bg-slate-100'
                                                         }`}>
                                                         <span className={`font-medium text-sm ${index === 0 ? 'text-yellow-600' :
-                                                            index === 1 ? 'text-gray-600' :
-                                                                index === 2 ? 'text-orange-600' : 'text-gray-600'
+                                                            index === 1 ? 'text-slate-600' :
+                                                                index === 2 ? 'text-orange-600' : 'text-slate-600'
                                                             }`}>
                                                             {index + 1}
                                                         </span>
@@ -618,10 +618,10 @@ export default function RaceResultsPage() {
                                             </td>
                                         )}
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">{result.userName}</div>
+                                            <div className="text-sm font-medium text-slate-800">{result.userName}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900">
+                                            <div className="text-sm text-slate-800">
                                                 {result.hasMadeAllPicks ? (
                                                     <span className="text-green-600 font-medium">All {requiredPositions.length} picks made</span>
                                                 ) : (
@@ -634,17 +634,17 @@ export default function RaceResultsPage() {
                                         {hasScoredResults && (
                                             <>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{result.totalCorrect}</div>
+                                                    <div className="text-sm text-slate-800">{result.totalCorrect}</div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">{result.totalPoints}</div>
+                                                    <div className="text-sm font-medium text-slate-800">{result.totalPoints}</div>
                                                 </td>
                                             </>
                                         )}
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                             <Link
                                                 href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}`}
-                                                className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-pink-700 bg-pink-100 hover:bg-pink-200"
+                                                className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-medium rounded-md hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 shadow-sm"
                                             >
                                                 View All Picks
                                             </Link>
@@ -659,25 +659,25 @@ export default function RaceResultsPage() {
                     <div className="md:hidden">
                         <div className="space-y-4 p-4">
                             {results.map((result, index) => (
-                                <div key={result.userId} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                <div key={result.userId} className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg p-4 shadow-sm">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center flex-1">
                                             {hasScoredResults && (
                                                 <div className={`h-10 w-10 rounded-full flex items-center justify-center mr-4 flex-shrink-0 ${index === 0 ? 'bg-yellow-100 border-2 border-yellow-200' :
-                                                    index === 1 ? 'bg-gray-100 border-2 border-gray-200' :
-                                                        index === 2 ? 'bg-orange-100 border-2 border-orange-200' : 'bg-gray-100 border-2 border-gray-200'
+                                                    index === 1 ? 'bg-slate-100 border-2 border-slate-200' :
+                                                        index === 2 ? 'bg-orange-100 border-2 border-orange-200' : 'bg-slate-100 border-2 border-slate-200'
                                                     }`}>
                                                     <span className={`font-bold text-sm ${index === 0 ? 'text-yellow-700' :
-                                                        index === 1 ? 'text-gray-700' :
-                                                            index === 2 ? 'text-orange-700' : 'text-gray-700'
+                                                        index === 1 ? 'text-slate-700' :
+                                                            index === 2 ? 'text-orange-700' : 'text-slate-700'
                                                         }`}>
                                                         {index + 1}
                                                     </span>
                                                 </div>
                                             )}
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-base font-semibold text-gray-900 truncate">{result.userName}</div>
-                                                <div className="text-sm text-gray-600 mt-1">
+                                                <div className="text-base font-semibold text-slate-800 truncate">{result.userName}</div>
+                                                <div className="text-sm text-slate-600 mt-1">
                                                     {result.hasMadeAllPicks ? (
                                                         <span className="inline-flex items-center text-green-600 font-medium">
                                                             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -699,13 +699,13 @@ export default function RaceResultsPage() {
                                     </div>
 
                                     {hasScoredResults && (
-                                        <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                                        <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border border-slate-200">
                                             <div className="text-center">
-                                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Correct Picks</div>
+                                                <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Correct Picks</div>
                                                 <div className="text-xl font-bold text-green-600">{result.totalCorrect}</div>
                                             </div>
                                             <div className="text-center">
-                                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Points</div>
+                                                <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Points</div>
                                                 <div className="text-xl font-bold text-blue-600">{result.totalPoints}</div>
                                             </div>
                                         </div>
@@ -714,7 +714,7 @@ export default function RaceResultsPage() {
                                     <div className="flex justify-end">
                                         <Link
                                             href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}`}
-                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-pink-600 hover:bg-pink-700 transition-colors shadow-sm"
+                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 shadow-sm"
                                         >
                                             View All Picks
                                             <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

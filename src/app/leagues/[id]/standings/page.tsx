@@ -160,64 +160,64 @@ export default function StandingsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+            <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
-                    title={`${league?.name} - Standings`}
-                    subtitle={`${standings.length} member${standings.length !== 1 ? 's' : ''} • Season ${league?.seasonYear}`}
+                    title={`${league?.name || 'League'} - Standings`}
+                    subtitle={`${standings.length} members • Season ${league?.seasonYear || '2025'}`}
                 >
                     <BackToLeagueButton leagueId={leagueId} className="text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2" />
                 </PageTitle>
 
                 {/* Stats Overview */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                    <div className="bg-white shadow-lg rounded-lg p-4">
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-lg p-4 border border-slate-200">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full flex items-center justify-center">
                                     <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                     </svg>
                                 </div>
                             </div>
                             <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Points</p>
-                                <p className="text-lg font-bold text-gray-900">
+                                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Points</p>
+                                <p className="text-lg font-bold text-slate-800">
                                     {standings.reduce((sum, s) => sum + s.totalPoints, 0)}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white shadow-lg rounded-lg p-4">
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-lg p-4 border border-slate-200">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center">
                                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
                                 </div>
                             </div>
                             <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Perfect Picks</p>
-                                <p className="text-lg font-bold text-gray-900">
+                                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Perfect Picks</p>
+                                <p className="text-lg font-bold text-slate-800">
                                     {standings.reduce((sum, s) => sum + s.perfectPicks, 0)}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white shadow-lg rounded-lg p-4">
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-lg p-4 border border-slate-200">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
                                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
                             </div>
                             <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Avg Accuracy</p>
-                                <p className="text-lg font-bold text-gray-900">
+                                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Avg Accuracy</p>
+                                <p className="text-lg font-bold text-slate-800">
                                     {standings.length > 0
                                         ? Math.round(standings.reduce((sum, s) => sum + s.accuracy, 0) / standings.length)
                                         : 0}%
@@ -226,18 +226,18 @@ export default function StandingsPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white shadow-lg rounded-lg p-4">
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-lg p-4 border border-slate-200">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-violet-100 rounded-full flex items-center justify-center">
                                     <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>
                             </div>
                             <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Active Members</p>
-                                <p className="text-lg font-bold text-gray-900">
+                                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Active Members</p>
+                                <p className="text-lg font-bold text-slate-800">
                                     {standings.filter(s => s.racesParticipated > 0).length}
                                 </p>
                             </div>
@@ -246,20 +246,20 @@ export default function StandingsPage() {
                 </div>
 
                 {/* Standings Table */}
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-lg overflow-hidden border border-slate-200">
                     {/* Desktop Table */}
                     <div className="hidden md:block">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-slate-50/50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                         Rank
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                         Member
                                     </th>
                                     <th
-                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                        className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100/50"
                                         onClick={() => handleSort('points')}
                                     >
                                         <div className="flex items-center">
@@ -272,7 +272,7 @@ export default function StandingsPage() {
                                         </div>
                                     </th>
                                     <th
-                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                        className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100/50"
                                         onClick={() => handleSort('accuracy')}
                                     >
                                         <div className="flex items-center">
@@ -285,7 +285,7 @@ export default function StandingsPage() {
                                         </div>
                                     </th>
                                     <th
-                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                        className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100/50"
                                         onClick={() => handleSort('distance')}
                                     >
                                         <div className="flex items-center">
@@ -298,7 +298,7 @@ export default function StandingsPage() {
                                         </div>
                                     </th>
                                     <th
-                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                        className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100/50"
                                         onClick={() => handleSort('races')}
                                     >
                                         <div className="flex items-center">
@@ -310,14 +310,14 @@ export default function StandingsPage() {
                                             )}
                                         </div>
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                         Stats
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white/50 divide-y divide-slate-200">
                                 {sortedStandings.map((member, index) => (
-                                    <tr key={member.id} className="hover:bg-gray-50">
+                                    <tr key={member.id} className="hover:bg-slate-50/50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${getPositionColor(index)}`}>
                                                 {index + 1}
@@ -325,18 +325,18 @@ export default function StandingsPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center">
                                                     <span className="text-pink-600 font-medium text-sm">
                                                         {cleanName(member.name).charAt(0).toUpperCase()}
                                                     </span>
                                                 </div>
                                                 <div className="ml-4">
                                                     <div className="flex items-center space-x-2">
-                                                        <div className="text-sm font-medium text-gray-900">
+                                                        <div className="text-sm font-medium text-slate-800">
                                                             {cleanName(member.name)}
                                                         </div>
                                                         {member.isOwner ? (
-                                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-100 to-violet-100 text-purple-800 border border-purple-200">
                                                                 <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                                     <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
                                                                 </svg>
@@ -344,37 +344,37 @@ export default function StandingsPage() {
                                                             </div>
                                                         ) : null}
                                                     </div>
-                                                    <div className="text-sm text-gray-500">
+                                                    <div className="text-sm text-slate-600">
                                                         {member.totalPicks} picks • {member.correctPicks} correct
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">{member.totalPoints}</div>
-                                            <div className="text-sm text-gray-500">{member.averagePointsPerRace} avg/race</div>
+                                            <div className="text-sm font-medium text-slate-800">{member.totalPoints}</div>
+                                            <div className="text-sm text-slate-500">{member.averagePointsPerRace} avg/race</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className={`text-sm font-medium ${getAccuracyColor(member.accuracy)}`}>
                                                 {member.accuracy}%
                                             </div>
-                                            <div className="text-sm text-gray-500">{member.perfectPicks} perfect</div>
+                                            <div className="text-sm text-slate-500">{member.perfectPicks} perfect</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className={`text-sm font-medium ${getDistanceColor(member.averageDistanceFromCorrect)}`}>
                                                 {member.averageDistanceFromCorrect || 0} positions
                                             </div>
-                                            <div className="text-sm text-gray-500">from target</div>
+                                            <div className="text-sm text-slate-500">from target</div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-800">
                                             {member.racesParticipated}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                             <div className="flex space-x-2">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
                                                     {member.totalPicks} picks
                                                 </span>
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200">
                                                     {member.correctPicks} correct
                                                 </span>
                                             </div>
@@ -389,7 +389,7 @@ export default function StandingsPage() {
                     <div className="md:hidden">
                         <div className="space-y-6 p-4">
                             {sortedStandings.map((member, index) => (
-                                <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                                <div key={member.id} className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg p-5 shadow-sm">
                                     <div className="flex items-start justify-between mb-5">
                                         <div className="flex items-center flex-1">
                                             <div className={`h-10 w-10 rounded-full flex items-center justify-center mr-4 flex-shrink-0 ${getPositionColor(index)}`}>
@@ -398,18 +398,18 @@ export default function StandingsPage() {
                                                 </span>
                                             </div>
                                             <div className="flex items-center flex-1">
-                                                <div className="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center mr-3">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center mr-3">
                                                     <span className="text-pink-600 font-medium text-sm">
                                                         {cleanName(member.name).charAt(0).toUpperCase()}
                                                     </span>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center space-x-2 mb-2">
-                                                        <div className="text-base font-semibold text-gray-900 truncate">
+                                                        <div className="text-base font-semibold text-slate-800 truncate">
                                                             {cleanName(member.name)}
                                                         </div>
                                                         {member.isOwner ? (
-                                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 flex-shrink-0">
+                                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-purple-100 to-violet-100 text-purple-800 flex-shrink-0 border border-purple-200">
                                                                 <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                                     <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
                                                                 </svg>
@@ -417,7 +417,7 @@ export default function StandingsPage() {
                                                             </div>
                                                         ) : null}
                                                     </div>
-                                                    <div className="text-sm text-gray-600">
+                                                    <div className="text-sm text-slate-600">
                                                         {member.totalPicks} picks • {member.correctPicks} correct
                                                     </div>
                                                 </div>
@@ -425,29 +425,29 @@ export default function StandingsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-5 p-4 bg-gray-50 rounded-lg">
+                                    <div className="grid grid-cols-2 gap-5 p-4 bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border border-slate-200">
                                         <div className="text-center">
-                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points</div>
-                                            <div className="text-xl font-bold text-gray-900 mb-1">{member.totalPoints}</div>
-                                            <div className="text-xs text-gray-500">{member.averagePointsPerRace} avg/race</div>
+                                            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Points</div>
+                                            <div className="text-xl font-bold text-slate-800 mb-1">{member.totalPoints}</div>
+                                            <div className="text-xs text-slate-500">{member.averagePointsPerRace} avg/race</div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Accuracy</div>
+                                            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Accuracy</div>
                                             <div className={`text-xl font-bold mb-1 ${getAccuracyColor(member.accuracy)}`}>
                                                 {member.accuracy}%
                                             </div>
-                                            <div className="text-xs text-gray-500">{member.perfectPicks} perfect</div>
+                                            <div className="text-xs text-slate-500">{member.perfectPicks} perfect</div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Avg Distance</div>
+                                            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Avg Distance</div>
                                             <div className={`text-xl font-bold mb-1 ${getDistanceColor(member.averageDistanceFromCorrect)}`}>
                                                 {member.averageDistanceFromCorrect || 0} positions
                                             </div>
-                                            <div className="text-xs text-gray-500">from target</div>
+                                            <div className="text-xs text-slate-500">from target</div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Races</div>
-                                            <div className="text-xl font-bold text-gray-900">{member.racesParticipated}</div>
+                                            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Races</div>
+                                            <div className="text-xl font-bold text-slate-800">{member.racesParticipated}</div>
                                         </div>
                                     </div>
                                 </div>

@@ -38,120 +38,120 @@ export default function Navigation() {
     return (
         <>
             {/* Desktop Navigation */}
-            <nav className="hidden md:block bg-white shadow">
+            <div className="hidden md:block bg-white/80 backdrop-blur-sm border-b border-slate-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
-                        {/* Logo */}
-                        <div className="flex items-center">
-                            <Link href="/dashboard" className="flex items-center space-x-2">
-                                <span className="text-2xl">🏎️</span>
-                                <div>
-                                    <h1 className="text-xl font-bold text-gray-900">FinalPoint</h1>
-                                    <p className="text-xs text-gray-600">F1 Prediction Game</p>
-                                </div>
-                            </Link>
-                        </div>
-
-                        {/* Desktop Navigation Links */}
+                    <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-8">
-                            {navigationItems.map((item) => (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href)
-                                        ? 'text-pink-600 bg-pink-50'
-                                        : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
-                                        }`}
-                                >
-                                    <span className="text-lg">{item.icon}</span>
-                                    <span>{item.name}</span>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Mobile Navigation */}
-            <nav className="md:hidden">
-                {/* Top Bar */}
-                <div className="bg-white shadow">
-                    <div className="px-4 py-2">
-                        <div className="flex items-center justify-between">
-                            {/* Logo */}
-                            <Link href="/dashboard" className="flex items-center space-x-2">
-                                <span className="text-xl">🏎️</span>
-                                <div>
-                                    <h1 className="text-lg font-bold text-gray-900">FinalPoint</h1>
-                                </div>
+                            <Link href="/dashboard" className="flex items-center space-x-2 text-slate-700 hover:text-indigo-600 transition-colors">
+                                <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <span className="text-lg font-semibold">FinalPoint</span>
                             </Link>
 
-                            {/* Hamburger Menu */}
-                            <button
-                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-                            >
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Mobile Menu */}
-                    {isMobileMenuOpen && (
-                        <div className="px-4 pb-4 border-t border-gray-200">
-                            <div className="space-y-2">
+                            <nav className="flex space-x-6">
                                 {navigationItems.map((item) => (
                                     <Link
                                         key={item.name}
                                         href={item.href}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href)
-                                            ? 'text-pink-600 bg-pink-50'
-                                            : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
+                                        className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === item.href
+                                                ? 'bg-indigo-100 text-indigo-700'
+                                                : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-100'
                                             }`}
                                     >
-                                        <span className="text-lg">{item.icon}</span>
+                                        {item.icon}
                                         <span>{item.name}</span>
                                     </Link>
                                 ))}
-                                <div className="pt-2 border-t border-gray-200">
-                                    <button
-                                        onClick={() => {
-                                            handleLogout();
-                                            setIsMobileMenuOpen(false);
-                                        }}
-                                        className="flex items-center space-x-3 px-3 py-2 w-full text-left text-sm font-medium text-gray-700 hover:text-gray-800 hover:bg-gray-50 rounded-md"
-                                    >
-                                        <span className="text-lg">🚪</span>
-                                        <span>Logout</span>
-                                    </button>
-                                </div>
-                            </div>
+                            </nav>
                         </div>
-                    )}
-                </div>
 
-                {/* Bottom Navigation Bar */}
-                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-50">
-                    <div className="flex justify-around">
+                        <div className="flex items-center space-x-4">
+                            <Link
+                                href="/profile"
+                                className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profile</span>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Top Bar */}
+            <div className="md:hidden bg-white/80 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between px-4 py-2">
+                    <Link href="/dashboard" className="flex items-center space-x-2 text-slate-700">
+                        <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span className="text-lg font-semibold">FinalPoint</span>
+                    </Link>
+
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="p-2 rounded-md text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-colors"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+                <div className="md:hidden bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-lg">
+                    <div className="px-4 py-2 space-y-1">
                         {navigationItems.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`flex flex-col items-center py-2 px-3 min-w-0 flex-1 ${isActive(item.href)
-                                    ? 'text-pink-600'
-                                    : 'text-gray-600 hover:text-gray-800'
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors ${pathname === item.href
+                                        ? 'bg-indigo-100 text-indigo-700'
+                                        : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-100'
                                     }`}
                             >
-                                <span className="text-xl mb-1">{item.icon}</span>
-                                <span className="text-xs font-medium truncate">{item.name}</span>
+                                {item.icon}
+                                <span>{item.name}</span>
                             </Link>
                         ))}
+                        <Link
+                            href="/profile"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-100 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span>Profile</span>
+                        </Link>
                     </div>
                 </div>
-            </nav>
+            )}
+
+            {/* Bottom Navigation Bar */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-slate-200 md:hidden z-50 shadow-lg">
+                <div className="flex justify-around">
+                    {navigationItems.map((item) => (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            className={`flex flex-col items-center py-2 px-3 text-xs font-medium transition-colors ${pathname === item.href
+                                    ? 'text-indigo-600'
+                                    : 'text-slate-600 hover:text-indigo-600'
+                                }`}
+                        >
+                            {item.icon}
+                            <span className="mt-1">{item.name}</span>
+                        </Link>
+                    ))}
+                </div>
+            </div>
         </>
     );
 }

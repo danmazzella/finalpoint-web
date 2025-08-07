@@ -15,6 +15,7 @@ import {
 } from '@/lib/api';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import PageTitle from '@/components/PageTitle';
 
 interface CurrentRace {
     weekNumber: number;
@@ -23,6 +24,7 @@ interface CurrentRace {
     status: string;
     circuitName: string;
     country: string;
+    description?: string; // Added for description
 }
 
 function PicksV2Form() {
@@ -42,6 +44,7 @@ function PicksV2Form() {
     const [userPicks, setUserPicks] = useState<Map<number, number>>(new Map()); // position -> driverId
     const [existingPicks, setExistingPicks] = useState<UserPickV2[]>([]);
     const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
@@ -70,6 +73,7 @@ function PicksV2Form() {
             }
         } catch (error) {
             console.error('Error loading data:', error);
+            setError('Failed to load race information.');
         } finally {
             setLoading(false);
         }
@@ -336,10 +340,15 @@ function PicksV2Form() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+            <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                <PageTitle
+                    title="Make Picks"
+                    subtitle="Select your F1 driver predictions for this week's race"
+                />
+
                 {/* New Feature Notice */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
                     <div className="flex">
                         <div className="flex-shrink-0">
                             <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -361,13 +370,13 @@ function PicksV2Form() {
                 </div>
 
                 {/* League Selection */}
-                <div className="bg-white shadow rounded-lg p-6 mb-6">
+                <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-6 border border-slate-200">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-medium text-gray-900">Select League</h2>
+                        <h2 className="text-lg font-medium text-slate-800">Select League</h2>
                         {selectedLeague && (
                             <Link
                                 href={`/leagues/${selectedLeague}`}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+                                className="inline-flex items-center px-3 py-2 border border-slate-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-slate-700 bg-white/80 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                             >
                                 <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -379,11 +388,11 @@ function PicksV2Form() {
                     <select
                         value={selectedLeague}
                         onChange={(e) => handleLeagueChange(e.target.value)}
-                        className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-pink-500 focus:border-pink-500 text-gray-900"
+                        className="block w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 bg-white/80"
                     >
-                        <option value="" className="text-gray-500">Choose a league</option>
+                        <option value="" className="text-slate-500">Choose a league</option>
                         {leagues.map((league) => (
-                            <option key={league.id} value={league.id} className="text-gray-900">
+                            <option key={league.id} value={league.id} className="text-slate-900">
                                 {league.name}
                             </option>
                         ))}
@@ -392,9 +401,9 @@ function PicksV2Form() {
 
                 {/* Current Race Information */}
                 {currentRace && (
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Current Race</h2>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-6 border border-slate-200">
+                        <h2 className="text-lg font-medium text-slate-800 mb-4">Current Race</h2>
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-lg font-semibold text-blue-900">{currentRace.raceName}</h3>
@@ -412,29 +421,31 @@ function PicksV2Form() {
                 )}
 
                 {!selectedLeague ? (
-                    <div className="bg-white shadow rounded-lg p-6 text-center">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">Select a league</h3>
-                        <p className="mt-1 text-sm text-gray-500">Choose a league to make your position predictions.</p>
+                    <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 text-center border border-slate-200">
+                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-medium text-slate-800 mb-2">Select a league</h3>
+                        <p className="text-slate-600">Choose a league to make your position predictions.</p>
                     </div>
                 ) : (
                     <>
                         {/* Position Selection and Current Picks */}
-                        <div className="bg-white shadow rounded-lg p-6 mb-6">
-                            <h2 className="text-lg font-medium text-gray-900 mb-4">
+                        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-6 border border-slate-200">
+                            <h2 className="text-lg font-medium text-slate-800 mb-4">
                                 Week {currentWeek} - Required Positions
                                 {currentRace && (
-                                    <span className="text-sm font-normal text-gray-500 ml-2">
+                                    <span className="text-sm font-normal text-slate-500 ml-2">
                                         ({currentRace.raceName})
                                     </span>
                                 )}
                             </h2>
 
                             {selectedPosition && (
-                                <div className="mb-4 p-3 bg-pink-50 border border-pink-200 rounded-md">
-                                    <p className="text-sm text-pink-800">
+                                <div className="mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
+                                    <p className="text-sm text-indigo-800">
                                         <span className="font-medium">Selected:</span> {getPositionLabel(selectedPosition)} -
                                         Click on a driver below to assign them to this position
                                     </p>
@@ -452,15 +463,15 @@ function PicksV2Form() {
                                         <div
                                             key={position}
                                             className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${isSelected
-                                                ? 'border-pink-500 bg-pink-50'
+                                                ? 'border-indigo-500 bg-indigo-50'
                                                 : pickedDriver
                                                     ? 'border-green-500 bg-green-50'
-                                                    : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                                                    : 'border-slate-200 bg-slate-50 hover:border-slate-300'
                                                 }`}
                                             onClick={() => handlePositionClick(position)}
                                         >
                                             <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-medium text-gray-900">{getPositionLabel(position)}</h3>
+                                                <h3 className="font-medium text-slate-800">{getPositionLabel(position)}</h3>
                                                 {pickedDriver && (
                                                     <button
                                                         onClick={(e) => {
@@ -478,11 +489,11 @@ function PicksV2Form() {
                                             </div>
                                             {pickedDriver ? (
                                                 <div className="text-sm">
-                                                    <p className="font-medium text-gray-900">{pickedDriver.name}</p>
-                                                    <p className="text-gray-500">{pickedDriver.team}</p>
+                                                    <p className="font-medium text-slate-800">{pickedDriver.name}</p>
+                                                    <p className="text-slate-500">{pickedDriver.team}</p>
                                                 </div>
                                             ) : (
-                                                <p className="text-sm text-gray-500">Click to select driver</p>
+                                                <p className="text-sm text-slate-500">Click to select driver</p>
                                             )}
                                         </div>
                                     );
@@ -491,7 +502,7 @@ function PicksV2Form() {
 
                             {/* Progress Status */}
                             {userPicks.size > 0 && (
-                                <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
                                     <div className="flex">
                                         <div className="flex-shrink-0">
                                             <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -514,9 +525,9 @@ function PicksV2Form() {
                         </div>
 
                         {/* Drivers Grid */}
-                        <div className="bg-white shadow rounded-lg p-6">
-                            <h2 className="text-lg font-medium text-gray-900 mb-4">Select Drivers</h2>
-                            <p className="text-sm text-gray-600 mb-4">
+                        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 border border-slate-200">
+                            <h2 className="text-lg font-medium text-slate-800 mb-4">Select Drivers</h2>
+                            <p className="text-sm text-slate-600 mb-4">
                                 {selectedPosition
                                     ? `Click on a driver to assign them to ${getPositionLabel(selectedPosition)}`
                                     : 'Click on a position above to start selecting drivers'
@@ -535,19 +546,19 @@ function PicksV2Form() {
                                             disabled={isDisabled}
                                             className={`p-4 border rounded-lg text-left transition-colors ${pickedPosition
                                                 ? pickedPosition === selectedPosition
-                                                    ? 'border-pink-500 bg-pink-50'
+                                                    ? 'border-indigo-500 bg-indigo-50'
                                                     : 'border-green-500 bg-green-50'
                                                 : isAlreadyPicked
-                                                    ? 'border-gray-300 bg-gray-100 opacity-50'
-                                                    : 'border-gray-200 hover:border-pink-300 hover:bg-gray-50'
+                                                    ? 'border-slate-300 bg-slate-100 opacity-50'
+                                                    : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
                                                 } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
                                             <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm font-medium text-gray-500">#{driver.driverNumber}</span>
-                                                <span className="text-xs text-gray-400">{driver.country}</span>
+                                                <span className="text-sm font-medium text-slate-500">#{driver.driverNumber}</span>
+                                                <span className="text-xs text-slate-400">{driver.country}</span>
                                             </div>
-                                            <h3 className="font-medium text-gray-900 mb-1">{driver.name}</h3>
-                                            <p className="text-sm text-gray-500">{driver.team}</p>
+                                            <h3 className="font-medium text-slate-800 mb-1">{driver.name}</h3>
+                                            <p className="text-sm text-slate-500">{driver.team}</p>
                                             {pickedPosition && (
                                                 <div className="mt-2">
                                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">

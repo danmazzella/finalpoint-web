@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { notificationsAPI, NotificationPreferences } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import PageTitle from '@/components/PageTitle';
 
 export default function NotificationsPage() {
     const { user } = useAuth();
@@ -217,217 +218,128 @@ export default function NotificationsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="max-w-3xl mx-auto">
-                    {/* Success/Error Messages */}
-                    {success && (
-                        <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                            {success}
-                        </div>
-                    )}
-                    {error && (
-                        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                            {error}
-                        </div>
-                    )}
+            <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                <PageTitle
+                    title="Notification Settings"
+                    subtitle="Manage your email and push notification preferences"
+                />
 
-                    {/* Email Notifications */}
-                    <div className="bg-white shadow rounded-lg mb-6">
-                        <div className="px-4 py-5 sm:p-6">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                                Email Notifications
-                            </h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium text-gray-900">Race Reminders</p>
-                                        <p className="text-sm text-gray-500">
-                                            Get reminded 5, 3, and 1 day before races if you haven&apos;t made picks
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => handlePreferenceChange('emailReminders')}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailReminders ? 'bg-pink-600' : 'bg-gray-200'
-                                            }`}
-                                    >
-                                        <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailReminders ? 'translate-x-5' : 'translate-x-1'
-                                                }`}
-                                        />
-                                    </button>
-                                </div>
+                <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 border border-slate-200">
+                    <h2 className="text-xl font-semibold text-slate-800 mb-6">Email Notifications</h2>
 
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium text-gray-900">Score Updates</p>
-                                        <p className="text-sm text-gray-500">
-                                            Get notified when your scores are updated after races
-                                        </p>
+                    <div className="space-y-4">
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
                                     </div>
-                                    <button
-                                        onClick={() => handlePreferenceChange('emailScoreUpdates')}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailScoreUpdates ? 'bg-pink-600' : 'bg-gray-200'
-                                            }`}
-                                    >
-                                        <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailScoreUpdates ? 'translate-x-5' : 'translate-x-1'
-                                                }`}
-                                        />
-                                    </button>
+                                    <div>
+                                        <h3 className="font-semibold text-slate-800">Race Reminders</h3>
+                                        <p className="text-sm text-slate-600">Get notified when races are about to start</p>
+                                    </div>
                                 </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" className="sr-only peer" />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-slate-800">Results Available</h3>
+                                        <p className="text-sm text-slate-600">Get notified when race results are posted</p>
+                                    </div>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" className="sr-only peer" />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg p-4 border border-purple-200">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-slate-800">League Updates</h3>
+                                        <p className="text-sm text-slate-600">Get notified about league activity and new members</p>
+                                    </div>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" className="sr-only peer" />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* Push Notifications */}
-                    <div className="bg-white shadow rounded-lg mb-6">
-                        <div className="px-4 py-5 sm:p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg leading-6 font-medium text-gray-900">
-                                    Push Notifications
-                                </h3>
-                                <div className="flex items-center space-x-2">
-                                    {pushSupported && pushPermission === 'default' && (
-                                        <button
-                                            onClick={requestPushPermission}
-                                            className="px-3 py-1 text-sm font-medium text-pink-600 bg-pink-100 rounded-md hover:bg-pink-200"
-                                        >
-                                            Enable Push
-                                        </button>
-                                    )}
-                                    {pushPermission === 'granted' && (
-                                        <span className="text-sm text-green-600 font-medium">✓ Enabled</span>
-                                    )}
-                                    {pushPermission === 'denied' && (
-                                        <div className="flex items-center space-x-2">
-                                            <span className="text-sm text-red-600 font-medium">✗ Blocked</span>
-                                            <button
-                                                onClick={resetPushPermission}
-                                                className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
-                                            >
-                                                Reset
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mt-6 border border-slate-200">
+                    <h2 className="text-xl font-semibold text-slate-800 mb-6">Push Notifications</h2>
 
-                            {!pushSupported && (
-                                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                                    <p className="text-sm text-yellow-800">
-                                        Push notifications are not supported in this browser
-                                    </p>
-                                </div>
-                            )}
-
-                            {pushPermission === 'denied' && (
-                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                                    <p className="text-sm text-red-800">
-                                        Push notifications are blocked. To enable them:
-                                    </p>
-                                    {navigator.userAgent.includes('Firefox') ? (
-                                        <ul className="text-sm text-red-700 mt-2 list-disc list-inside">
-                                            <li>Click the shield icon in your browser&apos;s address bar</li>
-                                            <li>Click &quot;Permissions&quot; or &quot;Site Permissions&quot;</li>
-                                            <li>Find &quot;Send Notifications&quot; and change it to &quot;Allow&quot;</li>
-                                            <li>Refresh this page and try again</li>
-                                        </ul>
-                                    ) : (
-                                        <ul className="text-sm text-red-700 mt-2 list-disc list-inside">
-                                            <li>Click the lock/info icon in your browser&apos;s address bar</li>
-                                            <li>Change &quot;Notifications&quot; to &quot;Allow&quot;</li>
-                                            <li>Refresh this page and try again</li>
-                                        </ul>
-                                    )}
-                                </div>
-                            )}
-
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium text-gray-900">Race Reminders</p>
-                                        <p className="text-sm text-gray-500">
-                                            Get reminded 5, 3, and 1 day before races if you haven&apos;t made picks
-                                        </p>
+                    <div className="space-y-4">
+                        <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg p-4 border border-orange-200">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.583 4.583A1 1 0 015.5 4.5h9a1 1 0 01.917 1.083l-1.5 9a1 1 0 01-.917.917h-6.5a1 1 0 01-.917-.917l-1.5-9z" />
+                                        </svg>
                                     </div>
-                                    <button
-                                        onClick={() => handlePreferenceChange('pushReminders')}
-                                        disabled={!pushSupported || pushPermission !== 'granted'}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushReminders && pushPermission === 'granted' ? 'bg-pink-600' : 'bg-gray-200'
-                                            } ${(!pushSupported || pushPermission !== 'granted') ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                        <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushReminders && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'
-                                                }`}
-                                        />
-                                    </button>
-                                </div>
-
-                                <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="font-medium text-gray-900">Score Updates</p>
-                                        <p className="text-sm text-gray-500">
-                                            Get notified when your scores are updated after races
-                                        </p>
+                                        <h3 className="font-semibold text-slate-800">Mobile Notifications</h3>
+                                        <p className="text-sm text-slate-600">Receive push notifications on your mobile device</p>
                                     </div>
-                                    <button
-                                        onClick={() => handlePreferenceChange('pushScoreUpdates')}
-                                        disabled={!pushSupported || pushPermission !== 'granted'}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushScoreUpdates && pushPermission === 'granted' ? 'bg-pink-600' : 'bg-gray-200'
-                                            } ${(!pushSupported || pushPermission !== 'granted') ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                        <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushScoreUpdates && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'
-                                                }`}
-                                        />
-                                    </button>
                                 </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" className="sr-only peer" />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-lg p-4 border border-pink-200">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                                        <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-slate-800">Pick Reminders</h3>
+                                        <p className="text-sm text-slate-600">Get reminded to make your picks before races</p>
+                                    </div>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" className="sr-only peer" />
+                                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* Test Notifications */}
-                    <div className="bg-white shadow rounded-lg mb-6">
-                        <div className="px-4 py-5 sm:p-6">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                                Test Notifications
-                            </h3>
-                            <p className="text-sm text-gray-500 mb-4">
-                                Send test notifications to verify your settings are working correctly
-                            </p>
-                            <div className="flex space-x-4">
-                                <button
-                                    onClick={() => testNotification('email')}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                                >
-                                    Test Email
-                                </button>
-                                <button
-                                    onClick={() => testNotification('push')}
-                                    disabled={!pushSupported || pushPermission !== 'granted'}
-                                    className={`px-4 py-2 text-sm font-medium text-white rounded-md ${pushSupported && pushPermission === 'granted'
-                                        ? 'bg-green-600 hover:bg-green-700'
-                                        : 'bg-gray-400 cursor-not-allowed'
-                                        }`}
-                                >
-                                    Test Push
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Save Button */}
-                    <div className="bg-white shadow rounded-lg">
-                        <div className="px-4 py-5 sm:p-6">
-                            <button
-                                onClick={savePreferences}
-                                disabled={isSaving}
-                                className="w-full px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50"
-                            >
-                                {isSaving ? 'Saving...' : 'Save Preferences'}
-                            </button>
-                        </div>
-                    </div>
+                <div className="mt-6 flex justify-end">
+                    <button className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-sm">
+                        Save Settings
+                    </button>
                 </div>
             </main>
         </div>

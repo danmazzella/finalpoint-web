@@ -234,274 +234,186 @@ export default function LeagueDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 py-2 sm:px-6 sm:py-6 lg:px-8">
+      <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <PageTitle
-          title={league.name}
-          subtitle={`Season ${league.seasonYear}`}
-        />
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Quick Actions and League Stats - Left Side */}
-          <div className="lg:col-span-1">
-            {/* Quick Actions */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                <Link
-                  href={`/picks?league=${league.id}`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
-                >
-                  Make Picks
-                </Link>
-                {!isMember && (
-                  <button
-                    onClick={joinLeague}
-                    disabled={joining}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {joining ? 'Joining...' : 'Join League'}
-                  </button>
-                )}
-                <Link
-                  href={`/leagues/${leagueId}/standings`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  View Standings
-                </Link>
-
-                <Link
-                  href={`/leagues/${leagueId}/results/${currentRace?.weekNumber || 1}`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  {loadingCurrentRace ? 'Loading...' : 'View Results'}
-                </Link>
-                {league?.userRole && (
-                  <button
-                    onClick={openSettings}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    League Settings
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* League Stats */}
-            <div className="bg-white shadow rounded-lg p-6 mt-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">League Stats</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Total Picks</span>
-                  <span className="text-sm font-medium text-gray-900">{stats?.totalPicks || 0}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Correct Picks</span>
-                  <span className="text-sm font-medium text-gray-900">{stats?.correctPicks || 0}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Accuracy</span>
-                  <span className="text-sm font-medium text-gray-900">{stats?.overallAccuracy || 0}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Average Points</span>
-                  <span className="text-sm font-medium text-gray-900">{stats?.averagePoints || 0}</span>
-                </div>
-              </div>
-            </div>
+          title={league?.name || 'League'}
+          subtitle={`${league?.memberCount || 0} members • Season ${league?.seasonYear || '2025'}`}
+        >
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              href="/picks-v2"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-medium rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-sm"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Make Picks
+            </Link>
+            <Link
+              href={`/leagues/${leagueId}/standings`}
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-medium rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 shadow-sm"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              View Standings
+            </Link>
           </div>
+        </PageTitle>
 
-          {/* League Info and Recent Activity - Right Side */}
-          <div className="lg:col-span-2">
-            {/* League Info */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-medium text-gray-900">League Information</h2>
-                {league.joinCode && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => {
-                        const shareUrl = `${window.location.origin}/joinleague/${league.joinCode}`;
-                        navigator.clipboard.writeText(shareUrl);
-                        showToast('Invite link copied! Share it with friends to join your league.', 'success');
-                      }}
-                      className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                      </svg>
-                      Invite Friends
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (league.joinCode) {
-                          navigator.clipboard.writeText(league.joinCode);
-                          showToast('Join code copied to clipboard!', 'success');
-                        }
-                      }}
-                      className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      Copy Code
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">League Name</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{league.name}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Season</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{league.seasonYear}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Members</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{league.memberCount || 1} member{league.memberCount !== 1 ? 's' : ''}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Your Status</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isMember
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
-                      }`}>
-                      {isMember ? 'Member' : 'Not a Member'}
-                    </span>
-                  </dd>
-                </div>
-                {league.joinCode && (
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Join Code</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
-                      <span className="font-mono tracking-widest bg-gray-100 px-2 py-1 rounded">
-                        {league.joinCode}
-                      </span>
-                    </dd>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white shadow rounded-lg p-6 mt-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
-                <Link
-                  href={`/leagues/${leagueId}/activity`}
-                  className="text-sm text-pink-600 hover:text-pink-700 font-medium"
-                >
-                  View All Activity →
-                </Link>
-              </div>
-              {activityLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
-                  <p className="mt-2 text-sm text-gray-500">Loading activity...</p>
-                </div>
-              ) : recentActivity.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="text-sm text-gray-500 mb-2">Found {recentActivity.length} activities</div>
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-shrink-0">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${activity.activityType === 'pick_created' ? 'bg-green-100' :
-                          activity.activityType === 'pick_changed' ? 'bg-blue-100' :
-                            activity.activityType === 'user_joined' ? 'bg-purple-100' :
-                              activity.activityType === 'user_left' ? 'bg-red-100' :
-                                activity.activityType === 'league_name_changed' ? 'bg-indigo-100' :
-                                  activity.activityType === 'race_result_processed' ? 'bg-yellow-100' :
-                                    'bg-pink-100'
-                          }`}>
-                          <svg className={`h-4 w-4 ${activity.activityType === 'pick_created' ? 'text-green-600' :
-                            activity.activityType === 'pick_changed' ? 'text-blue-600' :
-                              activity.activityType === 'user_joined' ? 'text-purple-600' :
-                                activity.activityType === 'user_left' ? 'text-red-600' :
-                                  activity.activityType === 'league_name_changed' ? 'text-indigo-600' :
-                                    activity.activityType === 'race_result_processed' ? 'text-yellow-600' :
-                                      'text-pink-600'
-                            }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            {activity.activityType === 'pick_created' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            ) : activity.activityType === 'pick_changed' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            ) : activity.activityType === 'user_joined' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                            ) : activity.activityType === 'user_left' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            ) : activity.activityType === 'league_name_changed' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            ) : activity.activityType === 'race_result_processed' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            ) : (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            )}
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
-                          {activity.activityType === 'user_joined' ? (
-                            `${activity.userName} joined the league`
-                          ) : activity.activityType === 'user_left' ? (
-                            `${activity.userName} left the league`
-                          ) : activity.activityType === 'league_name_changed' ? (
-                            `${activity.userName} changed the league name`
-                          ) : activity.activityType === 'race_result_processed' ? (
-                            `Race results processed for Week ${activity.weekNumber}`
-                          ) : (
-                            `${activity.userName || 'System'} ${activity.activityType === 'pick_created' ? 'made a pick' : 'changed their pick'} for Week ${activity.weekNumber}`
-                          )}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {activity.activityType === 'pick_created' ? (
-                            `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`
-                          ) : activity.activityType === 'pick_changed' ? (
-                            `Changed P${activity.position} from ${activity.previousDriverName} (${activity.previousDriverTeam}) to ${activity.driverName} (${activity.driverTeam})`
-                          ) : activity.activityType === 'race_result_processed' ? (
-                            `${activity.raceName ? `${activity.raceName} - ` : ''}${activity.driverName} (${activity.driverTeam}) finished in P${activity.position}`
-                          ) : activity.activityType === 'user_joined' ? (
-                            `Welcome to the league!`
-                          ) : activity.activityType === 'user_left' ? (
-                            `Goodbye!`
-                          ) : activity.activityType === 'league_name_changed' ? (
-                            `Changed from "${activity.previousDriverName}" to "${activity.driverName}"`
-                          ) : (
-                            `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`
-                          )}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0 text-sm text-gray-500">
-                        {new Date(activity.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        {/* League Information */}
+        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-6 border border-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
-                  <p className="mt-1 text-sm text-gray-500">Activity will appear here as members make picks.</p>
                 </div>
-              )}
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Members</p>
+                  <p className="text-2xl font-bold text-slate-800">{league?.memberCount || 0}</p>
+                </div>
+              </div>
             </div>
 
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-green-600">Season</p>
+                  <p className="text-2xl font-bold text-slate-800">{league?.seasonYear || '2025'}</p>
+                </div>
+              </div>
+            </div>
 
-
-
+            <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg p-4 border border-purple-200">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-purple-600">Join Code</p>
+                  <p className="text-lg font-bold text-slate-800">{league?.joinCode || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-6 border border-slate-200">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link
+              href={`/leagues/${leagueId}/standings`}
+              className="bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border border-indigo-200 rounded-lg p-4 transition-all duration-200 hover:shadow-md group"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 group-hover:text-indigo-700 transition-colors">Standings</h3>
+                  <p className="text-sm text-slate-600">View current rankings</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href="/picks-v2"
+              className="bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 border border-green-200 rounded-lg p-4 transition-all duration-200 hover:shadow-md group"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 group-hover:text-green-700 transition-colors">Make Picks</h3>
+                  <p className="text-sm text-slate-600">Select your predictions</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href={`/leagues/${leagueId}/activity`}
+              className="bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 border border-orange-200 rounded-lg p-4 transition-all duration-200 hover:shadow-md group"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 group-hover:text-orange-700 transition-colors">Activity</h3>
+                  <p className="text-sm text-slate-600">View league history</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              href={`/leagues/${leagueId}/results`}
+              className="bg-gradient-to-br from-pink-50 to-rose-50 hover:from-pink-100 hover:to-rose-100 border border-pink-200 rounded-lg p-4 transition-all duration-200 hover:shadow-md group"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 group-hover:text-pink-700 transition-colors">Results</h3>
+                  <p className="text-sm text-slate-600">View race results</p>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 border border-slate-200">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Recent Activity</h2>
+          {recentActivity.length > 0 ? (
+            <div className="space-y-3">
+              {recentActivity.slice(0, 5).map((activity, index) => (
+                <div key={index} className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-lg p-3">
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center mr-3">
+                      <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">{activity.message}</p>
+                      <p className="text-xs text-slate-500">{activity.time}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-slate-800 mb-2">No recent activity</h3>
+              <p className="text-slate-600">Activity will appear here as members make picks and races are completed.</p>
+            </div>
+          )}
         </div>
       </main>
 

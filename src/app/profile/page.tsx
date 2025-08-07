@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import PageTitle from '@/components/PageTitle';
 
 export default function ProfilePage() {
   const { user, logout, updateProfile, changePassword } = useAuth();
@@ -88,161 +89,133 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          {/* Success/Error Messages */}
-          {success && (
-            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-              {success}
-            </div>
-          )}
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
+      <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <PageTitle
+          title="Profile"
+          subtitle="Manage your account and preferences"
+        />
 
-          {/* Profile Information */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Account Information</h3>
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="h-16 w-16 rounded-full bg-pink-100 flex items-center justify-center">
-                  <span className="text-pink-600 font-bold text-xl">{user?.name?.charAt(0).toUpperCase()}</span>
+        {/* Profile Information */}
+        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-8 border border-slate-200">
+          <h2 className="text-xl font-semibold text-slate-800 mb-6">Account Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
                 <div>
-                  <h4 className="text-xl font-medium text-gray-900">{user?.name}</h4>
-                  <p className="text-gray-500">{user?.email}</p>
+                  <p className="text-sm font-medium text-blue-600">Name</p>
+                  <p className="text-lg font-semibold text-slate-800">{user?.name || 'Not set'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-green-600">Email</p>
+                  <p className="text-lg font-semibold text-slate-800">{user?.email || 'Not set'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg p-4 border border-purple-200">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-purple-600">Member Since</p>
+                  <p className="text-lg font-semibold text-slate-800">Unknown</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg p-4 border border-orange-200">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-orange-600">Status</p>
+                  <p className="text-lg font-semibold text-slate-800">Active</p>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Account Settings */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Account Settings</h3>
-              <div className="space-y-4">
-                <button
-                  onClick={() => setShowEditProfile(true)}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Edit Profile</p>
-                      <p className="text-sm text-gray-800">Update your name</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
+        {/* Actions */}
+        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-8 border border-slate-200">
+          <h2 className="text-xl font-semibold text-slate-800 mb-6">Account Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/notifications"
+              className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-medium rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 shadow-sm"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.583 4.583A1 1 0 015.5 4.5h9a1 1 0 01.917 1.083l-1.5 9a1 1 0 01-.917.917h-6.5a1 1 0 01-.917-.917l-1.5-9z" />
+              </svg>
+              Notification Settings
+            </Link>
 
-                <button
-                  onClick={() => setShowChangePassword(true)}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Change Password</p>
-                      <p className="text-sm text-gray-800">Update your password</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 shadow-sm"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout
+            </button>
+          </div>
+        </div>
 
-                <button
-                  onClick={handleNotificationSettings}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Notification Settings</p>
-                      <p className="text-sm text-gray-800">Manage email and push notifications</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
+        {/* Statistics */}
+        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 border border-slate-200">
+          <h2 className="text-xl font-semibold text-slate-800 mb-6">Your Statistics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 border border-slate-200 text-center">
+              <div className="w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
               </div>
+              <p className="text-sm font-medium text-slate-600">Leagues Joined</p>
+              <p className="text-2xl font-bold text-slate-800">3</p>
             </div>
-          </div>
 
-          {/* App Information */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">App Information</h3>
-              <div className="space-y-4">
-                <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">About FinalPoint</p>
-                      <p className="text-sm text-gray-500">Learn more about the app</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
-
-                <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Privacy Policy</p>
-                      <p className="text-sm text-gray-500">Read our privacy policy</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
-
-                <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Terms of Service</p>
-                      <p className="text-sm text-gray-500">Read our terms of service</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
-
-                <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Help & Support</p>
-                      <p className="text-sm text-gray-500">Get help and support</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 border border-slate-200 text-center">
+              <div className="w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
+              <p className="text-sm font-medium text-slate-600">Total Picks</p>
+              <p className="text-2xl font-bold text-slate-800">24</p>
             </div>
-          </div>
 
-          {/* Logout */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <button
-                onClick={handleLogout}
-                className="w-full px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Logout
-              </button>
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 border border-slate-200 text-center">
+              <div className="w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-slate-600">Total Points</p>
+              <p className="text-2xl font-bold text-slate-800">156</p>
             </div>
-          </div>
-
-          {/* App Version */}
-          <div className="text-center mt-6">
-            <p className="text-sm text-gray-500">FinalPoint v1.0.0</p>
-            <p className="text-xs text-gray-400 mt-1">F1 Prediction Game</p>
           </div>
         </div>
       </main>

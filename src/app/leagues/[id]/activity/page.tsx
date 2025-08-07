@@ -190,20 +190,20 @@ export default function LeagueActivityPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
                     title={leagueName ? `${leagueName} Activity` : 'League Activity'}
-                    subtitle="All league activity and history"
+                    subtitle="View all recent activity in this league"
                 >
                     <BackToLeagueButton leagueId={leagueId} className="text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2" />
                 </PageTitle>
 
                 {/* Activity List */}
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-lg font-medium text-gray-900">All Activity</h2>
-                        <p className="text-sm text-gray-500 mt-1">
+                <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl overflow-hidden border border-slate-200">
+                    <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+                        <h2 className="text-lg font-medium text-slate-800">All Activity</h2>
+                        <p className="text-sm text-slate-600 mt-1">
                             Complete history of all league activity
                         </p>
                     </div>
@@ -211,13 +211,13 @@ export default function LeagueActivityPage() {
                     <div className="p-6">
                         {loading && activities.length === 0 ? (
                             <div className="text-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
-                                <p className="mt-2 text-sm text-gray-500">Loading activities...</p>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                                <p className="mt-2 text-sm text-slate-500">Loading activities...</p>
                             </div>
                         ) : activities.length > 0 ? (
                             <div className="space-y-4">
                                 {activities.map((activity, index) => (
-                                    <div key={activity.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <div key={activity.id} className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
                                         <div className="flex items-start space-x-3">
                                             <div className="flex-shrink-0">
                                                 <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getActivityIconBg(activity.activityType)}`}>
@@ -225,13 +225,13 @@ export default function LeagueActivityPage() {
                                                 </div>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-gray-900">
+                                                <p className="text-sm font-semibold text-slate-800">
                                                     {getActivityMessage(activity)}
                                                 </p>
-                                                <p className="text-sm text-gray-600 mt-1">
+                                                <p className="text-sm text-slate-600 mt-1">
                                                     {getActivityDetails(activity)}
                                                 </p>
-                                                <p className="text-xs text-gray-500 mt-2">
+                                                <p className="text-xs text-slate-500 mt-2">
                                                     {new Date(activity.createdAt).toLocaleDateString('en-US', {
                                                         year: 'numeric',
                                                         month: 'short',
@@ -250,7 +250,7 @@ export default function LeagueActivityPage() {
                                         <button
                                             onClick={loadMore}
                                             disabled={loading}
-                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
                                         >
                                             {loading ? 'Loading...' : 'Load More'}
                                         </button>
@@ -259,17 +259,19 @@ export default function LeagueActivityPage() {
 
                                 {!hasMore && activities.length > 0 && (
                                     <div className="text-center pt-4">
-                                        <p className="text-sm text-gray-500">No more activities to load</p>
+                                        <p className="text-sm text-slate-500">No more activities to load</p>
                                     </div>
                                 )}
                             </div>
                         ) : (
                             <div className="text-center py-8">
-                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <h3 className="mt-2 text-sm font-medium text-gray-900">No activity found</h3>
-                                <p className="mt-1 text-sm text-gray-500">Activity will appear here as members make picks.</p>
+                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg font-medium text-slate-800 mb-2">No activity found</h3>
+                                <p className="text-slate-600">Activity will appear here as members make picks.</p>
                             </div>
                         )}
                     </div>

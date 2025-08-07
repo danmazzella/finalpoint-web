@@ -61,88 +61,86 @@ export default function LeaguesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <PageTitle
-          title="My Leagues"
-          subtitle="Manage your F1 prediction game"
+          title="Leagues"
+          subtitle="Join or create a league to start predicting F1 races"
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Link
               href="/join"
-              className="text-gray-600 hover:text-gray-700 font-medium"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
             >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
               Join League
             </Link>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+            <Link
+              href="/leagues"
+              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:from-slate-200 hover:to-slate-300 transition-all duration-200 shadow-sm border border-slate-300"
             >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
               Create League
-            </button>
+            </Link>
           </div>
         </PageTitle>
 
-        {leagues.length === 0 ? (
-          <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No leagues</h3>
-            <p className="mt-1 text-sm text-gray-500">Get started by creating your first league.</p>
-            <div className="mt-6">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
-              >
-                Create League
-              </button>
+        {/* Your Leagues Section */}
+        <div className="bg-white/70 backdrop-blur-sm shadow-lg rounded-xl p-6 mb-8 border border-slate-200">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Your Leagues</h2>
+          {leagues.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {leagues.map((league) => (
+                <Link
+                  key={league.id}
+                  href={`/leagues/${league.id}`}
+                  className="block bg-gradient-to-br from-slate-50 to-blue-50 hover:from-slate-100 hover:to-blue-100 border border-slate-200 rounded-lg p-4 transition-all duration-200 hover:shadow-md group"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-slate-800 group-hover:text-indigo-700 transition-colors">{league.name}</h3>
+                    <span className="text-xs bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 px-2 py-1 rounded-full border border-indigo-200">
+                      {league.memberCount} members
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-600 mb-3">Season {league.seasonYear}</p>
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span className="bg-slate-100 px-2 py-1 rounded">Join Code: {league.joinCode}</span>
+                    <svg className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </Link>
+              ))}
             </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {leagues.map((league) => (
-              <div key={league.id} className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-12 w-12 rounded-full bg-pink-100 flex items-center justify-center">
-                        <span className="text-pink-600 font-medium text-lg">{league.name.charAt(0)}</span>
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        Season {league.seasonYear} • {league.memberCount || 1} member{league.memberCount !== 1 ? 's' : ''}
-                        {league.userRole && (
-                          <span className={`ml-2 px-2 py-1 text-xs rounded-full ${league.userRole === 'Owner'
-                            ? 'bg-pink-100 text-pink-800'
-                            : 'bg-gray-100 text-gray-800'
-                            }`}>
-                            {league.userRole}
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-6 flex space-x-3">
-                    <Link
-                      href={`/leagues/${league.id}`}
-                      className="flex-1 bg-pink-600 text-white text-center px-4 py-2 rounded-md text-sm font-medium hover:bg-pink-700"
-                    >
-                      View League
-                    </Link>
-                    <Link
-                      href={`/picks?league=${league.id}`}
-                      className="flex-1 bg-gray-100 text-gray-700 text-center px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200"
-                    >
-                      Make Picks
-                    </Link>
-                  </div>
-                </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
               </div>
-            ))}
-          </div>
-        )}
+              <h3 className="text-lg font-medium text-slate-800 mb-2">No leagues yet</h3>
+              <p className="text-slate-600 mb-4">Join or create a league to get started!</p>
+              <div className="space-x-3">
+                <Link
+                  href="/join"
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-sm"
+                >
+                  Join League
+                </Link>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:from-slate-200 hover:to-slate-300 transition-all duration-200 shadow-sm border border-slate-300"
+                >
+                  Create League
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Create League Modal */}
