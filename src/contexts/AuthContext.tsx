@@ -10,11 +10,24 @@ interface User {
   avatar?: string;
 }
 
+interface AuthResponse {
+  success: boolean;
+  error?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string, avatar?: File) => Promise<boolean>;
+  loginError: string | null;
+  signupError: string | null;
+  loginFormData: { email: string; password: string };
+  signupFormData: { name: string; email: string; password: string; confirmPassword: string };
+  setLoginFormData: (data: { email: string; password: string }) => void;
+  setSignupFormData: (data: { name: string; email: string; password: string; confirmPassword: string }) => void;
+  clearLoginError: () => void;
+  clearSignupError: () => void;
+  login: (email: string, password: string) => Promise<AuthResponse>;
+  signup: (email: string, password: string, name: string, avatar?: File) => Promise<AuthResponse>;
   logout: () => void;
   updateProfile: (name: string) => Promise<boolean>;
   updateAvatar: (avatar: File) => Promise<boolean>;
@@ -34,6 +47,15 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [loginFormData, setLoginFormData] = useState<{ email: string; password: string }>({ email: '', password: '' });
+  const [signupFormData, setSignupFormData] = useState<{ name: string; email: string; password: string; confirmPassword: string }>({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   useEffect(() => {
     loadStoredUser();
@@ -52,30 +74,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<AuthResponse> => {
     try {
       setIsLoading(true);
+      setLoginError(null); // Clear any previous login error
+
       const response = await authAPI.login({ email, password });
 
       if (response.data.success) {
         const userData = response.data.user;
+        // Extract filename from avatar URL if present
+        if (userData.avatar) {
+          userData.avatar = userData.avatar.split('/').pop();
+        }
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('token', response.data.token);
-        return true;
+        setLoginError(null); // Clear any error on success
+        setLoginFormData({ email: '', password: '' }); // Clear form data on success
+        return { success: true };
       }
-      return false;
-    } catch (error) {
+      return { success: false, error: 'You have entered an invalid email or password' };
+    } catch (error: any) {
       console.error('Login error:', error);
-      return false;
+
+      // Extract error message from API response
+      let errorMessage = 'You have entered an invalid email or password';
+
+      if (error?.response?.data?.errors?.length > 0) {
+        // Handle ErrorClass format from backend - but use generic message for security
+        errorMessage = 'You have entered an invalid email or password';
+      } else if (error?.response?.data?.message) {
+        errorMessage = 'You have entered an invalid email or password';
+      } else if (error?.message) {
+        errorMessage = 'You have entered an invalid email or password';
+      }
+
+      setLoginError(errorMessage); // Store error in context
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signup = async (email: string, password: string, name: string, avatar?: File): Promise<boolean> => {
+  const clearLoginError = () => {
+    setLoginError(null);
+  };
+
+  const clearSignupError = () => {
+    setSignupError(null);
+  };
+
+  const signup = async (email: string, password: string, name: string, avatar?: File): Promise<AuthResponse> => {
     try {
       setIsLoading(true);
+      setSignupError(null); // Clear any previous signup error
 
       let data: any = { email, password, name };
 
@@ -90,12 +143,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (response.data.success) {
           const userData = response.data.user;
+          // Extract filename from avatar URL if present
+          if (userData.avatar) {
+            userData.avatar = userData.avatar.split('/').pop();
+          }
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.setItem('token', response.data.token);
-          return true;
+          setSignupError(null); // Clear any error on success
+          setSignupFormData({ name: '', email: '', password: '', confirmPassword: '' }); // Clear form data on success
+          return { success: true };
         }
-        return false;
+        return { success: false, error: 'Failed to create account. Please try again.' };
       } else {
         const response = await authAPI.signup(data);
 
@@ -104,13 +163,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.setItem('token', response.data.token);
-          return true;
+          setSignupError(null); // Clear any error on success
+          setSignupFormData({ name: '', email: '', password: '', confirmPassword: '' }); // Clear form data on success
+          return { success: true };
         }
-        return false;
+        return { success: false, error: 'Failed to create account. Please try again.' };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error);
-      return false;
+
+      // Extract error message from API response
+      let errorMessage = 'Failed to create account. Please try again.';
+
+      if (error?.response?.data?.errors?.length > 0) {
+        // Handle ErrorClass format from backend
+        const backendError = error.response.data.errors[0].message;
+
+        if (backendError === 'Username already taken') {
+          errorMessage = 'Username already taken. Please choose a different username.';
+        } else if (backendError === 'User already exists') {
+          errorMessage = 'Email already registered. Please use a different email or sign in.';
+        } else if (backendError.includes('Password must')) {
+          errorMessage = backendError; // Show specific password validation error from backend
+        } else {
+          errorMessage = backendError;
+        }
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      setSignupError(errorMessage); // Store error in context
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +235,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const response = await authAPI.updateAvatar(formData);
       if (response.data.success && user) {
-        const updatedUser = { ...user, avatar: response.data.avatar };
+        // Extract filename from the backend response URL
+        // Backend returns "/uploads/avatars/filename.jpg", we want just "filename.jpg"
+        const avatarUrl = response.data.avatar;
+        const filename = avatarUrl ? avatarUrl.split('/').pop() : null;
+
+        const updatedUser = { ...user, avatar: filename };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
         return true;
@@ -183,6 +273,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     isLoading,
+    loginError,
+    signupError,
+    loginFormData,
+    signupFormData,
+    setLoginFormData,
+    setSignupFormData,
+    clearLoginError,
+    clearSignupError,
     login,
     signup,
     logout,

@@ -7,28 +7,38 @@ import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
 
 function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
+  const [validationError, setValidationError] = useState('');
+  const { login, isLoading, loginError, loginFormData, setLoginFormData, clearLoginError } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  const { email, password } = loginFormData;
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Clear any previous errors
+    clearLoginError();
+    setValidationError('');
 
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setValidationError('Please fill in all fields');
       return;
     }
 
-    const success = await login(email, password);
-    if (success) {
-      router.push(redirectTo);
-    } else {
-      setError('Invalid email or password');
+    try {
+      const result = await login(email, password);
+
+      if (result?.success) {
+        router.push(redirectTo);
+      }
+      // Error handling is done in the AuthContext
+    } catch (error) {
+      console.error('Unexpected error in handleSubmit:', error);
     }
   };
 
@@ -59,7 +69,7 @@ function LoginForm() {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setLoginFormData({ email: e.target.value, password })}
                   placeholder="Enter your email address"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                 />
@@ -78,15 +88,17 @@ function LoginForm() {
                   autoComplete="current-password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setLoginFormData({ email, password: e.target.value })}
                   placeholder="Enter your password"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                 />
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
+            {(loginError || validationError) && (
+              <div className="text-red-600 text-sm text-center">
+                {loginError || validationError}
+              </div>
             )}
 
             <div>

@@ -107,37 +107,15 @@ apiService.interceptors.request.use(
 apiService.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // More robust error logging
-    const errorInfo = {
-      message: error?.message || 'Unknown error',
-      code: error?.code || 'UNKNOWN',
-      status: error?.response?.status || 'No response',
-      statusText: error?.response?.statusText || 'No status text',
-      data: error?.response?.data || 'No data',
-      url: error?.config?.url || 'No URL',
-      method: error?.config?.method || 'No method',
-      fullUrl: (error?.config?.baseURL || '') + (error?.config?.url || '') || 'No full URL',
-      isNetworkError: !error?.response,
-      isTimeout: error?.code === 'ECONNABORTED',
-      isCorsError: error?.message?.includes('CORS') || false
-    };
-
-    console.error('🔧 API Error Details:', errorInfo);
-
-    // Handle specific error types
-    if (errorInfo.isNetworkError) {
-      console.error('🔧 Network error - check if API is accessible');
-      console.error('🔧 Full URL attempted:', errorInfo.fullUrl);
-    } else if (errorInfo.isTimeout) {
-      console.error('🔧 Request timed out');
-    } else if (errorInfo.isCorsError) {
-      console.error('🔧 CORS error detected');
-    } else if (errorInfo.status === 401 && typeof window !== 'undefined') {
+    // Only handle 401 errors with automatic redirect
+    if (error?.response?.status === 401 && typeof window !== 'undefined') {
+      console.log('🔧 401 error - removing auth and redirecting');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
 
+    // Let all other errors (including 400 login failures) pass through normally
     return Promise.reject(error);
   }
 );

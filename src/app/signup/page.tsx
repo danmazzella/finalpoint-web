@@ -6,20 +6,26 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
 import Avatar from '@/components/Avatar';
+import PasswordStrengthIndicator, { validatePasswordComplexity } from '@/components/PasswordStrengthIndicator';
 
 function SignupForm() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [error, setError] = useState('');
-  const { signup, isLoading } = useAuth();
+  const [validationError, setValidationError] = useState('');
+  const {
+    signup,
+    isLoading,
+    signupError,
+    signupFormData,
+    setSignupFormData,
+    clearSignupError
+  } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { name, email, password, confirmPassword } = signupFormData;
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,18 +33,18 @@ function SignupForm() {
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+        setValidationError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
         return;
       }
 
       // Validate file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
+        setValidationError('File size must be less than 5MB');
         return;
       }
 
       setAvatar(file);
-      setError('');
+      setValidationError('');
 
       // Create preview
       const reader = new FileReader();
@@ -59,38 +65,36 @@ function SignupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+
+    // Clear any previous errors
+    clearSignupError();
+    setValidationError('');
 
     if (!name || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields');
+      setValidationError('Please fill in all fields');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setValidationError('Passwords do not match');
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Validate password complexity
+    const passwordValidation = validatePasswordComplexity(password);
+    if (!passwordValidation.isValid) {
+      setValidationError(passwordValidation.errors[0]);
       return;
     }
 
     try {
-      const success = await signup(email, password, name, avatar || undefined);
-      if (success) {
+      const result = await signup(email, password, name, avatar || undefined);
+      if (result.success) {
         router.push(redirectTo);
-      } else {
-        setError('Failed to create account. Please try again.');
       }
-    } catch (error: any) {
-      if (error?.response?.data?.errors?.some((e: any) => e.message === 'Username already taken')) {
-        setError('Username already taken. Please choose a different username.');
-      } else if (error?.response?.data?.errors?.some((e: any) => e.message === 'User already exists')) {
-        setError('Email already registered. Please use a different email or sign in.');
-      } else {
-        setError('Failed to create account. Please try again.');
-      }
+      // Error handling is done in the AuthContext
+    } catch (error) {
+      console.error('Unexpected error in handleSubmit:', error);
     }
   };
 
@@ -164,7 +168,7 @@ function SignupForm() {
                   autoComplete="name"
                   required
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => setSignupFormData({ ...signupFormData, name: e.target.value })}
                   placeholder="Enter your display name"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                 />
@@ -183,7 +187,7 @@ function SignupForm() {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setSignupFormData({ ...signupFormData, email: e.target.value })}
                   placeholder="Enter your email address"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                 />
@@ -202,10 +206,11 @@ function SignupForm() {
                   autoComplete="new-password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setSignupFormData({ ...signupFormData, password: e.target.value })}
                   placeholder="Enter your password"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                 />
+                <PasswordStrengthIndicator password={password} />
               </div>
             </div>
 
@@ -221,15 +226,17 @@ function SignupForm() {
                   autoComplete="new-password"
                   required
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => setSignupFormData({ ...signupFormData, confirmPassword: e.target.value })}
                   placeholder="Confirm your password"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                 />
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
+            {(signupError || validationError) && (
+              <div className="text-red-600 text-sm text-center">
+                {signupError || validationError}
+              </div>
             )}
 
             <div>
