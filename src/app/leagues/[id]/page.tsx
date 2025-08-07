@@ -6,6 +6,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { leaguesAPI, activityAPI, League, f1racesAPI } from '@/lib/api';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import PageTitle from '@/components/PageTitle';
 
 interface CurrentRace {
   weekNumber: number;
@@ -233,34 +234,13 @@ export default function LeagueDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{league.name}</h1>
-              <p className="text-gray-600">Season {league.seasonYear}</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/dashboard"
-                className="text-pink-600 hover:text-pink-700 font-medium"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/leagues"
-                className="text-gray-600 hover:text-gray-700 font-medium"
-              >
-                All Leagues
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <main className="max-w-7xl mx-auto px-4 py-2 sm:px-6 sm:py-6 lg:px-8">
+        <PageTitle
+          title={league.name}
+          subtitle={`Season ${league.seasonYear}`}
+        />
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Quick Actions and League Stats - Left Side */}
           <div className="lg:col-span-1">
             {/* Quick Actions */}

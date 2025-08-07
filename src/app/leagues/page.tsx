@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { leaguesAPI, League } from '@/lib/api';
 import Link from 'next/link';
+import PageTitle from '@/components/PageTitle';
 
 export default function LeaguesPage() {
   const { user } = useAuth();
@@ -60,39 +61,27 @@ export default function LeaguesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Leagues</h1>
-              <p className="text-gray-600">Manage your F1 prediction game</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/dashboard"
-                className="text-pink-600 hover:text-pink-700 font-medium"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/join"
-                className="text-gray-600 hover:text-gray-700 font-medium"
-              >
-                Join League
-              </Link>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
-              >
-                Create League
-              </button>
-            </div>
+      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <PageTitle
+          title="My Leagues"
+          subtitle="Manage your F1 prediction game"
+        >
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/join"
+              className="text-gray-600 hover:text-gray-700 font-medium"
+            >
+              Join League
+            </Link>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+            >
+              Create League
+            </button>
           </div>
-        </div>
-      </header>
+        </PageTitle>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {leagues.length === 0 ? (
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

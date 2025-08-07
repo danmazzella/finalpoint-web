@@ -337,26 +337,6 @@ function PicksV2Form() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Make Your Picks</h1>
-                            <p className="text-gray-600">Multiple position predictions for F1 races</p>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <Link
-                                href="/dashboard"
-                                className="text-pink-600 hover:text-pink-700 font-medium"
-                            >
-                                Dashboard
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                 {/* New Feature Notice */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">

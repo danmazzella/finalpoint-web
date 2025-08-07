@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { leaguesAPI, authAPI, League } from '@/lib/api';
 import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import PageTitle from '@/components/PageTitle';
 
 interface UserStats {
   totalPicks: number;
@@ -94,36 +95,20 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">FinalPoint</h1>
-              <p className="text-gray-600">F1 Prediction Game</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user?.name}</span>
-              <Link
-                href="/profile"
-                className="text-pink-600 hover:text-pink-700 font-medium"
-              >
-                Profile
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <PageTitle
+          title="Dashboard"
+          subtitle="Welcome to your F1 prediction game"
+        />
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {/* Your Leagues Section */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-md mb-8">
+        <div className="bg-white shadow-lg overflow-hidden sm:rounded-md mb-8">
           <div className="px-4 py-5 sm:px-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg leading-6 font-medium text-gray-900">Your Leagues</h3>
               <Link
                 href="/leagues"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 shadow-sm"
               >
                 Manage Leagues
               </Link>
@@ -188,33 +173,13 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+        {/* User Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white overflow-hidden shadow-lg rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-pink-500 rounded-md flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Active Leagues</dt>
-                    <dd className="text-lg font-medium text-gray-900">{leagues.length}</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                  <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center shadow-sm">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -230,11 +195,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="bg-white overflow-hidden shadow-lg rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center shadow-sm">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
@@ -252,7 +217,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Global Stats Section */}
-        <div className="bg-white shadow rounded-lg p-6 mb-8">
+        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
           <h2 className="text-lg font-medium text-gray-900 mb-6">Platform Statistics</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="text-center">
@@ -277,7 +242,7 @@ export default function DashboardPage() {
             {/* Pick Accuracy Chart */}
             <div>
               <h3 className="text-md font-medium text-gray-900 mb-4">Pick Accuracy</h3>
-              <div className="h-64">
+              <div className="h-64 mb-8">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -304,26 +269,22 @@ export default function DashboardPage() {
             <div>
               <h3 className="text-md font-medium text-gray-900 mb-4">Performance Metrics</h3>
               <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm">
                   <span className="text-sm font-medium text-gray-700">Average Points per Pick</span>
                   <span className="text-lg font-bold text-gray-900">{globalStats.averagePoints}</span>
                 </div>
-                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm">
                   <span className="text-sm font-medium text-gray-700">Average Distance from Target</span>
                   <span className="text-lg font-bold text-gray-900">{globalStats.averageDistanceFromTarget} positions</span>
-                </div>
-                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">Correct Picks</span>
-                  <span className="text-lg font-bold text-green-600">{globalStats.correctPicks}</span>
-                </div>
-                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">Incorrect Picks</span>
-                  <span className="text-lg font-bold text-red-600">{globalStats.totalPicks - globalStats.correctPicks}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Bottom spacing for mobile to account for fixed bottom navigation */}
+        <div className="md:hidden h-16"></div>
+
       </main>
     </div>
   );

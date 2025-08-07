@@ -6,6 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { picksAPI, f1racesAPI, leaguesAPI, RaceResultV2 } from '@/lib/api';
 import Link from 'next/link';
+import BackToLeagueButton from '@/components/BackToLeagueButton';
+import PageTitle from '@/components/PageTitle';
 
 interface Race {
     id: number;
@@ -236,36 +238,116 @@ export default function RaceResultsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Race Results</h1>
-                            <div className="flex items-center space-x-2 text-gray-600">
-                                <span className="text-pink-600 font-semibold">
-                                    {league?.name || 'Loading...'}
-                                </span>
-                                <span>•</span>
-                                <span>
-                                    {currentRace ? currentRace.raceName : `Week ${selectedWeek}`} Results
-                                </span>
-                            </div>
+            <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                <PageTitle
+                    title="Race Results"
+                    subtitle={
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                            <span className="text-pink-600 font-semibold">
+                                {league?.name || 'Loading...'}
+                            </span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="text-gray-600">
+                                {currentRace ? currentRace.raceName : `Week ${selectedWeek}`} Results
+                            </span>
                         </div>
-                        <Link
-                            href={`/leagues/${leagueId}`}
-                            className="text-pink-600 hover:text-pink-700 font-medium"
-                        >
-                            ← Back to League
-                        </Link>
-                    </div>
-                </div>
-            </header>
+                    }
+                >
+                    <BackToLeagueButton leagueId={leagueId} className="text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2" />
+                </PageTitle>
 
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                 {/* Week Navigation */}
                 <div className="bg-white shadow rounded-lg p-4 mb-6">
-                    <div className="flex items-center justify-between">
+                    {/* Mobile Week Navigation */}
+                    <div className="md:hidden">
+                        <div className="flex items-center justify-between mb-3">
+                            <button
+                                onClick={goToPreviousWeek}
+                                disabled={!canGoPrevious}
+                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoPrevious
+                                    ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Prev
+                            </button>
+                            <button
+                                onClick={goToNextWeek}
+                                disabled={!canGoNext}
+                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoNext
+                                    ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                Next
+                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowWeekSelector(!showWeekSelector)}
+                                className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                            >
+                                <div className="flex items-center">
+                                    <span className="text-lg font-bold text-pink-600 mr-2">Week {selectedWeek}</span>
+                                    <span className="text-gray-600 truncate">{currentRace?.raceName}</span>
+                                </div>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {/* Week Selector Dropdown */}
+                            {showWeekSelector && (
+                                <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    {races.map((race) => (
+                                        <button
+                                            key={race.weekNumber}
+                                            ref={race.weekNumber === selectedWeek ? selectedWeekRef : null}
+                                            onClick={() => handleWeekChange(race.weekNumber)}
+                                            className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-pink-50 text-pink-700' : 'text-gray-700'
+                                                }`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <span className="font-medium">Week {race.weekNumber}</span>
+                                                    <span className="text-gray-500 ml-2">- {race.raceName}</span>
+                                                </div>
+                                                {race.weekNumber === selectedWeek && (
+                                                    <svg className="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mt-3">
+                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                <span>Week {selectedWeek} of {races.length}</span>
+                                <span>{Math.round((selectedWeek / races.length) * 100)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                    className="bg-pink-600 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${(selectedWeek / races.length) * 100}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Desktop Week Navigation */}
+                    <div className="hidden md:flex items-center justify-between">
                         {/* Previous Button */}
                         <button
                             onClick={goToPreviousWeek}
@@ -340,20 +422,6 @@ export default function RaceResultsPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                         </button>
-                    </div>
-
-                    {/* Week Progress */}
-                    <div className="mt-4">
-                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                            <span>Week {currentIndex + 1} of {races.length}</span>
-                            <span>{Math.round(((currentIndex + 1) / races.length) * 100)}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                                className="bg-pink-600 h-2 rounded-full transition-all duration-300"
-                                style={{ width: `${((currentIndex + 1) / races.length) * 100}%` }}
-                            ></div>
-                        </div>
                     </div>
                 </div>
 
@@ -431,26 +499,40 @@ export default function RaceResultsPage() {
                 )}
 
                 {/* Summary Stats */}
-                <div className="bg-white shadow rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Summary</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-white shadow rounded-lg p-4 mb-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Summary</h3>
+
+                    {/* Mobile Summary Stats */}
+                    <div className="md:hidden">
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-gray-900">{totalParticipants}</div>
+                                <div className="text-xs text-gray-500">Participants</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-green-600">{totalCorrect}</div>
+                                <div className="text-xs text-gray-500">Correct Picks</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-blue-600">{totalPoints}</div>
+                                <div className="text-xs text-gray-500">Total Points</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Desktop Summary Stats */}
+                    <div className="hidden md:grid grid-cols-3 gap-6">
                         <div className="text-center">
-                            <p className="text-2xl font-bold text-gray-900">{totalParticipants}</p>
-                            <p className="text-sm text-gray-500">Participants</p>
+                            <div className="text-3xl font-bold text-gray-900">{totalParticipants}</div>
+                            <div className="text-sm text-gray-500">Participants</div>
                         </div>
                         <div className="text-center">
-                            <p className="text-2xl font-bold text-green-600">{totalCorrect}</p>
-                            <p className="text-sm text-gray-500">Total Correct Picks</p>
+                            <div className="text-3xl font-bold text-green-600">{totalCorrect}</div>
+                            <div className="text-sm text-gray-500">Correct Picks</div>
                         </div>
                         <div className="text-center">
-                            <p className="text-2xl font-bold text-blue-600">{totalPoints}</p>
-                            <p className="text-sm text-gray-500">Total Points</p>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-2xl font-bold text-purple-600">
-                                {totalParticipants > 0 ? Math.round((totalCorrect / (totalParticipants * requiredPositions.length)) * 100) : 0}%
-                            </p>
-                            <p className="text-sm text-gray-500">Overall Accuracy</p>
+                            <div className="text-3xl font-bold text-blue-600">{totalPoints}</div>
+                            <div className="text-sm text-gray-500">Total Points</div>
                         </div>
                     </div>
                 </div>
