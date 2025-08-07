@@ -62,12 +62,14 @@ export default function Navigation() {
         logout();
     };
 
-    // Hide navigation on standings, results, activity, login, and signup pages
+    // Hide navigation on standings, results, activity, login, signup, privacy, and terms pages
     const shouldHideNavigation = pathname.includes('/standings') ||
         pathname.includes('/results') ||
         pathname.includes('/activity') ||
         pathname === '/login' ||
-        pathname === '/signup';
+        pathname === '/signup' ||
+        pathname === '/privacy' ||
+        pathname === '/terms';
 
     if (shouldHideNavigation) {
         return null;
@@ -102,6 +104,8 @@ export default function Navigation() {
                                     <span>{item.name}</span>
                                 </Link>
                             ))}
+
+
                         </div>
                     </div>
                 </div>
@@ -150,6 +154,7 @@ export default function Navigation() {
                                     </Link>
                                 ))}
                                 <div className="pt-2 border-t border-gray-200">
+
                                     <button
                                         onClick={() => {
                                             handleLogout();

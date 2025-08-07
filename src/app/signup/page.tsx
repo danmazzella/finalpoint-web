@@ -168,6 +168,20 @@ function SignupForm() {
                 Sign in instead
               </Link>
             </div>
+
+            {/* Legal Links */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="text-center text-xs text-gray-500">
+                By creating an account, you agree to our{' '}
+                <Link href="/terms" className="text-blue-600 hover:text-blue-800 underline">
+                  Terms & Conditions
+                </Link>
+                {' '}and{' '}
+                <Link href="/privacy" className="text-blue-600 hover:text-blue-800 underline">
+                  Privacy Policy
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

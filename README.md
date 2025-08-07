@@ -26,14 +26,20 @@ A modern web application for the F1 Prediction Game, built with Next.js and Tail
 src/
 ├── app/                    # Next.js App Router pages
 │   ├── login/             # Login page
-│   ├── signup/            # Signup page
+│   ├── signup/            # Signup page (with legal links)
 │   ├── dashboard/         # Main dashboard
+│   ├── profile/           # Profile page (with legal links)
+│   ├── privacy/           # Privacy policy page
+│   ├── terms/             # Terms and conditions page
 │   └── layout.tsx         # Root layout
 ├── contexts/              # React Context providers
 │   └── AuthContext.tsx    # Authentication context
 ├── lib/                   # Shared utilities
 │   └── api.ts            # API service layer
 └── components/            # Reusable components
+    ├── Navigation.tsx     # Main navigation
+    ├── Footer.tsx         # Footer with legal links
+    └── Logo.tsx           # Brand logo
 ```
 
 ## 🚀 Getting Started
@@ -94,6 +100,19 @@ The web app shares the same API endpoints as the mobile app:
 - **Buttons**: Consistent styling with hover states
 - **Forms**: Accessible input fields with validation
 - **Navigation**: Responsive header with user menu
+
+## 📋 Legal Pages
+
+The application includes comprehensive legal pages:
+
+- **Privacy Policy** (`/privacy`): Details how user data is collected, used, and protected
+- **Terms & Conditions** (`/terms`): Outlines user rights, responsibilities, and service terms
+
+### Legal Page Access
+- **Signup Page**: Legal links are displayed at the bottom with consent text
+- **Profile Page**: Legal links are available in the "App Information" section
+- **Footer**: Legal links are accessible from all pages via the footer
+- **Direct URLs**: Pages are accessible directly at `/privacy` and `/terms`
 
 ## 📱 Responsive Design
 

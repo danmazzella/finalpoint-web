@@ -191,7 +191,7 @@ export default function ProfilePage() {
                   </div>
                 </button>
 
-                <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                <Link href="/privacy" className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-gray-900">Privacy Policy</p>
@@ -201,9 +201,9 @@ export default function ProfilePage() {
                       <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                </button>
+                </Link>
 
-                <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                <Link href="/terms" className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-gray-900">Terms of Service</p>
@@ -213,9 +213,12 @@ export default function ProfilePage() {
                       <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                </button>
+                </Link>
 
-                <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                <a
+                  href="mailto:dan@mazzella.me?subject=FinalPoint%20Support%20Request"
+                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block"
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-gray-900">Help & Support</p>
@@ -225,7 +228,7 @@ export default function ProfilePage() {
                       <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                </button>
+                </a>
               </div>
             </div>
           </div>
