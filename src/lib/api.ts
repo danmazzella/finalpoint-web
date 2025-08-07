@@ -34,7 +34,8 @@ console.log('🔧 Final API Base URL:', API_BASE_URL);
 
 // Helper function to get full avatar URL
 export const getAvatarUrl = (avatarPath: string | null | undefined): string | null => {
-  if (!avatarPath) return null;
+  // Handle null, undefined, empty string, or the string "null"
+  if (!avatarPath || avatarPath === 'null' || avatarPath.trim() === '') return null;
 
   // If it's already a full URL, return as is
   if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
