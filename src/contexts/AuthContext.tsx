@@ -147,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       const formData = new FormData();
       formData.append('avatar', avatar);
-      
+
       const response = await authAPI.updateAvatar(formData);
       if (response.data.success && user) {
         const updatedUser = { ...user, avatar: response.data.avatar };

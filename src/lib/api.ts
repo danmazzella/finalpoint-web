@@ -41,7 +41,18 @@ export const getAvatarUrl = (avatarPath: string | null | undefined): string | nu
     return avatarPath;
   }
 
-  // Remove /api from the base URL since avatar paths don't include it
+  // For production (finalpoint.app), use the same domain as the current page
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'finalpoint.app' || hostname === 'www.finalpoint.app') {
+      // Use the same domain as the current page for avatars
+      const protocol = window.location.protocol;
+      const domain = window.location.hostname;
+      return `${protocol}//${domain}${avatarPath}`;
+    }
+  }
+
+  // For development, remove /api from the base URL since avatar paths don't include it
   const baseUrl = API_BASE_URL.replace('/api', '');
   return `${baseUrl}${avatarPath}`;
 };

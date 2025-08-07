@@ -17,8 +17,34 @@ export default function TestAvatarPage() {
         if (user?.avatar) {
             const constructedUrl = getAvatarUrl(user.avatar);
             console.log('🔧 Test Avatar Page - Constructed URL:', constructedUrl);
+
+            // Test if the URL is accessible
+            if (constructedUrl) {
+                fetch(constructedUrl)
+                    .then(response => {
+                        console.log('🔧 Avatar URL accessible:', response.ok);
+                    })
+                    .catch(error => {
+                        console.error('🔧 Avatar URL not accessible:', error);
+                    });
+            }
         }
     }, [user]);
+
+    const testUrlConstruction = () => {
+        const testPaths = [
+            '/uploads/avatars/test.jpg',
+            'http://192.168.0.15:6075/uploads/avatars/test.jpg',
+            'https://example.com/avatar.jpg',
+            null,
+            undefined
+        ];
+
+        testPaths.forEach(path => {
+            const url = getAvatarUrl(path);
+            console.log(`🔧 Test URL construction:`, { path, constructedUrl: url });
+        });
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
@@ -67,6 +93,27 @@ export default function TestAvatarPage() {
                         <div>
                             <p><strong>Test Path:</strong> {testAvatarPath}</p>
                             <p><strong>Constructed URL:</strong> {getAvatarUrl(testAvatarPath)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white shadow rounded-lg p-6 mb-6">
+                    <h2 className="text-xl font-semibold mb-4">URL Construction Tests</h2>
+                    <button
+                        onClick={testUrlConstruction}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Test URL Construction
+                    </button>
+                    <p className="text-sm text-gray-600 mt-2">Check console for results</p>
+
+                    <div className="mt-4">
+                        <h3 className="text-lg font-medium mb-2">Manual URL Test</h3>
+                        <div className="space-y-2">
+                            <p><strong>Current hostname:</strong> {typeof window !== 'undefined' ? window.location.hostname : 'N/A'}</p>
+                            <p><strong>API Base URL:</strong> {typeof window !== 'undefined' ? (window as any).API_BASE_URL || 'N/A' : 'N/A'}</p>
+                            <p><strong>User avatar path:</strong> {user?.avatar || 'None'}</p>
+                            <p><strong>Constructed URL:</strong> {user?.avatar ? getAvatarUrl(user.avatar) : 'None'}</p>
                         </div>
                     </div>
                 </div>
