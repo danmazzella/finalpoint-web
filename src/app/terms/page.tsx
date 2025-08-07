@@ -123,6 +123,12 @@ export default function TermsAndConditionsPage() {
                             <p className="text-gray-700 mb-4">
                                 Points are awarded based on the accuracy of your predictions. The scoring system is determined by us and may be updated from time to time. Final scores are calculated based on official race results.
                             </p>
+                            <p className="text-gray-700 mb-4">
+                                For detailed information about how points are calculated, including scoring breakdowns and examples, please visit our{' '}
+                                <Link href="/scoring" className="text-blue-600 hover:text-blue-800 underline">
+                                    Scoring System page
+                                </Link>.
+                            </p>
 
                             <h3 className="text-xl font-semibold text-gray-800 mb-3">5.3 Fair Play</h3>
                             <p className="text-gray-700 mb-4">

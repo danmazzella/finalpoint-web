@@ -238,6 +238,11 @@ export default function ShareLeaguePage() {
                             <p>• Compete with other league members</p>
                             <p>• View standings and track your performance</p>
                         </div>
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                            <Link href="/scoring" className="text-blue-600 hover:text-blue-800 text-sm">
+                                Learn more about the scoring system →
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </main>

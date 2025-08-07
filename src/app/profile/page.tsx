@@ -215,6 +215,18 @@ export default function ProfilePage() {
                   </div>
                 </Link>
 
+                <Link href="/scoring" className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Scoring System</p>
+                      <p className="text-sm text-gray-500">Learn how points are calculated</p>
+                    </div>
+                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </Link>
+
                 <a
                   href="mailto:dan@mazzella.me?subject=FinalPoint%20Support%20Request"
                   className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block"
