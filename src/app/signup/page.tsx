@@ -61,7 +61,7 @@ function SignupForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
+                Username
               </label>
               <div className="mt-1">
                 <input
