@@ -114,6 +114,7 @@ export const authAPI = {
   login: (data: LoginData) => apiService.post('/users/login', data),
   getUserStats: () => apiService.get('/users/stats'),
   getGlobalStats: () => apiService.get('/users/global-stats'),
+  getMonthlyStats: () => apiService.get('/users/monthly-stats'),
   updateProfile: (data: { name: string }) => apiService.put('/users/profile', data),
   changePassword: (data: { currentPassword: string; newPassword: string }) => apiService.put('/users/password', data),
 };

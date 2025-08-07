@@ -44,19 +44,19 @@ function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-900/50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-pink-600 mb-2">Create Account</h1>
-          <h2 className="text-xl text-gray-600">Join the F1 Prediction Game</h2>
+          <h1 className="text-4xl font-bold text-pink-600 dark:text-pink-400 mb-2">Create Account</h1>
+          <h2 className="text-xl text-slate-600 dark:text-slate-400">Join the F1 Prediction Game</h2>
         </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm py-8 px-4 shadow-sm border border-slate-200/50 dark:border-slate-700/50 sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Full Name
               </label>
               <div className="mt-1">
@@ -69,13 +69,13 @@ function SignupForm() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your display name"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm text-gray-900"
+                  className="appearance-none block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-pink-500 dark:focus:ring-pink-400 focus:border-pink-500 dark:focus:border-pink-400 sm:text-sm text-slate-900 dark:text-slate-100 bg-white/50 dark:bg-slate-700/50"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Email address
               </label>
               <div className="mt-1">
@@ -88,13 +88,13 @@ function SignupForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm text-gray-900"
+                  className="appearance-none block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-pink-500 dark:focus:ring-pink-400 focus:border-pink-500 dark:focus:border-pink-400 sm:text-sm text-slate-900 dark:text-slate-100 bg-white/50 dark:bg-slate-700/50"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Password
               </label>
               <div className="mt-1">
@@ -107,13 +107,13 @@ function SignupForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm text-gray-900"
+                  className="appearance-none block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-pink-500 dark:focus:ring-pink-400 focus:border-pink-500 dark:focus:border-pink-400 sm:text-sm text-slate-900 dark:text-slate-100 bg-white/50 dark:bg-slate-700/50"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                 Confirm Password
               </label>
               <div className="mt-1">
@@ -126,20 +126,20 @@ function SignupForm() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm your password"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm text-gray-900"
+                  className="appearance-none block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-pink-500 dark:focus:ring-pink-400 focus:border-pink-500 dark:focus:border-pink-400 sm:text-sm text-slate-900 dark:text-slate-100 bg-white/50 dark:bg-slate-700/50"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
+              <div className="text-red-600 dark:text-red-400 text-sm text-center">{error}</div>
             )}
 
             <div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 dark:bg-pink-500 dark:hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 transition-colors"
               >
                 {isLoading ? 'Creating account...' : 'Create account'}
               </button>
@@ -149,17 +149,17 @@ function SignupForm() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-slate-300 dark:border-slate-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Already have an account?</span>
+                <span className="px-2 bg-white/70 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400">Already have an account?</span>
               </div>
             </div>
 
             <div className="mt-6">
               <Link
                 href={`/login?redirect=${encodeURIComponent(redirectTo)}`}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-pink-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-pink-600 dark:text-pink-400 bg-white/50 dark:bg-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 dark:focus:ring-offset-slate-800 transition-colors"
               >
                 Sign in instead
               </Link>
@@ -174,18 +174,18 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50/50 dark:bg-slate-900/50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-pink-600 mb-2">Create Account</h1>
-            <h2 className="text-xl text-gray-600">Join the F1 Prediction Game</h2>
+            <h1 className="text-4xl font-bold text-pink-600 dark:text-pink-400 mb-2">Create Account</h1>
+            <h2 className="text-xl text-slate-600 dark:text-slate-400">Join the F1 Prediction Game</h2>
           </div>
         </div>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm py-8 px-4 shadow-sm border border-slate-200/50 dark:border-slate-700/50 sm:rounded-lg sm:px-10">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading...</p>
+              <p className="mt-4 text-slate-600 dark:text-slate-400">Loading...</p>
             </div>
           </div>
         </div>
