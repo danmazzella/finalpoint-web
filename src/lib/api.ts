@@ -121,6 +121,15 @@ apiService.interceptors.response.use(
 );
 
 // API methods
+export const adminAPI = {
+  getDashboardStats: () => apiService.get('/admin/dashboard-stats'),
+  getAllUsers: () => apiService.get('/admin/users'),
+  updateUserRole: (userId: number, role: 'user' | 'admin') =>
+    apiService.put(`/admin/users/${userId}/role`, { role }),
+  getAllLeagues: () => apiService.get('/admin/leagues'),
+  getPickStatsByWeek: () => apiService.get('/admin/pick-stats-by-week'),
+};
+
 export const authAPI = {
   signup: (data: SignupData | FormData) => {
     if (data instanceof FormData) {
@@ -234,6 +243,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  role?: 'user' | 'admin';
 }
 
 export interface SignupData {
