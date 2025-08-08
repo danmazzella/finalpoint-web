@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import PageTitle from '@/components/PageTitle';
-import { adminAPI, User } from '@/lib/api';
+import { adminAPI, User, getAvatarUrl } from '@/lib/api';
 
 interface AdminStats {
   users: {
@@ -299,10 +299,10 @@ export default function AdminPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
-                            {user.avatar ? (
+                            {user.avatar && getAvatarUrl(user.avatar) ? (
                               <img
                                 className="h-10 w-10 rounded-full"
-                                src={`/uploads/avatars/${user.avatar}`}
+                                src={getAvatarUrl(user.avatar)!}
                                 alt={user.name}
                               />
                             ) : (
