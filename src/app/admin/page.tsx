@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import PageTitle from '@/components/PageTitle';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, User } from '@/lib/api';
 
 interface AdminStats {
   users: {
