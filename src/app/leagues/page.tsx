@@ -5,9 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { leaguesAPI, League } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
+import { useSearchParams } from 'next/navigation';
 
 export default function LeaguesPage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -87,7 +90,7 @@ export default function LeaguesPage() {
         >
           <div className="flex items-center space-x-3">
             <Link
-              href="/join"
+              href={`/join?redirect=${encodeURIComponent(redirectTo)}`}
               className="text-gray-600 hover:text-gray-700 font-medium"
             >
               Join League
@@ -145,13 +148,13 @@ export default function LeaguesPage() {
                   </div>
                   <div className="mt-6 flex space-x-3">
                     <Link
-                      href={`/leagues/${league.id}`}
+                      href={`/leagues/${league.id}?redirect=${encodeURIComponent(redirectTo)}`}
                       className="flex-1 bg-blue-600 text-white text-center px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
                     >
                       View League
                     </Link>
                     <Link
-                      href={`/picks?league=${league.id}`}
+                      href={`/picks?league=${league.id}&redirect=${encodeURIComponent(redirectTo)}`}
                       className="flex-1 bg-gray-100 text-gray-700 text-center px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200"
                     >
                       Make Picks
@@ -199,8 +202,8 @@ export default function LeaguesPage() {
                         type="button"
                         onClick={() => handlePositionToggle(position)}
                         className={`p-2 rounded-md text-sm font-medium border transition-colors ${selectedPositions.includes(position)
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
                           } ${selectedPositions.length >= 2 && !selectedPositions.includes(position) ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={selectedPositions.length >= 2 && !selectedPositions.includes(position)}
                       >

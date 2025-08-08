@@ -112,7 +112,19 @@ apiService.interceptors.response.use(
       console.log('🔧 401 error - removing auth and redirecting');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+
+      // Preserve current URL for redirect after login
+      const currentPath = window.location.pathname + window.location.search;
+
+      // Validate redirect URL to prevent open redirects
+      const isValidRedirect = currentPath.startsWith('/') &&
+        !currentPath.startsWith('//') &&
+        !currentPath.includes('javascript:') &&
+        !currentPath.includes('data:');
+
+      const redirectPath = isValidRedirect ? currentPath : '/dashboard';
+      const encodedRedirect = encodeURIComponent(redirectPath);
+      window.location.href = `/login?redirect=${encodedRedirect}`;
     }
 
     // Let all other errors (including 400 login failures) pass through normally

@@ -22,10 +22,11 @@ export default function AdminLayout({
         }
 
         if (!user) {
-            router.push('/login');
+            const encodedRedirect = encodeURIComponent(pathname);
+            router.push(`/login?redirect=${encodedRedirect}`);
             return;
         }
-    }, [user, router]);
+    }, [user, router, pathname]);
 
     // Don't render anything if user is not admin or not logged in
     if (!user || user.role !== 'admin') {
@@ -54,8 +55,8 @@ export default function AdminLayout({
                                 key={tab.name}
                                 href={tab.href}
                                 className={`py-2 px-1 border-b-2 font-medium text-sm ${tab.current
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
                             >
                                 {tab.name}

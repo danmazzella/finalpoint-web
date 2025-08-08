@@ -33,6 +33,19 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Skip Next.js static files and development assets
+    const url = new URL(event.request.url);
+    if (url.pathname.startsWith('/_next/') || 
+        url.pathname.includes('localhost:3000') ||
+        url.pathname.includes('localhost:3001') ||
+        url.pathname.includes('localhost:3002') ||
+        url.pathname.includes('localhost:3003') ||
+        url.pathname.includes('localhost:3004') ||
+        url.pathname.includes('localhost:3005')) {
+        // Let these requests pass through to the network
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then((response) => {

@@ -23,9 +23,17 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
         // Check if current route is public
         const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
-        // If not authenticated and trying to access a protected route, redirect to login
+        // If not authenticated and trying to access a protected route, redirect to login with current path
         if (!user && !isPublicRoute) {
-            router.push('/login');
+            // Validate redirect URL to prevent open redirects
+            const isValidRedirect = pathname.startsWith('/') &&
+                !pathname.startsWith('//') &&
+                !pathname.includes('javascript:') &&
+                !pathname.includes('data:');
+
+            const redirectPath = isValidRedirect ? pathname : '/dashboard';
+            const encodedRedirect = encodeURIComponent(redirectPath);
+            router.push(`/login?redirect=${encodedRedirect}`);
         }
     }, [user, isLoading, pathname, router]);
 

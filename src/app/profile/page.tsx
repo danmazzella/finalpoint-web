@@ -4,13 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
 import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Avatar from '@/components/Avatar';
 
 export default function ProfilePage() {
   const { user, logout, updateProfile, changePassword, updateAvatar } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
@@ -165,7 +167,7 @@ export default function ProfilePage() {
   };
 
   const handleNotificationSettings = () => {
-    router.push('/notifications');
+    router.push(`/notifications?redirect=${encodeURIComponent(redirectTo)}`);
   };
 
   return (
@@ -288,7 +290,7 @@ export default function ProfilePage() {
                   </div>
                 </button>
 
-                <Link href="/privacy" className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
+                <Link href={`/privacy?redirect=${encodeURIComponent(redirectTo)}`} className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-gray-900">Privacy Policy</p>
@@ -300,7 +302,7 @@ export default function ProfilePage() {
                   </div>
                 </Link>
 
-                <Link href="/terms" className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
+                <Link href={`/terms?redirect=${encodeURIComponent(redirectTo)}`} className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-gray-900">Terms of Service</p>
@@ -312,7 +314,7 @@ export default function ProfilePage() {
                   </div>
                 </Link>
 
-                <Link href="/scoring" className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
+                <Link href={`/scoring?redirect=${encodeURIComponent(redirectTo)}`} className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-gray-900">Scoring System</p>

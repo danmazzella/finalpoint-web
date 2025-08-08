@@ -4,9 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { notificationsAPI, NotificationPreferences } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export default function NotificationsPage() {
     const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const redirectTo = searchParams.get('redirect') || '/dashboard';
     const [preferences, setPreferences] = useState<NotificationPreferences>({
         emailReminders: true,
         emailScoreUpdates: true,
@@ -115,6 +118,13 @@ export default function NotificationsPage() {
 
             if (permission === 'granted') {
                 try {
+                    // Skip service worker registration in development to avoid caching issues
+                    if (process.env.NODE_ENV === 'development') {
+                        console.log('Skipping service worker registration in development mode');
+                        setSuccess('Push notifications enabled (development mode - service worker disabled)');
+                        return;
+                    }
+
                     // Register service worker with proper scope
                     const registration = await navigator.serviceWorker.register('/sw.js', {
                         scope: '/'
@@ -241,7 +251,7 @@ export default function NotificationsPage() {
                     {/* Back to Profile Button */}
                     <div className="mb-6">
                         <Link
-                            href="/profile"
+                            href={`/profile?redirect=${encodeURIComponent(redirectTo)}`}
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
