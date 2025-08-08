@@ -29,7 +29,7 @@ interface AdminStats {
   };
 }
 
-interface User {
+interface AdminUser {
   id: number;
   email: string;
   name: string;
