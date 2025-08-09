@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { picksAPI, MemberPicksV2, leaguesAPI } from '@/lib/api';
 import PageTitle from '@/components/PageTitle';
+import Avatar from '@/components/Avatar';
 
 interface Member {
     id: number;
@@ -244,9 +245,12 @@ export default function MemberPicksPage() {
 
                             {/* Current Member Badge */}
                             <div className="flex items-center">
-                                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                                    {memberPicks.userName.charAt(0).toUpperCase()}
-                                </div>
+                                <Avatar
+                                    src={memberPicks.userAvatar}
+                                    alt={`${memberPicks.userName}'s avatar`}
+                                    size="md"
+                                    className="shadow-sm"
+                                />
                                 <span className="ml-4 text-base text-gray-600 font-medium">
                                     Viewing picks by {memberPicks.userName}
                                 </span>
@@ -289,9 +293,12 @@ export default function MemberPicksPage() {
 
                             {/* Current Member Badge and Label */}
                             <div className="flex flex-col items-center">
-                                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-base shadow-sm">
-                                    {memberPicks.userName.charAt(0).toUpperCase()}
-                                </div>
+                                <Avatar
+                                    src={memberPicks.userAvatar}
+                                    alt={`${memberPicks.userName}'s avatar`}
+                                    size="sm"
+                                    className="shadow-sm"
+                                />
                                 <span className="mt-2 text-sm text-gray-600 text-center font-medium">
                                     Viewing picks by {memberPicks.userName}
                                 </span>

@@ -371,6 +371,7 @@ export interface MemberPicksV2 {
   weekNumber: number;
   userId: number;
   userName: string;
+  userAvatar?: string;
   picks: {
     position: number;
     driverId: number;
