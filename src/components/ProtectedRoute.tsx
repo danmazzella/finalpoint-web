@@ -14,7 +14,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const pathname = usePathname();
 
     // List of public routes that don't require authentication
-    const publicRoutes = ['/login', '/signup', '/join', '/joinleague', '/privacy', '/terms'];
+    const publicRoutes = ['/login', '/signup', '/join', '/joinleague', '/privacy', '/terms', '/reset-password'];
 
     useEffect(() => {
         // Don't redirect while loading

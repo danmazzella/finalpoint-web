@@ -151,6 +151,8 @@ export const authAPI = {
     }
   },
   login: (data: LoginData) => apiService.post('/users/login', data),
+  forgotPassword: (data: { email: string }) => apiService.post('/users/forgot-password', data),
+  resetPassword: (data: { token: string; newPassword: string }) => apiService.post('/users/reset-password', data),
   getProfile: () => apiService.get('/users/profile'),
   getUserStats: () => apiService.get('/users/stats'),
   getGlobalStats: () => apiService.get('/users/global-stats'),

@@ -35,6 +35,8 @@ interface AuthContextType {
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
   refreshUserData: () => Promise<boolean>;
   deleteAccount: (password: string) => Promise<boolean>;
+  forgotPassword: (email: string) => Promise<AuthResponse>;
+  resetPassword: (token: string, newPassword: string) => Promise<AuthResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -315,6 +317,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const forgotPassword = async (email: string): Promise<AuthResponse> => {
+    try {
+      setIsLoading(true);
+      const response = await authAPI.forgotPassword({ email });
+
+      if (response.data.success) {
+        return { success: true };
+      }
+      return { success: false, error: 'Failed to send password reset email. Please try again.' };
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+
+      let errorMessage = 'Failed to send password reset email. Please try again.';
+
+      if (error?.response?.data?.errors?.length > 0) {
+        errorMessage = error.response.data.errors[0].message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPassword = async (token: string, newPassword: string): Promise<AuthResponse> => {
+    try {
+      setIsLoading(true);
+      const response = await authAPI.resetPassword({ token, newPassword });
+
+      if (response.data.success) {
+        return { success: true };
+      }
+      return { success: false, error: 'Failed to reset password. Please try again.' };
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+
+      let errorMessage = 'Failed to reset password. Please try again.';
+
+      if (error?.response?.data?.errors?.length > 0) {
+        errorMessage = error.response.data.errors[0].message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value = {
     user,
     isLoading,
@@ -334,6 +388,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     changePassword,
     refreshUserData,
     deleteAccount,
+    forgotPassword,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -77,14 +77,15 @@ export default function Navigation() {
         logout();
     };
 
-    // Hide navigation on standings, results, activity, login, signup, privacy, and terms pages
+    // Hide navigation on standings, results, activity, login, signup, privacy, terms, and reset-password pages
     const shouldHideNavigation = pathname.includes('/standings') ||
         pathname.includes('/results') ||
         pathname.includes('/activity') ||
         pathname === '/login' ||
         pathname === '/signup' ||
         pathname === '/privacy' ||
-        pathname === '/terms';
+        pathname === '/terms' ||
+        pathname === '/reset-password';
 
     if (shouldHideNavigation) {
         return null;
