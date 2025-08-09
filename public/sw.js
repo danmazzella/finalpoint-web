@@ -10,11 +10,9 @@ const urlsToCache = [
 
 // Install event
 self.addEventListener('install', (event) => {
-    console.log('Service Worker installing...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('Opened cache');
                 // Only cache the main page for now to avoid errors
                 return cache.addAll(['/']);
             })
@@ -35,7 +33,7 @@ self.addEventListener('fetch', (event) => {
 
     // Skip Next.js static files and development assets
     const url = new URL(event.request.url);
-    if (url.pathname.startsWith('/_next/') || 
+    if (url.pathname.startsWith('/_next/') ||
         url.pathname.includes('localhost:3000') ||
         url.pathname.includes('localhost:3001') ||
         url.pathname.includes('localhost:3002') ||
@@ -62,7 +60,6 @@ self.addEventListener('fetch', (event) => {
 
 // Push notification event
 self.addEventListener('push', (event) => {
-    console.log('Push event received:', event);
 
     let notificationData = {
         title: 'FinalPoint',
@@ -117,7 +114,6 @@ self.addEventListener('push', (event) => {
 
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
-    console.log('Notification clicked:', event);
 
     event.notification.close();
 
@@ -139,19 +135,16 @@ self.addEventListener('notificationclick', (event) => {
 
 // Background sync event
 self.addEventListener('sync', (event) => {
-    console.log('Background sync event:', event);
-
     if (event.tag === 'background-sync') {
         event.waitUntil(
             // Handle background sync
-            console.log('Background sync completed')
+            Promise.resolve()
         );
     }
 });
 
 // Message event (for communication with main thread)
 self.addEventListener('message', (event) => {
-    console.log('Service worker message received:', event);
 
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();

@@ -12,15 +12,10 @@ export default function TestAPIPage() {
         setResult('Testing...');
 
         try {
-            console.log('🧪 Testing notification preferences...');
-
             // Test GET preferences
-            console.log('📋 Testing GET /notifications/preferences...');
             const getResponse = await notificationsAPI.getPreferences();
-            console.log('✅ GET response:', getResponse.data);
 
             // Test PUT preferences
-            console.log('📝 Testing PUT /notifications/preferences...');
             const preferences = {
                 emailReminders: true,
                 emailScoreUpdates: false,
@@ -29,7 +24,6 @@ export default function TestAPIPage() {
             };
 
             const putResponse = await notificationsAPI.updatePreferences(preferences);
-            console.log('✅ PUT response:', putResponse.data);
 
             setResult('✅ Both GET and PUT requests successful! Check console for details.');
 

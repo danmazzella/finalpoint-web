@@ -25,17 +25,10 @@ export default function AdminUsersPage() {
         try {
             setLoading(true);
 
-            console.log('Loading users...');
-
             const usersResponse = await adminAPI.getAllUsers();
-
-            console.log('API Response:', {
-                users: { status: usersResponse.status, ok: usersResponse.status === 200 },
-            });
 
             if (usersResponse.status === 200) {
                 const usersData = usersResponse.data;
-                console.log('Users data:', usersData);
                 setUsers(usersData.data);
             } else {
                 console.error('Users response error:', usersResponse.data);

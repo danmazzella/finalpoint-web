@@ -34,9 +34,7 @@ export default function ShareLeaguePage() {
     const loadLeague = async () => {
         try {
             setLoading(true);
-            console.log('Loading league with join code:', joinCode);
             const response = await leaguesAPI.getLeagueByCode(joinCode);
-            console.log('API response:', response.data);
             if (response.data.success) {
                 setLeague(response.data.data);
             }

@@ -4,11 +4,9 @@ import axios from 'axios';
 const getApiBaseUrl = () => {
   // Check for environment variable first
   if (process.env.NEXT_PUBLIC_API_URL) {
-    console.log('🔧 Using NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
     // Ensure the URL ends with /api if it doesn't already
     const url = process.env.NEXT_PUBLIC_API_URL;
     if (!url.endsWith('/api')) {
-      console.log('🔧 Adding /api to URL');
       return url.endsWith('/') ? url + 'api' : url + '/api';
     }
     return url;
@@ -17,35 +15,41 @@ const getApiBaseUrl = () => {
   // Check if we're in production (deployed to finalpoint.app)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
-    console.log('🔧 Current hostname:', hostname);
     if (hostname === 'finalpoint.app' || hostname === 'www.finalpoint.app') {
-      console.log('🔧 Using production API URL');
       return 'https://api.finalpoint.app/api';
     }
   }
 
   // Fallback to development URL
-  console.log('🔧 Using development API URL');
   return 'http://192.168.0.15:6075/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
-console.log('🔧 Final API Base URL:', API_BASE_URL);
 
 // Helper function to get full avatar URL
 export const getAvatarUrl = (avatarPath: string | null | undefined): string | null => {
-  console.log('🔧 getAvatarUrl called with:', avatarPath, 'type:', typeof avatarPath);
-
   // Handle null, undefined, empty string, or the string "null"
   if (!avatarPath || avatarPath === 'null' || avatarPath.trim() === '') {
-    console.log('🔧 getAvatarUrl returning null for:', avatarPath);
     return null;
   }
 
   // If it's already a full URL, return as is
   if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
-    console.log('🔧 getAvatarUrl returning full URL:', avatarPath);
     return avatarPath;
+  }
+
+  // If it starts with /uploads/avatars/, it's already a full path, just add the base URL
+  if (avatarPath.startsWith('/uploads/avatars/')) {
+    // For production (finalpoint.app), use the API domain for avatars
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname === 'finalpoint.app' || hostname === 'www.finalpoint.app') {
+        return `https://api.finalpoint.app${avatarPath}`;
+      }
+    }
+    // For development, remove /api from the base URL since avatar paths don't include it
+    const baseUrl = API_BASE_URL.replace('/api', '');
+    return `${baseUrl}${avatarPath}`;
   }
 
   // For production (finalpoint.app), use the API domain for avatars
@@ -54,7 +58,6 @@ export const getAvatarUrl = (avatarPath: string | null | undefined): string | nu
     if (hostname === 'finalpoint.app' || hostname === 'www.finalpoint.app') {
       // Use the API domain for avatars in production
       const url = `https://api.finalpoint.app/uploads/avatars/${avatarPath}`;
-      console.log('🔧 getAvatarUrl returning production URL:', url);
       return url;
     }
   }
@@ -62,7 +65,6 @@ export const getAvatarUrl = (avatarPath: string | null | undefined): string | nu
   // For development, remove /api from the base URL since avatar paths don't include it
   const baseUrl = API_BASE_URL.replace('/api', '');
   const url = `${baseUrl}/uploads/avatars/${avatarPath}`;
-  console.log('🔧 getAvatarUrl returning development URL:', url);
   return url;
 };
 
@@ -91,11 +93,6 @@ apiService.interceptors.request.use(
     config.headers['Cache-Control'] = 'no-cache';
     config.headers['Pragma'] = 'no-cache';
 
-    console.log('🔧 Making request to:', config.url);
-    console.log('🔧 Full URL:', (config.baseURL || '') + (config.url || ''));
-    console.log('🔧 Request method:', config.method);
-    console.log('🔧 Request headers:', config.headers);
-    console.log('🔧 Request data:', config.data);
     return config;
   },
   (error) => {
@@ -109,7 +106,6 @@ apiService.interceptors.response.use(
   async (error) => {
     // Only handle 401 errors with automatic redirect
     if (error?.response?.status === 401 && typeof window !== 'undefined') {
-      console.log('🔧 401 error - removing auth and redirecting');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 
@@ -155,6 +151,7 @@ export const authAPI = {
     }
   },
   login: (data: LoginData) => apiService.post('/users/login', data),
+  getProfile: () => apiService.get('/users/profile'),
   getUserStats: () => apiService.get('/users/stats'),
   getGlobalStats: () => apiService.get('/users/global-stats'),
   getMonthlyStats: () => apiService.get('/users/monthly-stats'),
@@ -348,6 +345,7 @@ export interface PositionResultV2 {
   picks: {
     userId: number;
     userName: string;
+    userAvatar?: string;
     driverId: number;
     driverName: string;
     driverTeam: string;

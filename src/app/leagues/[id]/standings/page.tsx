@@ -255,9 +255,6 @@ export default function StandingsPage() {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Rank
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Member
                                     </th>
                                     <th
@@ -321,18 +318,17 @@ export default function StandingsPage() {
                                 {sortedStandings.map((member, index) => (
                                     <tr key={member.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${getPositionColor(index)}`}>
-                                                {index + 1}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <Avatar
-                                                    src={member.avatar}
-                                                    alt={`${member.name}'s avatar`}
-                                                    size="md"
-                                                    className="flex-shrink-0"
-                                                />
+                                                <div className="relative flex-shrink-0">
+                                                    <Avatar
+                                                        src={member.avatar}
+                                                        alt={`${member.name}'s avatar`}
+                                                        size="md"
+                                                    />
+                                                    <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm ${getPositionColor(index)}`}>
+                                                        {index + 1}
+                                                    </div>
+                                                </div>
                                                 <div className="ml-4">
                                                     <div className="flex items-center space-x-2">
                                                         <div className="text-sm font-medium text-gray-900">
@@ -395,35 +391,32 @@ export default function StandingsPage() {
                                 <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
                                     <div className="flex items-start justify-between mb-5">
                                         <div className="flex items-center flex-1">
-                                            <div className={`h-10 w-10 rounded-full flex items-center justify-center mr-4 flex-shrink-0 ${getPositionColor(index)}`}>
-                                                <span className="font-bold text-sm text-white">
-                                                    {index + 1}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center flex-1">
+                                            <div className="relative flex-shrink-0 mr-4">
                                                 <Avatar
                                                     src={member.avatar}
                                                     alt={`${member.name}'s avatar`}
                                                     size="md"
-                                                    className="flex-shrink-0 mr-3"
                                                 />
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center space-x-2 mb-2">
-                                                        <div className="text-base font-semibold text-gray-900 truncate">
-                                                            {cleanName(member.name)}
+                                                <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm ${getPositionColor(index)}`}>
+                                                    {index + 1}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <div className="text-base font-semibold text-gray-900 truncate">
+                                                        {cleanName(member.name)}
+                                                    </div>
+                                                    {member.isOwner ? (
+                                                        <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 flex-shrink-0">
+                                                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                                                            </svg>
+                                                            Owner
                                                         </div>
-                                                        {member.isOwner ? (
-                                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 flex-shrink-0">
-                                                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                                                                </svg>
-                                                                Owner
-                                                            </div>
-                                                        ) : null}
-                                                    </div>
-                                                    <div className="text-sm text-gray-600">
-                                                        {member.totalPicks} picks • {member.correctPicks} correct
-                                                    </div>
+                                                    ) : null}
+                                                </div>
+                                                <div className="text-sm text-gray-600">
+                                                    {member.totalPicks} picks • {member.correctPicks} correct
                                                 </div>
                                             </div>
                                         </div>

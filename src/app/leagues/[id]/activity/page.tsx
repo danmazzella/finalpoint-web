@@ -106,7 +106,14 @@ export default function LeagueActivityPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                 );
+            case 'pick_removed':
+                return (
+                    <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                );
             case 'member_joined':
+            case 'user_joined':
                 return (
                     <svg className="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -116,6 +123,24 @@ export default function LeagueActivityPage() {
                 return (
                     <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                );
+            case 'league_created':
+                return (
+                    <svg className="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                );
+            case 'league_name_changed':
+                return (
+                    <svg className="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                );
+            case 'race_result_processed':
+                return (
+                    <svg className="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                     </svg>
                 );
             default:
@@ -133,10 +158,19 @@ export default function LeagueActivityPage() {
                 return 'bg-green-100';
             case 'pick_changed':
                 return 'bg-blue-100';
+            case 'pick_removed':
+                return 'bg-red-100';
             case 'member_joined':
+            case 'user_joined':
                 return 'bg-purple-100';
             case 'member_left':
                 return 'bg-red-100';
+            case 'league_created':
+                return 'bg-yellow-100';
+            case 'league_name_changed':
+                return 'bg-indigo-100';
+            case 'race_result_processed':
+                return 'bg-orange-100';
             default:
                 return 'bg-gray-100';
         }
@@ -149,7 +183,7 @@ export default function LeagueActivityPage() {
             case 'pick_created':
                 return `${activity.userName} made a pick`;
             case 'pick_changed':
-                return `${activity.userName} changed their pick`;
+                return `${activity.userName} changed their pick from ${activity.previousDriverName || 'Unknown'} to ${activity.driverName || 'Unknown'}`;
             case 'member_joined':
                 return `${activity.userName} joined the league`;
             case 'member_left':
@@ -164,11 +198,15 @@ export default function LeagueActivityPage() {
     const getActivityDetails = (activity: Activity) => {
         switch (activity.activityType) {
             case 'pick_created':
-            case 'pick_changed':
                 if (activity.driverName && activity.position) {
                     return `P${activity.position}: ${activity.driverName} (${activity.driverTeam})`;
                 }
                 return activity.driverName ? `${activity.driverName} (${activity.driverTeam})` : 'Driver selection';
+            case 'pick_changed':
+                if (activity.position) {
+                    return `Position P${activity.position} • Week ${activity.weekNumber || 'Unknown'}`;
+                }
+                return `Week ${activity.weekNumber || 'Unknown'}`;
             case 'member_joined':
             case 'member_left':
                 return 'League membership change';
@@ -198,7 +236,7 @@ export default function LeagueActivityPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+            <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
                     title={leagueName ? `${leagueName} Activity` : 'League Activity'}
                     subtitle="All league activity and history"

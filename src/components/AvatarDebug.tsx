@@ -27,15 +27,7 @@ export default function AvatarDebug({
     const sizeClass = sizeClasses[size];
     const avatarUrl = getAvatarUrl(src);
 
-    console.log('Avatar Debug:', {
-        originalSrc: src,
-        constructedUrl: avatarUrl,
-        size,
-        className
-    });
-
     if (!avatarUrl) {
-        console.log('No avatar URL, showing fallback');
         return (
             <div className={`${baseClasses} ${sizeClass} ${className}`}>
                 <span className="text-lg">{fallback}</span>
@@ -59,7 +51,7 @@ export default function AvatarDebug({
                 }
             }}
             onLoad={() => {
-                console.log('Avatar image loaded successfully:', avatarUrl);
+                // Avatar loaded successfully
             }}
         />
     );

@@ -33,6 +33,7 @@ interface AuthContextType {
   updateProfile: (name: string) => Promise<boolean>;
   updateAvatar: (avatar: File) => Promise<boolean>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  refreshUserData: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -131,7 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       setSignupError(null); // Clear any previous signup error
 
-      let data: any = { email, password, name };
+      const data: any = { email, password, name };
 
       if (avatar) {
         const formData = new FormData();
@@ -271,6 +272,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshUserData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await authAPI.getProfile();
+      if (response.data.success && response.data.data) {
+        const userData = response.data.data;
+        if (userData.avatar) {
+          userData.avatar = userData.avatar.split('/').pop();
+        }
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Refresh user data error:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value = {
     user,
     isLoading,
@@ -288,6 +311,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateProfile,
     updateAvatar,
     changePassword,
+    refreshUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

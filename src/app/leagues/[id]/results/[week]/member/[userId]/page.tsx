@@ -1,19 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { picksAPI, MemberPicksV2 } from '@/lib/api';
-import { useToast } from '@/contexts/ToastContext';
+import { picksAPI, MemberPicksV2, leaguesAPI } from '@/lib/api';
 import PageTitle from '@/components/PageTitle';
-import BackToLeagueButton from '@/components/BackToLeagueButton';
+
+interface Member {
+    id: number;
+    name: string;
+    avatar?: string;
+    role?: string;
+}
 
 export default function MemberPicksPage() {
     const params = useParams();
     const router = useRouter();
-    const { showToast } = useToast();
 
     const [memberPicks, setMemberPicks] = useState<MemberPicksV2 | null>(null);
+    const [leagueMembers, setLeagueMembers] = useState<Member[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -21,11 +26,7 @@ export default function MemberPicksPage() {
     const weekNumber = params.week as string;
     const userId = params.userId as string;
 
-    useEffect(() => {
-        loadMemberPicks();
-    }, [leagueId, weekNumber, userId]);
-
-    const loadMemberPicks = async () => {
+    const loadMemberPicks = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -47,13 +48,99 @@ export default function MemberPicksPage() {
         } finally {
             setLoading(false);
         }
+    }, [leagueId, weekNumber, userId]);
+
+    const loadLeagueMembers = useCallback(async () => {
+        try {
+            // Get members from race results to maintain the same order as shown on results page
+            const response = await picksAPI.getRaceResultsV2(parseInt(leagueId), parseInt(weekNumber));
+            if (response.data.success) {
+                // Convert results to member format and maintain the results ordering
+                const membersFromResults = response.data.data.results.map((result: { userId: number; userName: string; userAvatar?: string }) => ({
+                    id: result.userId,
+                    name: result.userName,
+                    avatar: result.userAvatar
+                }));
+                setLeagueMembers(membersFromResults);
+            }
+        } catch (error) {
+            console.error('Error loading race results for member navigation:', error);
+            // Fallback to league members if race results fail
+            try {
+                const fallbackResponse = await leaguesAPI.getLeagueMembers(parseInt(leagueId));
+                if (fallbackResponse.data.success) {
+                    setLeagueMembers(fallbackResponse.data.data);
+                }
+            } catch (fallbackError) {
+                console.error('Error loading league members fallback:', fallbackError);
+            }
+        }
+    }, [leagueId, weekNumber]);
+
+    const navigateToMember = (newUserId: number, memberIndex?: number) => {
+        const url = `/leagues/${leagueId}/results/${weekNumber}/member/${newUserId}`;
+        const finalUrl = memberIndex !== undefined ? `${url}?memberIndex=${memberIndex}` : url;
+        // Use replace instead of push to avoid building up navigation stack
+        router.replace(finalUrl);
     };
+
+    const getCurrentMemberIndex = () => {
+        // Handle duplicate userIds by finding ALL matches and using URL params to determine which one
+        const urlParams = new URLSearchParams(window.location.search);
+        const memberIndex = urlParams.get('memberIndex');
+
+        if (memberIndex !== null) {
+            const index = parseInt(memberIndex);
+
+            return index >= 0 && index < leagueMembers.length ? index : 0;
+        }
+
+        // For backward compatibility, find by userId but handle duplicates
+        const targetUserId = parseInt(userId);
+        const allMatchingIndices = leagueMembers
+            .map((member, index) => member.id === targetUserId ? index : -1)
+            .filter(index => index !== -1);
+
+
+
+        // Return the first match, or 0 if no match found
+        return allMatchingIndices.length > 0 ? allMatchingIndices[0] : 0;
+    };
+
+    const canNavigatePrevious = () => {
+        return getCurrentMemberIndex() > 0;
+    };
+
+    const canNavigateNext = () => {
+        return getCurrentMemberIndex() < leagueMembers.length - 1;
+    };
+
+    const navigateToPrevious = () => {
+        const currentIndex = getCurrentMemberIndex();
+        if (currentIndex > 0) {
+            const previousMember = leagueMembers[currentIndex - 1];
+            navigateToMember(previousMember.id, currentIndex - 1);
+        }
+    };
+
+    const navigateToNext = () => {
+        const currentIndex = getCurrentMemberIndex();
+        if (currentIndex < leagueMembers.length - 1) {
+            const nextMember = leagueMembers[currentIndex + 1];
+            navigateToMember(nextMember.id, currentIndex + 1);
+        }
+    };
+
+    useEffect(() => {
+        loadMemberPicks();
+        loadLeagueMembers();
+    }, [loadMemberPicks, loadLeagueMembers]);
 
     const getPositionLabel = (position: number) => {
         const labels: { [key: number]: string } = {
-            1: 'P1 (Winner)',
-            2: 'P2 (Second)',
-            3: 'P3 (Third)',
+            1: 'P1',
+            2: 'P2',
+            3: 'P3',
             4: 'P4',
             5: 'P5',
             6: 'P6',
@@ -119,9 +206,9 @@ export default function MemberPicksPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+            <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
-                    title={`${memberPicks.userName}'s Picks`}
+                    title="Member Picks"
                     subtitle={`Week ${memberPicks.weekNumber} • ${memberPicks.totalPicks} positions`}
                 >
                     <Link
@@ -134,6 +221,99 @@ export default function MemberPicksPage() {
                         Back to Results
                     </Link>
                 </PageTitle>
+
+                {/* Member Context with Navigation */}
+                <div className="mb-6">
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center justify-center">
+                        <div className="flex items-center space-x-6">
+                            {/* Previous Member Button */}
+                            <button
+                                onClick={navigateToPrevious}
+                                disabled={!canNavigatePrevious()}
+                                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${canNavigatePrevious()
+                                    ? 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Prev
+                            </button>
+
+                            {/* Current Member Badge */}
+                            <div className="flex items-center">
+                                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                                    {memberPicks.userName.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="ml-4 text-base text-gray-600 font-medium">
+                                    Viewing picks by {memberPicks.userName}
+                                </span>
+                            </div>
+
+                            {/* Next Member Button */}
+                            <button
+                                onClick={navigateToNext}
+                                disabled={!canNavigateNext()}
+                                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${canNavigateNext()
+                                    ? 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                Next
+                                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile Navigation */}
+                    <div className="md:hidden">
+                        <div className="flex items-center justify-between px-4">
+                            {/* Previous Member Button */}
+                            <button
+                                onClick={navigateToPrevious}
+                                disabled={!canNavigatePrevious()}
+                                className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg border transition-colors min-w-[70px] ${canNavigatePrevious()
+                                    ? 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Prev
+                            </button>
+
+                            {/* Current Member Badge and Label */}
+                            <div className="flex flex-col items-center">
+                                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-base shadow-sm">
+                                    {memberPicks.userName.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="mt-2 text-sm text-gray-600 text-center font-medium">
+                                    Viewing picks by {memberPicks.userName}
+                                </span>
+                            </div>
+
+                            {/* Next Member Button */}
+                            <button
+                                onClick={navigateToNext}
+                                disabled={!canNavigateNext()}
+                                className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg border transition-colors min-w-[70px] ${canNavigateNext()
+                                    ? 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                Next
+                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Summary Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -202,31 +382,7 @@ export default function MemberPicksPage() {
                     </div>
                 </div>
 
-                {/* Actual Race Results Section */}
-                <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Actual Race Results</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {memberPicks.picks.map((pick) => (
-                            <div key={pick.position} className="border border-gray-200 rounded-lg p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-gray-500">
-                                        {getPositionLabel(pick.position)}
-                                    </span>
-                                </div>
-                                {pick.actualDriverName ? (
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-900">
-                                            {pick.actualDriverName}
-                                        </p>
-                                        <p className="text-xs text-gray-500">{pick.actualDriverTeam}</p>
-                                    </div>
-                                ) : (
-                                    <p className="text-xs text-gray-400 italic">No result available</p>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
+
 
                 {/* Member's Picks Section */}
                 <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -241,128 +397,152 @@ export default function MemberPicksPage() {
 
                     {/* Desktop Grid */}
                     <div className="hidden md:block p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {memberPicks.picks.map((pick) => (
-                                <div
-                                    key={pick.position}
-                                    className={`p-4 border-2 rounded-lg ${pick.isCorrect === null
-                                        ? 'border-gray-300 bg-gray-50'
-                                        : pick.isCorrect
-                                            ? 'border-green-500 bg-green-50'
-                                            : 'border-red-500 bg-red-50'
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <span className="text-sm font-medium text-gray-500">
-                                            {getPositionLabel(pick.position)}
-                                        </span>
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${pick.isCorrect === null
-                                            ? 'bg-gray-100 text-gray-800'
+                        {memberPicks.picks.length === 0 ? (
+                            <div className="text-center py-12">
+                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                <h3 className="mt-2 text-sm font-medium text-gray-900">No Picks Made</h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    {memberPicks.userName} hasn&apos;t made any picks for Week {memberPicks.weekNumber} yet.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {memberPicks.picks.map((pick) => (
+                                    <div
+                                        key={pick.position}
+                                        className={`p-4 border-2 rounded-lg ${pick.isCorrect === null
+                                            ? 'border-gray-300 bg-gray-50'
                                             : pick.isCorrect
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-red-100 text-red-800'
-                                            }`}>
-                                            {pick.points !== null ? `${pick.points} pts` : 'Not Scored'}
-                                        </span>
-                                    </div>
-
-                                    <div className="mb-2">
-                                        <p className="text-sm font-semibold text-gray-900">
-                                            {pick.driverName}
-                                        </p>
-                                        <p className="text-xs text-gray-500">{pick.driverTeam}</p>
-                                        {pick.actualFinishPosition && (
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                Actually finished: P{pick.actualFinishPosition}
-                                            </p>
-                                        )}
-                                        {pick.isCorrect === null && !pick.actualFinishPosition && (
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                Race not scored yet
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {pick.actualDriverId && pick.actualDriverId !== pick.driverId && (
-                                        <div className="mt-2 pt-2 border-t border-gray-200">
-                                            <p className="text-xs text-gray-500">Actual:</p>
-                                            <p className="text-xs font-medium text-gray-700">
-                                                {pick.actualDriverName} ({pick.actualDriverTeam})
-                                            </p>
+                                                ? 'border-green-500 bg-green-50'
+                                                : 'border-red-500 bg-red-50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm font-medium text-gray-500">
+                                                {getPositionLabel(pick.position)}
+                                            </span>
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${pick.isCorrect === null
+                                                ? 'bg-gray-100 text-gray-800'
+                                                : pick.isCorrect
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                {pick.points !== null ? `${pick.points} pts` : 'Not Scored'}
+                                            </span>
                                         </div>
-                                    )}
 
-                                    {pick.isCorrect && (
-                                        <div className="mt-2 pt-2 border-t border-green-200">
-                                            <p className="text-xs text-green-600 font-medium">✓ Correct!</p>
+                                        <div className="mb-2">
+                                            <p className="text-sm font-semibold text-gray-900">
+                                                {pick.driverName}
+                                            </p>
+                                            <p className="text-xs text-gray-500">{pick.driverTeam}</p>
+                                            {pick.actualFinishPosition && (
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    Actually finished: P{pick.actualFinishPosition}
+                                                </p>
+                                            )}
+                                            {pick.isCorrect === null && !pick.actualFinishPosition && (
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    Race not scored yet
+                                                </p>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+
+                                        {pick.actualDriverId && pick.actualDriverId !== pick.driverId && (
+                                            <div className="mt-2 pt-2 border-t border-gray-200">
+                                                <p className="text-xs text-gray-500">Actual:</p>
+                                                <p className="text-xs font-medium text-gray-700">
+                                                    {pick.actualDriverName} ({pick.actualDriverTeam})
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {pick.isCorrect && (
+                                            <div className="mt-2 pt-2 border-t border-green-200">
+                                                <p className="text-xs text-green-600 font-medium">✓ Correct!</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Mobile Cards */}
                     <div className="md:hidden">
-                        <div className="space-y-4 p-4">
-                            {memberPicks.picks.map((pick) => (
-                                <div
-                                    key={pick.position}
-                                    className={`p-4 border-2 rounded-lg shadow-sm ${pick.isCorrect === null
-                                        ? 'border-gray-300 bg-white'
-                                        : pick.isCorrect
-                                            ? 'border-green-500 bg-green-50'
-                                            : 'border-red-500 bg-red-50'
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-sm font-medium text-gray-500">
-                                            {getPositionLabel(pick.position)}
-                                        </span>
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${pick.isCorrect === null
-                                            ? 'bg-gray-100 text-gray-800'
+                        {memberPicks.picks.length === 0 ? (
+                            <div className="text-center py-12 px-4">
+                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                                <h3 className="mt-2 text-sm font-medium text-gray-900">No Picks Made</h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    {memberPicks.userName} hasn&apos;t made any picks for Week {memberPicks.weekNumber} yet.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4 p-4">
+                                {memberPicks.picks.map((pick) => (
+                                    <div
+                                        key={pick.position}
+                                        className={`p-4 border-2 rounded-lg shadow-sm ${pick.isCorrect === null
+                                            ? 'border-gray-300 bg-white'
                                             : pick.isCorrect
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-red-100 text-red-800'
-                                            }`}>
-                                            {pick.points !== null ? `${pick.points} pts` : 'Not Scored'}
-                                        </span>
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <p className="text-base font-semibold text-gray-900">
-                                            {pick.driverName}
-                                        </p>
-                                        <p className="text-sm text-gray-500">{pick.driverTeam}</p>
-                                        {pick.actualFinishPosition && (
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                Actually finished: P{pick.actualFinishPosition}
-                                            </p>
-                                        )}
-                                        {pick.isCorrect === null && !pick.actualFinishPosition && (
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                Race not scored yet
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {pick.actualDriverId && pick.actualDriverId !== pick.driverId && (
-                                        <div className="mt-3 pt-3 border-t border-gray-200">
-                                            <p className="text-xs text-gray-500">Actual:</p>
-                                            <p className="text-sm font-medium text-gray-700">
-                                                {pick.actualDriverName} ({pick.actualDriverTeam})
-                                            </p>
+                                                ? 'border-green-500 bg-green-50'
+                                                : 'border-red-500 bg-red-50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="text-sm font-medium text-gray-500">
+                                                {getPositionLabel(pick.position)}
+                                            </span>
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${pick.isCorrect === null
+                                                ? 'bg-gray-100 text-gray-800'
+                                                : pick.isCorrect
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                {pick.points !== null ? `${pick.points} pts` : 'Not Scored'}
+                                            </span>
                                         </div>
-                                    )}
 
-                                    {pick.isCorrect && (
-                                        <div className="mt-3 pt-3 border-t border-green-200">
-                                            <p className="text-sm text-green-600 font-medium">✓ Correct!</p>
+                                        <div className="mb-3">
+                                            <p className="text-base font-semibold text-gray-900">
+                                                {pick.driverName}
+                                            </p>
+                                            <p className="text-sm text-gray-500">{pick.driverTeam}</p>
+                                            {pick.actualFinishPosition && (
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    Actually finished: P{pick.actualFinishPosition}
+                                                </p>
+                                            )}
+                                            {pick.isCorrect === null && !pick.actualFinishPosition && (
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    Race not scored yet
+                                                </p>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+
+                                        {pick.actualDriverId && pick.actualDriverId !== pick.driverId && (
+                                            <div className="mt-3 pt-3 border-t border-gray-200">
+                                                <p className="text-xs text-gray-500">Actual:</p>
+                                                <p className="text-sm font-medium text-gray-700">
+                                                    {pick.actualDriverName} ({pick.actualDriverTeam})
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {pick.isCorrect && (
+                                            <div className="mt-3 pt-3 border-t border-green-200">
+                                                <p className="text-sm text-green-600 font-medium">✓ Correct!</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

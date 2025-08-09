@@ -11,18 +11,14 @@ export default function TestAvatarPage() {
     const [testAvatarPath, setTestAvatarPath] = useState('/uploads/avatars/test-avatar.jpg');
 
     useEffect(() => {
-        console.log('🔧 Test Avatar Page - User data:', user);
-        console.log('🔧 Test Avatar Page - User avatar:', user?.avatar);
-
         if (user?.avatar) {
             const constructedUrl = getAvatarUrl(user.avatar);
-            console.log('🔧 Test Avatar Page - Constructed URL:', constructedUrl);
 
             // Test if the URL is accessible
             if (constructedUrl) {
                 fetch(constructedUrl)
                     .then(response => {
-                        console.log('🔧 Avatar URL accessible:', response.ok);
+                        // Avatar URL accessible
                     })
                     .catch(error => {
                         console.error('🔧 Avatar URL not accessible:', error);
@@ -42,7 +38,7 @@ export default function TestAvatarPage() {
 
         testPaths.forEach(path => {
             const url = getAvatarUrl(path);
-            console.log(`🔧 Test URL construction:`, { path, constructedUrl: url });
+            // URL construction test
         });
     };
 
@@ -134,7 +130,7 @@ export default function TestAvatarPage() {
                                         // Test if production API is accessible
                                         fetch('https://api.finalpoint.app/api/drivers/get')
                                             .then(response => {
-                                                console.log('🔧 Production API accessible:', response.ok);
+                                                // Production API accessible
                                             })
                                             .catch(error => {
                                                 console.error('🔧 Production API not accessible:', error);
@@ -143,7 +139,7 @@ export default function TestAvatarPage() {
                                         // Test if static files are served
                                         fetch('https://api.finalpoint.app/uploads/')
                                             .then(response => {
-                                                console.log('🔧 Static files accessible:', response.ok);
+                                                // Static files accessible
                                             })
                                             .catch(error => {
                                                 console.error('🔧 Static files not accessible:', error);

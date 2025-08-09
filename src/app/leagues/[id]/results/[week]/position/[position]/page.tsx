@@ -7,6 +7,7 @@ import { picksAPI, PositionResultV2 } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import PageTitle from '@/components/PageTitle';
 import BackToLeagueButton from '@/components/BackToLeagueButton';
+import Avatar from '@/components/Avatar';
 
 export default function PositionResultsPage() {
     const params = useParams();
@@ -14,6 +15,7 @@ export default function PositionResultsPage() {
     const { showToast } = useToast();
 
     const [results, setResults] = useState<PositionResultV2 | null>(null);
+    const [availablePositions, setAvailablePositions] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -23,6 +25,7 @@ export default function PositionResultsPage() {
 
     useEffect(() => {
         loadResults();
+        loadAvailablePositions();
     }, [leagueId, weekNumber, position]);
 
     const loadResults = async () => {
@@ -49,11 +52,55 @@ export default function PositionResultsPage() {
         }
     };
 
+    const loadAvailablePositions = async () => {
+        try {
+            const response = await picksAPI.getLeaguePositions(parseInt(leagueId));
+            if (response.data.success) {
+                // Sort positions in ascending order (P1, P2, P3, etc.)
+                const sortedPositions = response.data.data.sort((a: number, b: number) => a - b);
+                setAvailablePositions(sortedPositions);
+            }
+        } catch (error) {
+            console.error('Error loading available positions:', error);
+        }
+    };
+
+    const navigateToPosition = (newPosition: number) => {
+        // Use replace instead of push to avoid building up navigation stack
+        router.replace(`/leagues/${leagueId}/results/${weekNumber}/position/${newPosition}`);
+    };
+
+    const getCurrentPositionIndex = () => {
+        return availablePositions.findIndex(pos => pos === parseInt(position));
+    };
+
+    const canNavigatePrevious = () => {
+        return getCurrentPositionIndex() > 0;
+    };
+
+    const canNavigateNext = () => {
+        return getCurrentPositionIndex() < availablePositions.length - 1;
+    };
+
+    const navigateToPrevious = () => {
+        const currentIndex = getCurrentPositionIndex();
+        if (currentIndex > 0) {
+            navigateToPosition(availablePositions[currentIndex - 1]);
+        }
+    };
+
+    const navigateToNext = () => {
+        const currentIndex = getCurrentPositionIndex();
+        if (currentIndex < availablePositions.length - 1) {
+            navigateToPosition(availablePositions[currentIndex + 1]);
+        }
+    };
+
     const getPositionLabel = (position: number) => {
         const labels: { [key: number]: string } = {
-            1: 'P1 (Winner)',
-            2: 'P2 (Second)',
-            3: 'P3 (Third)',
+            1: 'P1',
+            2: 'P2',
+            3: 'P3',
             4: 'P4',
             5: 'P5',
             6: 'P6',
@@ -119,9 +166,9 @@ export default function PositionResultsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+            <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
-                    title={`${getPositionLabel(results.position)} Results`}
+                    title="Picks By Position"
                     subtitle={`Week ${results.weekNumber} • ${results.totalParticipants} participants`}
                 >
                     <Link
@@ -134,6 +181,99 @@ export default function PositionResultsPage() {
                         Back to Results
                     </Link>
                 </PageTitle>
+
+                {/* Position Context with Navigation */}
+                <div className="mb-6">
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center justify-center">
+                        <div className="flex items-center space-x-6">
+                            {/* Previous Position Button */}
+                            <button
+                                onClick={navigateToPrevious}
+                                disabled={!canNavigatePrevious()}
+                                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${canNavigatePrevious()
+                                    ? 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Prev
+                            </button>
+
+                            {/* Current Position Badge */}
+                            <div className="flex items-center">
+                                <span className="inline-flex items-center px-4 py-2 rounded-full text-lg font-bold bg-blue-600 text-white shadow-sm">
+                                    {getPositionLabel(results.position)}
+                                </span>
+                                <span className="ml-4 text-base text-gray-600 font-medium">
+                                    Viewing picks for {getPositionLabel(results.position)}
+                                </span>
+                            </div>
+
+                            {/* Next Position Button */}
+                            <button
+                                onClick={navigateToNext}
+                                disabled={!canNavigateNext()}
+                                className={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${canNavigateNext()
+                                    ? 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                Next
+                                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile Navigation */}
+                    <div className="md:hidden">
+                        <div className="flex items-center justify-between px-4">
+                            {/* Previous Position Button */}
+                            <button
+                                onClick={navigateToPrevious}
+                                disabled={!canNavigatePrevious()}
+                                className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg border transition-colors min-w-[70px] ${canNavigatePrevious()
+                                    ? 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Prev
+                            </button>
+
+                            {/* Current Position Badge and Label */}
+                            <div className="flex flex-col items-center">
+                                <span className="inline-flex items-center px-3 py-2 rounded-full text-base font-bold bg-blue-600 text-white shadow-sm">
+                                    {getPositionLabel(results.position)}
+                                </span>
+                                <span className="mt-2 text-sm text-gray-600 text-center font-medium">
+                                    Viewing picks for {getPositionLabel(results.position)}
+                                </span>
+                            </div>
+
+                            {/* Next Position Button */}
+                            <button
+                                onClick={navigateToNext}
+                                disabled={!canNavigateNext()}
+                                className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg border transition-colors min-w-[70px] ${canNavigateNext()
+                                    ? 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50'
+                                    : 'text-gray-400 bg-gray-50 border-gray-200 cursor-not-allowed'
+                                    }`}
+                            >
+                                Next
+                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Actual Result Banner */}
                 {results.actualResult && (
@@ -171,131 +311,93 @@ export default function PositionResultsPage() {
                     </div>
                 )}
 
-                {/* Results Table */}
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-900">
+                {/* Results Cards */}
+                <div className="space-y-6">
+                    <div className="bg-white shadow-lg rounded-lg p-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">
                             All Picks for {getPositionLabel(results.position)}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 mb-6">
                             {results.totalParticipants} participants • {results.correctPicks} correct predictions
                         </p>
-                    </div>
 
-                    {/* Desktop Table */}
-                    <div className="hidden md:block overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Rank
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Member
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Pick
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actual Finish
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Result
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Points
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {results.picks.map((pick, index) => (
-                                    <tr key={pick.userId} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            #{index + 1}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {pick.userName}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {pick.driverName} ({pick.driverTeam})
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {pick.actualFinishPosition ? `P${pick.actualFinishPosition}` : (pick.isCorrect === null ? 'Not Scored' : 'DNF')}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${pick.isCorrect === null
-                                                ? 'bg-gray-100 text-gray-800'
-                                                : pick.isCorrect
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-red-100 text-red-800'
-                                                }`}>
-                                                {pick.isCorrect === null
-                                                    ? 'Not Scored'
-                                                    : pick.isCorrect
-                                                        ? '✓ Correct'
-                                                        : '✗ Wrong'
-                                                }
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {pick.points !== null ? pick.points : '-'}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Mobile Cards */}
-                    <div className="md:hidden">
-                        <div className="space-y-4 p-4">
+                        <div className="space-y-4">
                             {results.picks.map((pick, index) => (
-                                <div key={pick.userId} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                                    <div className="flex items-start justify-between mb-4">
+                                <div key={pick.userId} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                    <div className="flex items-start justify-between">
                                         <div className="flex items-center flex-1">
-                                            <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mr-4 flex-shrink-0">
-                                                <span className="font-bold text-sm text-gray-700">
-                                                    #{index + 1}
-                                                </span>
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="text-base font-semibold text-gray-900 truncate">{pick.userName}</div>
-                                                <div className="text-sm text-gray-600 mt-1">
-                                                    {pick.driverName} ({pick.driverTeam})
+                                            {/* Avatar with Position Overlay */}
+                                            <div className="relative mr-4">
+                                                <Avatar
+                                                    src={pick.userAvatar}
+                                                    alt={`${pick.userName}'s avatar`}
+                                                    size="md"
+                                                />
+                                                <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm ${index === 0 ? 'bg-yellow-500 text-white' :
+                                                    index === 1 ? 'bg-gray-400 text-white' :
+                                                        index === 2 ? 'bg-orange-600 text-white' :
+                                                            'bg-blue-600 text-white'
+                                                    }`}>
+                                                    {index + 1}
                                                 </div>
+                                            </div>
+
+                                            {/* User Info */}
+                                            <div className="flex-1">
+                                                <h4 className="text-lg font-semibold text-gray-900 mb-1">{pick.userName}</h4>
+                                                <div className="flex items-center text-sm text-green-600 mb-2">
+                                                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                    All 2 picks made
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Points Display */}
+                                        <div className="text-right">
+                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">POINTS</div>
+                                            <div className="text-3xl font-bold text-gray-900">
+                                                {pick.points !== null ? pick.points : '-'}
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded-lg">
-                                        <div className="text-center">
-                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Actual Finish</div>
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {pick.actualFinishPosition ? `P${pick.actualFinishPosition}` : (pick.isCorrect === null ? 'Not Scored' : 'DNF')}
+                                    {/* Additional Stats */}
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <div className="grid grid-cols-2 gap-4 text-center">
+                                            <div>
+                                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">CORRECT PICKS</div>
+                                                <div className="text-2xl font-bold text-gray-900">
+                                                    {pick.isCorrect ? '1' : '0'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">ACTUAL FINISH</div>
+                                                <div className="text-lg font-semibold text-gray-900">
+                                                    {pick.actualFinishPosition ? `P${pick.actualFinishPosition}` : 'DNF'}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="text-center">
-                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Result</div>
-                                            <div className={`text-sm font-medium ${pick.isCorrect === null
-                                                ? 'text-gray-600'
-                                                : pick.isCorrect
-                                                    ? 'text-green-600'
-                                                    : 'text-red-600'
-                                                }`}>
-                                                {pick.isCorrect === null
-                                                    ? 'Not Scored'
+
+                                        {/* Result Status */}
+                                        {results.actualResult && (
+                                            <div className="mt-3 text-center">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${pick.isCorrect === null
+                                                    ? 'bg-gray-100 text-gray-800'
                                                     : pick.isCorrect
-                                                        ? '✓ Correct'
-                                                        : '✗ Wrong'
-                                                }
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-red-100 text-red-800'
+                                                    }`}>
+                                                    {pick.isCorrect === null
+                                                        ? 'Not Scored'
+                                                        : pick.isCorrect
+                                                            ? '✓ Correct'
+                                                            : '✗ Wrong'
+                                                    }
+                                                </span>
                                             </div>
-                                        </div>
-                                        <div className="text-center col-span-2">
-                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Points</div>
-                                            <div className="text-lg font-bold text-gray-900">
-                                                {pick.points !== null ? pick.points : '-'}
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

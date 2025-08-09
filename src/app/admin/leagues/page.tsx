@@ -30,17 +30,10 @@ export default function AdminLeaguesPage() {
         try {
             setLoading(true);
 
-            console.log('Loading leagues...');
-
             const leaguesResponse = await adminAPI.getAllLeagues();
-
-            console.log('API Response:', {
-                leagues: { status: leaguesResponse.status, ok: leaguesResponse.status === 200 },
-            });
 
             if (leaguesResponse.status === 200) {
                 const leaguesData = leaguesResponse.data;
-                console.log('Leagues data:', leaguesData);
                 setLeagues(leaguesData.data);
             } else {
                 console.error('Leagues response error:', leaguesResponse.data);

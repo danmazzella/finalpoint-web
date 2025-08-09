@@ -120,7 +120,6 @@ export default function NotificationsPage() {
                 try {
                     // Skip service worker registration in development to avoid caching issues
                     if (process.env.NODE_ENV === 'development') {
-                        console.log('Skipping service worker registration in development mode');
                         setSuccess('Push notifications enabled (development mode - service worker disabled)');
                         return;
                     }
@@ -129,8 +128,6 @@ export default function NotificationsPage() {
                     const registration = await navigator.serviceWorker.register('/sw.js', {
                         scope: '/'
                     });
-
-                    console.log('Service worker registered:', registration);
 
                     // Wait for service worker to be ready
                     await navigator.serviceWorker.ready;
@@ -144,9 +141,6 @@ export default function NotificationsPage() {
                             userVisibleOnly: true,
                             applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
                         });
-                        console.log('Push subscription created:', subscription);
-                    } else {
-                        console.log('Existing push subscription found:', subscription);
                     }
 
                     // Send subscription to server
@@ -204,11 +198,6 @@ export default function NotificationsPage() {
                 if (response.data.developmentMode) {
                     setSuccess(`Test ${type} notification queued (development mode). Check browser console for details.`);
                     // Show a console notification for development
-                    console.log(`🔔 Test ${type} notification:`, {
-                        title: 'FinalPoint Test Notification',
-                        body: `This is a test ${type} notification from FinalPoint.`,
-                        timestamp: new Date().toISOString()
-                    });
                 } else {
                     setSuccess(`Test ${type} notification sent successfully!`);
                 }

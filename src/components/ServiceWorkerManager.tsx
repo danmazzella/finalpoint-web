@@ -10,7 +10,6 @@ export default function ServiceWorkerManager() {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
           registrations.forEach((registration) => {
             registration.unregister();
-            console.log('Unregistered service worker in development mode');
           });
         });
       }

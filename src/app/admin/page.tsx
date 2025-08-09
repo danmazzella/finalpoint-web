@@ -38,17 +38,10 @@ export default function AdminOverviewPage() {
     try {
       setLoading(true);
 
-      console.log('Loading admin data...');
-
       const statsResponse = await adminAPI.getDashboardStats();
-
-      console.log('API Response:', {
-        stats: { status: statsResponse.status, ok: statsResponse.status === 200 },
-      });
 
       if (statsResponse.status === 200) {
         const statsData = statsResponse.data;
-        console.log('Stats data:', statsData);
         setStats(statsData.data);
       } else {
         console.error('Stats response error:', statsResponse.data);

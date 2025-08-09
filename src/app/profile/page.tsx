@@ -3,12 +3,13 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Avatar from '@/components/Avatar';
+import PasswordStrengthIndicator, { validatePasswordComplexity } from '@/components/PasswordStrengthIndicator';
 
 export default function ProfilePage() {
-  const { user, logout, updateProfile, changePassword, updateAvatar } = useAuth();
+  const { user, logout, updateProfile, changePassword, updateAvatar, refreshUserData } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -93,6 +94,10 @@ export default function ProfilePage() {
       if (success) {
         setSuccess('Avatar updated successfully!');
         showToast('Avatar updated successfully!', 'success');
+
+        // Refresh user data from API to get the updated avatar
+        await refreshUserData();
+
         setShowAvatarUpload(false);
         setAvatar(null);
         setAvatarPreview(null);
@@ -124,9 +129,14 @@ export default function ProfilePage() {
       } else {
         setError('Failed to update profile. Please try again.');
       }
-    } catch (error: any) {
-      if (error?.response?.data?.errors?.some((e: any) => e.message === 'Username already taken')) {
-        setError('Username already taken. Please choose a different username.');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { errors?: Array<{ message: string }> } } };
+        if (axiosError.response?.data?.errors?.some((e) => e.message === 'Username already taken')) {
+          setError('Username already taken. Please choose a different username.');
+        } else {
+          setError('An error occurred. Please try again.');
+        }
       } else {
         setError('An error occurred. Please try again.');
       }
@@ -137,21 +147,32 @@ export default function ProfilePage() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
     setSuccess('');
 
-    if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
-      setIsLoading(false);
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError('Please fill in all fields');
       return;
     }
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    // Validate password complexity
+    const passwordValidation = validatePasswordComplexity(newPassword);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.errors[0]);
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
       const success = await changePassword(currentPassword, newPassword);
       if (success) {
         setSuccess('Password changed successfully!');
-        showToast('Password changed successfully!', 'success');
         setShowChangePassword(false);
         setCurrentPassword('');
         setNewPassword('');
@@ -159,7 +180,8 @@ export default function ProfilePage() {
       } else {
         setError('Failed to change password. Please check your current password.');
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error('Change password error:', error);
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -278,7 +300,12 @@ export default function ProfilePage() {
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">App Information</h3>
               <div className="space-y-4">
-                <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                <a
+                  href="https://finalpoint.app/info"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block"
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-gray-900">About FinalPoint</p>
@@ -288,7 +315,7 @@ export default function ProfilePage() {
                       <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                     </svg>
                   </div>
-                </button>
+                </a>
 
                 <Link href={`/privacy?redirect=${encodeURIComponent(redirectTo)}`} className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
                   <div className="flex items-center justify-between">
@@ -539,6 +566,7 @@ export default function ProfilePage() {
                     minLength={6}
                   />
                 </div>
+                <PasswordStrengthIndicator password={newPassword} />
                 <div className="flex justify-end space-x-3">
                   <button
                     type="button"
