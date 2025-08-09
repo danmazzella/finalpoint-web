@@ -162,6 +162,7 @@ export const authAPI = {
     },
   }),
   changePassword: (data: { currentPassword: string; newPassword: string }) => apiService.put('/users/password', data),
+  deleteAccount: (data: { password: string }) => apiService.delete('/users/account', { data }),
 };
 
 export const leaguesAPI = {

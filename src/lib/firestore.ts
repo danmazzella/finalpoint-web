@@ -1,32 +1,32 @@
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  doc, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit,
-  QueryConstraint,
-  DocumentData,
-  WithFieldValue
+import {
+    collection,
+    addDoc,
+    getDocs,
+    doc,
+    getDoc,
+    updateDoc,
+    deleteDoc,
+    query,
+    where,
+    orderBy,
+    limit,
+    QueryConstraint,
+    DocumentData,
+    WithFieldValue
 } from 'firebase/firestore';
 import { db } from './firebase';
 
 // Generic Firestore utilities
 export const firestoreUtils = {
-      // Add a new document
-  add: async <T extends DocumentData>(collectionName: string, data: WithFieldValue<T>) => {
-    try {
-      const docRef = await addDoc(collection(db, collectionName), data);
-      return { id: docRef.id, error: null };
-    } catch (error: any) {
-      return { id: null, error: error.message };
-    }
-  },
+    // Add a new document
+    add: async <T extends DocumentData>(collectionName: string, data: WithFieldValue<T>) => {
+        try {
+            const docRef = await addDoc(collection(db, collectionName), data);
+            return { id: docRef.id, error: null };
+        } catch (error: any) {
+            return { id: null, error: error.message };
+        }
+    },
 
     // Get all documents from a collection
     getAll: async (collectionName: string) => {
@@ -58,16 +58,16 @@ export const firestoreUtils = {
         }
     },
 
-      // Update a document
-  update: async (collectionName: string, id: string, data: Record<string, any>) => {
-    try {
-      const docRef = doc(db, collectionName, id);
-      await updateDoc(docRef, data);
-      return { error: null };
-    } catch (error: any) {
-      return { error: error.message };
-    }
-  },
+    // Update a document
+    update: async (collectionName: string, id: string, data: Record<string, any>) => {
+        try {
+            const docRef = doc(db, collectionName, id);
+            await updateDoc(docRef, data);
+            return { error: null };
+        } catch (error: any) {
+            return { error: error.message };
+        }
+    },
 
     // Delete a document
     delete: async (collectionName: string, id: string) => {
@@ -97,20 +97,20 @@ export const firestoreUtils = {
 
 // Define types for better type safety
 interface User extends DocumentData {
-  email: string;
-  displayName?: string;
-  uid?: string;
-  createdAt?: Date;
-  lastLoginAt?: Date;
+    email: string;
+    displayName?: string;
+    uid?: string;
+    createdAt?: Date;
+    lastLoginAt?: Date;
 }
 
 // Example usage functions with proper types
 export const userOperations = {
-  createUser: (userData: WithFieldValue<User>) => firestoreUtils.add<User>('users', userData),
-  getUsers: () => firestoreUtils.getAll('users'),
-  getUser: (id: string) => firestoreUtils.getById('users', id),
-  updateUser: (id: string, data: Partial<User>) => firestoreUtils.update('users', id, data),
-  deleteUser: (id: string) => firestoreUtils.delete('users', id),
-  getUsersByEmail: (email: string) => 
-    firestoreUtils.query('users', [where('email', '==', email)])
+    createUser: (userData: WithFieldValue<User>) => firestoreUtils.add<User>('users', userData),
+    getUsers: () => firestoreUtils.getAll('users'),
+    getUser: (id: string) => firestoreUtils.getById('users', id),
+    updateUser: (id: string, data: Partial<User>) => firestoreUtils.update('users', id, data),
+    deleteUser: (id: string) => firestoreUtils.delete('users', id),
+    getUsersByEmail: (email: string) =>
+        firestoreUtils.query('users', [where('email', '==', email)])
 };

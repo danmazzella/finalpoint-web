@@ -291,6 +291,21 @@ export default function ProfilePage() {
                     </svg>
                   </div>
                 </button>
+
+                <Link
+                  href="/profile/delete-account"
+                  className="w-full text-left px-4 py-3 border border-red-200 rounded-md hover:bg-red-50 transition-colors block"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-red-900">Delete Account</p>
+                      <p className="text-sm text-red-700">Permanently delete your account</p>
+                    </div>
+                    <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </Link>
               </div>
             </div>
           </div>
@@ -595,6 +610,7 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
     </div>
   );
 } 

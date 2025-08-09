@@ -34,6 +34,7 @@ interface AuthContextType {
   updateAvatar: (avatar: File) => Promise<boolean>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
   refreshUserData: () => Promise<boolean>;
+  deleteAccount: (password: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -294,6 +295,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const deleteAccount = async (password: string): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      const response = await authAPI.deleteAccount({ password });
+      if (response.data.success) {
+        // Clear user data and redirect to login
+        setUser(null);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Delete account error:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value = {
     user,
     isLoading,
@@ -312,6 +333,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateAvatar,
     changePassword,
     refreshUserData,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
