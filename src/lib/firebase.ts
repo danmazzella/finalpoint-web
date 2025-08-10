@@ -2,7 +2,7 @@ import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getAnalytics, Analytics, isSupported } from 'firebase/analytics';
 
 // Firebase configuration from environment variables
 // Make sure to create a .env.local file with your actual Firebase values
@@ -29,16 +29,27 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// Initialize Analytics only on client side with proper support check
-let analytics: any = null;
+// Initialize Analytics for Firebase v12+
+let analytics: Analytics | null = null;
+
 if (typeof window !== 'undefined') {
-    isSupported().then((supported) => {
-        if (supported) {
-            analytics = getAnalytics(app);
+    // For Firebase v12+, we need to check support and initialize properly
+    const initializeAnalytics = async () => {
+        try {
+            const supported = await isSupported();
+            if (supported && firebaseConfig.measurementId) {
+                analytics = getAnalytics(app);
+                console.log('✅ Firebase Analytics initialized successfully');
+            } else {
+                console.warn('⚠️ Analytics not supported or no measurement ID');
+            }
+        } catch (error) {
+            console.warn('⚠️ Analytics initialization failed:', error);
         }
-    }).catch((error) => {
-        console.warn('Firebase Analytics not supported:', error);
-    });
+    };
+    
+    // Initialize analytics
+    initializeAnalytics();
 }
 
 export { analytics };

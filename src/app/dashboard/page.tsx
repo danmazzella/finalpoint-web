@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { leaguesAPI, authAPI, League } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
+import { analytics } from '@/lib/firebase';
 
 interface UserStats {
   totalPicks: number;
@@ -55,6 +56,26 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadLeagues();
+    
+    // Test Firebase Analytics
+    if (analytics) {
+      console.log('🔍 Testing Firebase Analytics...');
+      console.log('Analytics object:', analytics);
+      
+      // Test with a simple event using Firebase v12 API
+      try {
+        // @ts-expect-error - Firebase v12 analytics API
+        analytics.logEvent('page_view', {
+          page_title: 'Dashboard',
+          page_location: '/dashboard'
+        });
+        console.log('✅ Analytics event logged successfully!');
+      } catch (error) {
+        console.error('❌ Failed to log analytics event:', error);
+      }
+    } else {
+      console.log('⚠️ Analytics not available yet');
+    }
   }, []);
 
   const loadLeagues = async () => {
