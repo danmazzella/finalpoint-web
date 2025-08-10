@@ -7,6 +7,9 @@ import { logEvent as firebaseLogEvent } from 'firebase/analytics';
 export const logEvent = (eventName: string, eventParams?: Record<string, any>) => {
     if (analytics) {
         try {
+            console.log('🔍 About to log event:', eventName, eventParams);
+            console.log('📊 Analytics object:', analytics);
+
             firebaseLogEvent(analytics, eventName, eventParams);
             console.log('✅ Analytics event logged:', eventName, eventParams);
             return true;

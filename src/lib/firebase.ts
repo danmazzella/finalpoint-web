@@ -39,7 +39,15 @@ if (typeof window !== 'undefined') {
             const supported = await isSupported();
             if (supported && firebaseConfig.measurementId) {
                 analytics = getAnalytics(app);
+
+                // Enable debug mode in development
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('🔧 Analytics debug mode enabled');
+                }
+
                 console.log('✅ Firebase Analytics initialized successfully');
+                console.log('📊 Measurement ID:', firebaseConfig.measurementId);
+                console.log('🌐 Project ID:', firebaseConfig.projectId);
             } else {
                 console.warn('⚠️ Analytics not supported or no measurement ID');
             }
