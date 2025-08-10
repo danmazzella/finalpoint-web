@@ -12,45 +12,30 @@ declare global {
 
 // Utility function to log analytics events
 export const logEvent = (eventName: string, eventParams?: Record<string, string | number | boolean>) => {
-    console.log('🔍 About to log event:', eventName, eventParams);
-    
     if (analytics) {
         try {
-            console.log('📊 Analytics object:', analytics);
-            console.log('🔧 Analytics object keys:', Object.keys(analytics));
-            console.log('🔧 Analytics object type:', typeof analytics);
-            console.log('🔧 Analytics object constructor:', analytics.constructor?.name);
-            
             // Firebase v12: use firebaseLogEvent function, not analytics.logEvent
-            console.log('🔄 Using firebaseLogEvent for Firebase v12');
             firebaseLogEvent(analytics, eventName, eventParams);
-            console.log('✅ Firebase Analytics event logged via firebaseLogEvent:', eventName, eventParams);
             return true;
-            
+
         } catch (error) {
             console.error('❌ Firebase Analytics failed:', error);
-            
+
             // Fallback to gtag if available
             if (typeof window !== 'undefined' && window.gtag) {
-                console.log('🔄 Falling back to gtag');
                 window.gtag('event', eventName, eventParams);
-                console.log('✅ Gtag event logged:', eventName, eventParams);
                 return true;
             }
-            
+
             return false;
         }
     } else {
-        console.warn('⚠️ Firebase Analytics not available');
-        
         // Fallback to gtag if available
         if (typeof window !== 'undefined' && window.gtag) {
-            console.log('🔄 Falling back to gtag');
             window.gtag('event', eventName, eventParams);
-            console.log('✅ Gtag event logged:', eventName, eventParams);
             return true;
         }
-        
+
         return false;
     }
 };

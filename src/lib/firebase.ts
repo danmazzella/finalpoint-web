@@ -42,12 +42,8 @@ if (typeof window !== 'undefined') {
 
                 // Enable debug mode in development
                 if (process.env.NODE_ENV === 'development') {
-                    console.log('🔧 Analytics debug mode enabled');
+                    // Analytics debug mode enabled silently
                 }
-
-                console.log('✅ Firebase Analytics initialized successfully');
-                console.log('📊 Measurement ID:', firebaseConfig.measurementId);
-                console.log('🌐 Project ID:', firebaseConfig.projectId);
             } else {
                 console.warn('⚠️ Analytics not supported or no measurement ID');
             }

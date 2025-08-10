@@ -5,6 +5,8 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import ConditionalLayout from '@/components/ConditionalLayout';
 import ServiceWorkerManager from '@/components/ServiceWorkerManager';
+import PageViewTracker from '@/components/PageViewTracker';
+import { Suspense } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,6 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
         <ServiceWorkerManager />
         <AuthProvider>
           <ToastProvider>

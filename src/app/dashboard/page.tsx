@@ -56,17 +56,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadLeagues();
-
-    // Test Firebase Analytics
-    console.log('🔍 Testing Firebase Analytics...');
-
-    // Test with a simple page view event
-    const success = logPageView('Dashboard', '/dashboard');
-    if (success) {
-      console.log('✅ Analytics event logged successfully!');
-    } else {
-      console.log('⚠️ Analytics event failed to log');
-    }
   }, []);
 
   const loadLeagues = async () => {
