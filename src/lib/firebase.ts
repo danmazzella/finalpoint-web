@@ -47,7 +47,7 @@ if (typeof window !== 'undefined') {
             console.warn('⚠️ Analytics initialization failed:', error);
         }
     };
-    
+
     // Initialize analytics
     initializeAnalytics();
 }

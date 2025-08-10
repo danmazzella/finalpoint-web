@@ -1,23 +1,24 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAnalytics } from '@/lib/analytics';
+import { logPageView, logCustomEvent } from '@/lib/analytics';
 
 const AnalyticsTest: React.FC = () => {
-    const analytics = useAnalytics();
-
     useEffect(() => {
         // Test analytics on component mount
-        analytics.pageView('analytics_test', 'Analytics Test Page');
-    }, [analytics]);
+        logPageView('Analytics Test Page', '/analytics-test');
+    }, []);
 
     const handleTestEvent = () => {
-        analytics.buttonClick('test_analytics_button', 'analytics_test_page');
+        logCustomEvent('button_click', {
+            button_name: 'test_analytics_button',
+            location: 'analytics_test_page'
+        });
         console.log('Test analytics event sent!');
     };
 
     const handleCustomEvent = () => {
-        analytics.logEvent('custom_test_event', {
+        logCustomEvent('custom_test_event', {
             test_parameter: 'test_value',
             timestamp: new Date().toISOString()
         });
