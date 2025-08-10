@@ -24,6 +24,18 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
 // Initialize Firebase (check if already initialized to avoid errors in development)
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
+// Debug: Log Firebase configuration
+if (typeof window !== 'undefined') {
+    console.log('🔧 Firebase Config:', {
+        projectId: firebaseConfig.projectId,
+        authDomain: firebaseConfig.authDomain,
+        measurementId: firebaseConfig.measurementId,
+        appId: firebaseConfig.appId
+    });
+    console.log('🚀 Firebase App:', app);
+    console.log('📱 Environment:', process.env.NODE_ENV);
+}
+
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
@@ -41,13 +53,25 @@ if (typeof window !== 'undefined') {
     // For Firebase v12+, we need to check support and initialize properly
     const initializeAnalytics = async () => {
         try {
+            console.log('🔍 Checking if analytics is supported...');
             const supported = await isSupported();
+            console.log('📱 Analytics supported:', supported);
+            console.log('🔑 Measurement ID:', firebaseConfig.measurementId);
+
             if (supported && firebaseConfig.measurementId) {
                 analytics = getAnalytics(app);
                 console.log('✅ Firebase Analytics initialized successfully');
+                console.log('📊 Analytics instance:', analytics);
                 console.log('📊 Measurement ID:', firebaseConfig.measurementId);
+
+                // Test if analytics is working
+                console.log('🧪 Testing analytics instance properties:', {
+                    app: analytics.app
+                });
             } else {
                 console.warn('⚠️ Analytics not supported or no measurement ID');
+                console.warn('Supported:', supported);
+                console.warn('Measurement ID:', firebaseConfig.measurementId);
             }
         } catch (error) {
             console.warn('⚠️ Analytics initialization failed:', error);

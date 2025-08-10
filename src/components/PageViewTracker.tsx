@@ -16,12 +16,20 @@ export default function PageViewTracker() {
             if (analytics) {
                 setAnalyticsReady(true);
                 console.log('✅ Analytics ready, tracking enabled');
+
+                // Test analytics with a custom event
+                import('@/lib/analytics').then(({ logEvent }) => {
+                    logEvent('analytics_test', {
+                        test_param: 'page_tracker_ready',
+                        timestamp: new Date().toISOString()
+                    });
+                });
             } else {
                 // Check again in 100ms
                 setTimeout(checkAnalytics, 100);
             }
         };
-        
+
         checkAnalytics();
     }, []);
 
@@ -70,7 +78,7 @@ export default function PageViewTracker() {
         // Log the page view
         console.log(`📊 Tracking page view: ${pageTitle} (${fullPath})`);
         const success = logPageView(pageTitle, fullPath);
-        
+
         if (success) {
             console.log('✅ Page view tracked successfully');
         } else {

@@ -13,12 +13,15 @@ declare global {
 // Utility function to log analytics events
 export const logEvent = (eventName: string, eventParams?: Record<string, string | number | boolean>) => {
     const currentAnalytics = analytics || getAnalyticsInstance();
-    
+
     if (currentAnalytics) {
         try {
             console.log(`📊 Logging Firebase event: ${eventName}`, eventParams);
+            console.log(`🔍 Analytics instance:`, currentAnalytics);
+
             // Firebase v12: use firebaseLogEvent function, not analytics.logEvent
-            firebaseLogEvent(currentAnalytics, eventName, eventParams);
+            const result = firebaseLogEvent(currentAnalytics, eventName, eventParams);
+            console.log(`✅ Firebase logEvent result:`, result);
             return true;
 
         } catch (error) {
