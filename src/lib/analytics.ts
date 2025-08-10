@@ -1,7 +1,7 @@
 'use client';
 
 import { logEvent as firebaseLogEvent } from 'firebase/analytics';
-import { analytics } from './firebase';
+import { analytics, getAnalyticsInstance } from './firebase';
 
 // Check if gtag is available (Google Tag Manager)
 declare global {
@@ -12,10 +12,13 @@ declare global {
 
 // Utility function to log analytics events
 export const logEvent = (eventName: string, eventParams?: Record<string, string | number | boolean>) => {
-    if (analytics) {
+    const currentAnalytics = analytics || getAnalyticsInstance();
+    
+    if (currentAnalytics) {
         try {
+            console.log(`📊 Logging Firebase event: ${eventName}`, eventParams);
             // Firebase v12: use firebaseLogEvent function, not analytics.logEvent
-            firebaseLogEvent(analytics, eventName, eventParams);
+            firebaseLogEvent(currentAnalytics, eventName, eventParams);
             return true;
 
         } catch (error) {
@@ -23,6 +26,7 @@ export const logEvent = (eventName: string, eventParams?: Record<string, string 
 
             // Fallback to gtag if available
             if (typeof window !== 'undefined' && window.gtag) {
+                console.log(`📊 Falling back to gtag: ${eventName}`, eventParams);
                 window.gtag('event', eventName, eventParams);
                 return true;
             }
@@ -30,8 +34,10 @@ export const logEvent = (eventName: string, eventParams?: Record<string, string 
             return false;
         }
     } else {
+        console.log('⚠️ No analytics available, trying gtag fallback');
         // Fallback to gtag if available
         if (typeof window !== 'undefined' && window.gtag) {
+            console.log(`📊 Using gtag fallback: ${eventName}`, eventParams);
             window.gtag('event', eventName, eventParams);
             return true;
         }
@@ -42,6 +48,7 @@ export const logEvent = (eventName: string, eventParams?: Record<string, string 
 
 // Utility function to log page views
 export const logPageView = (pageTitle: string, pageLocation: string) => {
+    console.log(`📊 logPageView called with: ${pageTitle} at ${pageLocation}`);
     return logEvent('page_view', {
         page_title: pageTitle,
         page_location: pageLocation

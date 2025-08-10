@@ -1,14 +1,36 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { logPageView } from '@/lib/analytics';
+import { analytics } from '@/lib/firebase';
 
 export default function PageViewTracker() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const [analyticsReady, setAnalyticsReady] = useState(false);
+
+    // Wait for analytics to be ready
+    useEffect(() => {
+        const checkAnalytics = () => {
+            if (analytics) {
+                setAnalyticsReady(true);
+                console.log('✅ Analytics ready, tracking enabled');
+            } else {
+                // Check again in 100ms
+                setTimeout(checkAnalytics, 100);
+            }
+        };
+        
+        checkAnalytics();
+    }, []);
 
     useEffect(() => {
+        if (!analyticsReady) {
+            console.log('⏳ Waiting for analytics to be ready...');
+            return;
+        }
+
         // Get the full URL including search params
         const fullPath = searchParams.toString()
             ? `${pathname}?${searchParams.toString()}`
@@ -46,9 +68,16 @@ export default function PageViewTracker() {
         const pageTitle = getPageTitle(pathname);
 
         // Log the page view
-        logPageView(pageTitle, fullPath);
+        console.log(`📊 Tracking page view: ${pageTitle} (${fullPath})`);
+        const success = logPageView(pageTitle, fullPath);
+        
+        if (success) {
+            console.log('✅ Page view tracked successfully');
+        } else {
+            console.log('❌ Failed to track page view');
+        }
 
-    }, [pathname, searchParams]);
+    }, [pathname, searchParams, analyticsReady]);
 
     // This component doesn't render anything
     return null;

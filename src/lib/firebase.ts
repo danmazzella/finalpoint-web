@@ -32,6 +32,11 @@ export const storage = getStorage(app);
 // Initialize Analytics for Firebase v12+
 let analytics: Analytics | null = null;
 
+// Function to get analytics instance
+export const getAnalyticsInstance = () => {
+    return analytics;
+};
+
 if (typeof window !== 'undefined') {
     // For Firebase v12+, we need to check support and initialize properly
     const initializeAnalytics = async () => {
@@ -39,11 +44,8 @@ if (typeof window !== 'undefined') {
             const supported = await isSupported();
             if (supported && firebaseConfig.measurementId) {
                 analytics = getAnalytics(app);
-
-                // Enable debug mode in development
-                if (process.env.NODE_ENV === 'development') {
-                    // Analytics debug mode enabled silently
-                }
+                console.log('✅ Firebase Analytics initialized successfully');
+                console.log('📊 Measurement ID:', firebaseConfig.measurementId);
             } else {
                 console.warn('⚠️ Analytics not supported or no measurement ID');
             }
