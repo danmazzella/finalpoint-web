@@ -1,25 +1,101 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Logo from '@/components/Logo';
 
+declare global {
+  interface Window {
+    google: {
+      accounts: {
+        id: {
+          initialize: (config: any) => void;
+          renderButton: (element: HTMLElement, options: any) => void;
+          prompt: () => void;
+        };
+      };
+    };
+  }
+}
+
 function LoginForm() {
   const [validationError, setValidationError] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
 
   const [forgotPasswordError, setForgotPasswordError] = useState('');
-  const { login, forgotPassword, isLoading, loginError, loginFormData, setLoginFormData, clearLoginError } = useAuth();
+  const { login, forgotPassword, isLoading, loginError, loginFormData, setLoginFormData, clearLoginError, loginWithGoogle } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
 
   const { email, password } = loginFormData;
+
+  // Google Sign-In functionality
+  useEffect(() => {
+    // Load Google Identity Services script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+          callback: handleGoogleSuccess,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+
+        // Render the Google Sign-In button
+        if (googleButtonRef.current) {
+          window.google.accounts.id.renderButton(googleButtonRef.current, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'signin_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+          });
+        }
+      }
+    };
+    script.onerror = () => {
+      console.error('Failed to load Google Identity Services');
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  const handleGoogleSuccess = async (response: any) => {
+    if (response.credential) {
+      setGoogleLoading(true);
+      setValidationError('');
+
+      try {
+        const result = await loginWithGoogle(response.credential);
+        if (result.success) {
+          router.push(redirectTo);
+        } else {
+          setValidationError(result.error || 'Google Sign-In failed. Please try again.');
+        }
+      } catch (err: any) {
+        setValidationError('Google Sign-In failed. Please try again.');
+      } finally {
+        setGoogleLoading(false);
+      }
+    }
+  };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
@@ -188,8 +264,6 @@ function LoginForm() {
                   </div>
                 )}
 
-
-
                 <div className="flex space-x-3">
                   <button
                     type="submit"
@@ -213,6 +287,25 @@ function LoginForm() {
               </form>
             </div>
           )}
+
+          {/* Divider */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            {/* Google Sign-In Button */}
+            <div className="mt-4">
+              <div ref={googleButtonRef} className="w-full flex justify-center">
+                {/* Google Sign-In button will be rendered here */}
+              </div>
+            </div>
+          </div>
 
           <div className="mt-6">
             <div className="relative">

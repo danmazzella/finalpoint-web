@@ -29,6 +29,7 @@ interface AuthContextType {
   clearSignupError: () => void;
   login: (email: string, password: string) => Promise<AuthResponse>;
   signup: (email: string, password: string, name: string, avatar?: File) => Promise<AuthResponse>;
+  loginWithGoogle: (idToken: string) => Promise<AuthResponse>;
   logout: () => void;
   updateProfile: (name: string) => Promise<boolean>;
   updateAvatar: (avatar: File) => Promise<boolean>;
@@ -200,6 +201,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setSignupError(errorMessage); // Store error in context
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (idToken: string): Promise<AuthResponse> => {
+    try {
+      setIsLoading(true);
+      const response = await authAPI.googleAuth(idToken);
+      if (response.data.success) {
+        const userData = response.data.user;
+        if (userData.avatar) {
+          userData.avatar = userData.avatar.split('/').pop();
+        }
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('token', response.data.token);
+        return { success: true };
+      }
+      return { success: false, error: 'Failed to sign in with Google. Please try again.' };
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      let errorMessage = 'Failed to sign in with Google. Please try again.';
+      if (error?.response?.data?.errors?.length > 0) {
+        errorMessage = error.response.data.errors[0].message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
@@ -382,6 +412,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearSignupError,
     login,
     signup,
+    loginWithGoogle,
     logout,
     updateProfile,
     updateAvatar,
