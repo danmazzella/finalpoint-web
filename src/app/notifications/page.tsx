@@ -14,7 +14,15 @@ export default function NotificationsPage() {
         emailReminders: true,
         emailScoreUpdates: true,
         pushReminders: true,
-        pushScoreUpdates: true
+        pushScoreUpdates: true,
+        emailReminder5Days: true,
+        emailReminder3Days: true,
+        emailReminder1Day: true,
+        pushReminder5Days: true,
+        pushReminder3Days: true,
+        pushReminder1Day: true,
+        emailOther: true,
+        pushOther: true
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -34,11 +42,36 @@ export default function NotificationsPage() {
             if (response.data.success) {
                 // Convert database values (1/0) to proper booleans
                 const rawData = response.data.data;
+                console.log('Raw notification preferences from backend:', rawData);
+
                 setPreferences({
                     emailReminders: Boolean(rawData.emailReminders),
                     emailScoreUpdates: Boolean(rawData.emailScoreUpdates),
                     pushReminders: Boolean(rawData.pushReminders),
-                    pushScoreUpdates: Boolean(rawData.pushScoreUpdates)
+                    pushScoreUpdates: Boolean(rawData.pushScoreUpdates),
+                    emailReminder5Days: Boolean(rawData.emailReminder5Days ?? true),
+                    emailReminder3Days: Boolean(rawData.emailReminder3Days ?? true),
+                    emailReminder1Day: Boolean(rawData.emailReminder1Day ?? true),
+                    pushReminder5Days: Boolean(rawData.pushReminder5Days ?? true),
+                    pushReminder3Days: Boolean(rawData.pushReminder3Days ?? true),
+                    pushReminder1Day: Boolean(rawData.pushReminder1Day ?? true),
+                    emailOther: Boolean(rawData.emailOther ?? true),
+                    pushOther: Boolean(rawData.pushOther ?? true)
+                });
+
+                console.log('Processed notification preferences:', {
+                    emailReminders: Boolean(rawData.emailReminders),
+                    emailScoreUpdates: Boolean(rawData.emailScoreUpdates),
+                    pushReminders: Boolean(rawData.pushReminders),
+                    pushScoreUpdates: Boolean(rawData.pushScoreUpdates),
+                    emailReminder5Days: Boolean(rawData.emailReminder5Days ?? true),
+                    emailReminder3Days: Boolean(rawData.emailReminder3Days ?? true),
+                    emailReminder1Day: Boolean(rawData.emailReminder1Day ?? true),
+                    pushReminder5Days: Boolean(rawData.pushReminder5Days ?? true),
+                    pushReminder3Days: Boolean(rawData.pushReminder3Days ?? true),
+                    pushReminder1Day: Boolean(rawData.pushReminder1Day ?? true),
+                    emailOther: Boolean(rawData.emailOther ?? true),
+                    pushOther: Boolean(rawData.pushOther ?? true)
                 });
             }
         } catch (error) {
@@ -276,6 +309,63 @@ export default function NotificationsPage() {
                                     </button>
                                 </div>
 
+                                {/* 5-Day Reminder */}
+                                <div className="flex items-center justify-between ml-6">
+                                    <div>
+                                        <p className="font-medium text-gray-900">5-Day Reminder</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get reminded 5 days before races
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('emailReminder5Days')}
+                                        disabled={!preferences.emailReminders}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailReminder5Days && preferences.emailReminders ? 'bg-blue-600' : 'bg-gray-200'} ${!preferences.emailReminders ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailReminder5Days && preferences.emailReminders ? 'translate-x-5' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* 3-Day Reminder */}
+                                <div className="flex items-center justify-between ml-6">
+                                    <div>
+                                        <p className="font-medium text-gray-900">3-Day Reminder</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get reminded 3 days before races
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('emailReminder3Days')}
+                                        disabled={!preferences.emailReminders}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailReminder3Days && preferences.emailReminders ? 'bg-blue-600' : 'bg-gray-200'} ${!preferences.emailReminders ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailReminder3Days && preferences.emailReminders ? 'translate-x-5' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* 1-Day Reminder */}
+                                <div className="flex items-center justify-between ml-6">
+                                    <div>
+                                        <p className="font-medium text-gray-900">1-Day Reminder</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get reminded 1 day before races
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('emailReminder1Day')}
+                                        disabled={!preferences.emailReminders}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailReminder1Day && preferences.emailReminders ? 'bg-blue-600' : 'bg-gray-200'} ${!preferences.emailReminders ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailReminder1Day && preferences.emailReminders ? 'translate-x-5' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+                                </div>
+
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="font-medium text-gray-900">Score Updates</p>
@@ -290,6 +380,26 @@ export default function NotificationsPage() {
                                     >
                                         <span
                                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailScoreUpdates ? 'translate-x-5' : 'translate-x-1'
+                                                }`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* Other Notifications */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-medium text-gray-900">Other Notifications</p>
+                                        <p className="text-sm text-gray-500">
+                                            Welcome messages, league invitations, and custom messages
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('emailOther')}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailOther ? 'bg-blue-600' : 'bg-gray-200'
+                                            }`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailOther ? 'translate-x-5' : 'translate-x-1'
                                                 }`}
                                         />
                                     </button>
@@ -382,6 +492,63 @@ export default function NotificationsPage() {
                                     </button>
                                 </div>
 
+                                {/* 5-Day Reminder */}
+                                <div className="flex items-center justify-between ml-6">
+                                    <div>
+                                        <p className="font-medium text-gray-900">5-Day Reminder</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get reminded 5 days before races
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('pushReminder5Days')}
+                                        disabled={!pushSupported || pushPermission !== 'granted'}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushReminder5Days && pushPermission === 'granted' ? 'bg-blue-600' : 'bg-gray-200'} ${!pushSupported || pushPermission !== 'granted' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushReminder5Days && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* 3-Day Reminder */}
+                                <div className="flex items-center justify-between ml-6">
+                                    <div>
+                                        <p className="font-medium text-gray-900">3-Day Reminder</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get reminded 3 days before races
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('pushReminder3Days')}
+                                        disabled={!pushSupported || pushPermission !== 'granted'}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushReminder3Days && pushPermission === 'granted' ? 'bg-blue-600' : 'bg-gray-200'} ${!pushSupported || pushPermission !== 'granted' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushReminder3Days && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* 1-Day Reminder */}
+                                <div className="flex items-center justify-between ml-6">
+                                    <div>
+                                        <p className="font-medium text-gray-900">1-Day Reminder</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get reminded 1 day before races
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('pushReminder1Day')}
+                                        disabled={!pushSupported || pushPermission !== 'granted'}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushReminder1Day && pushPermission === 'granted' ? 'bg-blue-600' : 'bg-gray-200'} ${!pushSupported || pushPermission !== 'granted' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushReminder1Day && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+                                </div>
+
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="font-medium text-gray-900">Score Updates</p>
@@ -397,6 +564,26 @@ export default function NotificationsPage() {
                                     >
                                         <span
                                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushScoreUpdates && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'
+                                                }`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* Other Notifications */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-medium text-gray-900">Other Notifications</p>
+                                        <p className="text-sm text-gray-500">
+                                            Welcome messages, league invitations, and custom messages
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('pushOther')}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushOther ? 'bg-blue-600' : 'bg-gray-200'
+                                            }`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushOther ? 'translate-x-5' : 'translate-x-1'
                                                 }`}
                                         />
                                     </button>

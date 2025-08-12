@@ -130,12 +130,24 @@ apiService.interceptors.response.use(
 
 // API methods
 export const adminAPI = {
-  getDashboardStats: () => apiService.get('/admin/dashboard-stats'),
+  // Admin functions
   getAllUsers: () => apiService.get('/admin/users'),
-  updateUserRole: (userId: number, role: 'user' | 'admin') =>
-    apiService.put(`/admin/users/${userId}/role`, { role }),
   getAllLeagues: () => apiService.get('/admin/leagues'),
+  updateUserRole: (userId: number, role: string) =>
+    apiService.put(`/admin/users/${userId}/role`, { role }),
+  getAdminDashboardStats: () => apiService.get('/admin/dashboard-stats'),
   getPickStatsByWeek: () => apiService.get('/admin/pick-stats-by-week'),
+  getPickLockingStatus: () => apiService.get('/admin/pick-locking-status'),
+
+  // Template data for notifications
+  getAvailableRaces: () => apiService.get('/admin/available-races'),
+  getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
+
+  // Notification testing
+  testNotifications: (userId: number, notificationType: 'email' | 'push' | 'both', customMessage?: string, templateId?: string, templateFields?: Record<string, string>) =>
+    apiService.post('/admin/test-notifications', { userId, notificationType, customMessage, templateId, templateFields }),
+  getUserNotificationHistory: (userId: number) =>
+    apiService.get(`/admin/users/${userId}/notification-history`),
 };
 
 export const authAPI = {
@@ -399,4 +411,12 @@ export interface NotificationPreferences {
   emailScoreUpdates: boolean;
   pushReminders: boolean;
   pushScoreUpdates: boolean;
+  emailReminder5Days: boolean;
+  emailReminder3Days: boolean;
+  emailReminder1Day: boolean;
+  pushReminder5Days: boolean;
+  pushReminder3Days: boolean;
+  pushReminder1Day: boolean;
+  emailOther: boolean;
+  pushOther: boolean;
 } 
