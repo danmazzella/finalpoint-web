@@ -23,6 +23,11 @@ interface CurrentRace {
     status: string;
     circuitName: string;
     country: string;
+    picksLocked: boolean;
+    lockMessage: string;
+    timeUntilLock: number;
+    qualifyingDate?: string;
+    showCountdown?: boolean;
 }
 
 function PicksV2Form() {
@@ -134,6 +139,12 @@ function PicksV2Form() {
     const makePick = async (position: number, driverId: number) => {
         if (!selectedLeague) {
             showToast('Please select a league first', 'error');
+            return;
+        }
+
+        // Check if picks are locked
+        if (currentRace?.picksLocked) {
+            showToast('Picks are currently locked for this race. Picks lock 1 hour before qualifying starts.', 'error');
             return;
         }
 
@@ -262,6 +273,12 @@ function PicksV2Form() {
             return;
         }
 
+        // Check if picks are locked
+        if (currentRace?.picksLocked) {
+            showToast('Picks are currently locked for this race. Picks lock 1 hour before qualifying starts.', 'error');
+            return;
+        }
+
         try {
             setSubmitting(true);
 
@@ -296,28 +313,6 @@ function PicksV2Form() {
     return (
         <div className="min-h-screen bg-gray-50">
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                {/* New Feature Notice */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div className="flex">
-                        <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                        <div className="ml-3">
-                            <h3 className="text-sm font-medium text-blue-800">
-                                New: Multiple Position Picks
-                            </h3>
-                            <div className="mt-2 text-sm text-blue-700">
-                                <p>
-                                    This league now supports picking multiple finishing positions (like P1 and P10).
-                                    Click on a position to select it, then choose a driver for that position.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 {/* League Selection */}
                 <div className="bg-white shadow rounded-lg p-6 mb-6">
                     <div className="flex justify-between items-center mb-4">
@@ -352,12 +347,58 @@ function PicksV2Form() {
                 {currentRace && (
                     <div className="bg-white shadow rounded-lg p-6 mb-6">
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Current Race</h2>
+
+                        {/* Pick Locking Status Banner */}
+                        {currentRace.picksLocked && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-red-800">
+                                            Picks are Locked
+                                        </h3>
+                                        <div className="mt-2 text-sm text-red-700">
+                                            <p>{currentRace.lockMessage}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Pick Locking Countdown */}
+                        {!currentRace.picksLocked && currentRace.showCountdown && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-yellow-800">
+                                            Picks Lock Soon
+                                        </h3>
+                                        <div className="mt-2 text-sm text-yellow-700">
+                                            <p>{currentRace.lockMessage}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-lg font-semibold text-blue-900">{currentRace.raceName}</h3>
                                     <p className="text-sm text-blue-700">{currentRace.circuitName}, {currentRace.country}</p>
                                     <p className="text-sm text-blue-600">Week {currentRace.weekNumber} • {new Date(currentRace.raceDate).toLocaleDateString()}</p>
+                                    {currentRace.qualifyingDate && (
+                                        <p className="text-sm text-blue-600">Qualifying: {new Date(currentRace.qualifyingDate).toLocaleDateString()}</p>
+                                    )}
                                 </div>
                                 <div className="text-right">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -405,6 +446,7 @@ function PicksV2Form() {
                                     const pickedDriverId = userPicks.get(position);
                                     const pickedDriver = drivers.find(d => d.id === pickedDriverId);
                                     const isSelected = selectedPosition === position;
+                                    const isLocked = currentRace?.picksLocked;
 
                                     return (
                                         <div
@@ -414,7 +456,7 @@ function PicksV2Form() {
                                                 : pickedDriver
                                                     ? 'border-green-500 bg-green-50'
                                                     : 'border-gray-200 bg-gray-50 hover:border-gray-300'
-                                                }`}
+                                                } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             onClick={() => handlePositionClick(position)}
                                         >
                                             <div className="flex items-center justify-between mb-2">
@@ -483,7 +525,7 @@ function PicksV2Form() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 {drivers.map((driver) => {
                                     const pickedPosition = getDriverPickedPosition(driver.id);
-                                    const isDisabled = submitting || (selectedPosition === null);
+                                    const isDisabled = submitting || (selectedPosition === null) || currentRace?.picksLocked;
                                     const isAlreadyPicked = pickedPosition && pickedPosition !== selectedPosition;
 
                                     return (
