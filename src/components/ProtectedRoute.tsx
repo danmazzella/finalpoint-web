@@ -14,14 +14,17 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const pathname = usePathname();
 
     // List of public routes that don't require authentication
-    const publicRoutes = ['/login', '/signup', '/join', '/joinleague', '/privacy', '/terms', '/reset-password'];
+    const publicRoutes = ['/login', '/signup', '/privacy', '/terms', '/reset-password'];
+
+    // Special handling for joinleague routes - they should be public
+    const isJoinLeagueRoute = pathname.startsWith('/joinleague');
+
+    // Check if current route is public
+    const isPublicRoute = publicRoutes.some(route => pathname === route) || isJoinLeagueRoute;
 
     useEffect(() => {
         // Don't redirect while loading
         if (isLoading) return;
-
-        // Check if current route is public
-        const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
         // If not authenticated and trying to access a protected route, redirect to login with current path
         if (!user && !isPublicRoute) {
@@ -35,7 +38,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
             const encodedRedirect = encodeURIComponent(redirectPath);
             router.push(`/login?redirect=${encodedRedirect}`);
         }
-    }, [user, isLoading, pathname, router]);
+    }, [user, isLoading, pathname, router, isPublicRoute]);
 
     // Show loading spinner while checking authentication
     if (isLoading) {
@@ -47,7 +50,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
 
     // If not authenticated and on a public route, show the page
-    if (!user && publicRoutes.some(route => pathname.startsWith(route))) {
+    if (!user && isPublicRoute) {
         return <>{children}</>;
     }
 
