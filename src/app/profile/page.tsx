@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Avatar from '@/components/Avatar';
 import PasswordStrengthIndicator, { validatePasswordComplexity } from '@/components/PasswordStrengthIndicator';
+import { authAPI } from '@/lib/api';
 
 export default function ProfilePage() {
   const { user, logout, updateProfile, changePassword, updateAvatar, refreshUserData } = useAuth();
@@ -21,6 +22,10 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Profile avatar state - fetched directly from API
+  const [profileAvatar, setProfileAvatar] = useState<string | null>(null);
+  const [isLoadingAvatar, setIsLoadingAvatar] = useState(true);
+
   // Edit Profile Form State
   const [editName, setEditName] = useState(user?.name || '');
 
@@ -33,6 +38,26 @@ export default function ProfilePage() {
   const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch profile data directly from API when component mounts
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        setIsLoadingAvatar(true);
+        const response = await authAPI.getProfile();
+        if (response.data.success && response.data.data) {
+          setProfileAvatar(response.data.data.avatar);
+          setEditName(response.data.data.name || '');
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      } finally {
+        setIsLoadingAvatar(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
@@ -98,6 +123,13 @@ export default function ProfilePage() {
         // Refresh user data from API to get the updated avatar
         await refreshUserData();
 
+        // Also update the local profile avatar state
+        const response = await authAPI.getProfile();
+
+        if (response.data.success && response.data.data) {
+          setProfileAvatar(response.data.data.avatar);
+        }
+
         setShowAvatarUpload(false);
         setAvatar(null);
         setAvatarPreview(null);
@@ -125,7 +157,14 @@ export default function ProfilePage() {
       if (success) {
         setSuccess('Profile updated successfully!');
         setShowEditProfile(false);
-        setEditName(user?.name || '');
+
+        // Refresh profile data from API
+        const response = await authAPI.getProfile();
+
+        if (response.data.success && response.data.data) {
+          setProfileAvatar(response.data.data.avatar);
+          setEditName(response.data.data.name || '');
+        }
       } else {
         setError('Failed to update profile. Please try again.');
       }
@@ -214,7 +253,7 @@ export default function ProfilePage() {
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Account Information</h3>
               <div className="flex items-center space-x-4 mb-6">
                 <Avatar
-                  src={user?.avatar}
+                  src={profileAvatar || user?.avatar}
                   alt={`${user?.name}'s avatar`}
                   size="lg"
                   className="flex-shrink-0"
@@ -419,7 +458,7 @@ export default function ProfilePage() {
                   </label>
                   <div className="flex items-center space-x-4 mb-4">
                     <Avatar
-                      src={avatarPreview || user?.avatar}
+                      src={avatarPreview || profileAvatar || user?.avatar}
                       alt="Avatar preview"
                       size="lg"
                       className="flex-shrink-0"

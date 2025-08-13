@@ -11,11 +11,13 @@ export default function LeaguesPage() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
-  const [leagues, setLeagues] = useState<League[]>([]);
+  const [myLeagues, setMyLeagues] = useState<League[]>([]);
+  const [publicLeagues, setPublicLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newLeagueName, setNewLeagueName] = useState('');
   const [selectedPositions, setSelectedPositions] = useState<number[]>([]);
+  const [isPublic, setIsPublic] = useState(false);
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -25,9 +27,17 @@ export default function LeaguesPage() {
   const loadLeagues = async () => {
     try {
       setLoading(true);
-      const response = await leaguesAPI.getLeagues();
-      if (response.data.success) {
-        setLeagues(response.data.data);
+      const [myLeaguesResponse, publicLeaguesResponse] = await Promise.all([
+        leaguesAPI.getLeagues(),
+        leaguesAPI.getPublicLeagues()
+      ]);
+
+      if (myLeaguesResponse.data.success) {
+        setMyLeagues(myLeaguesResponse.data.data);
+      }
+
+      if (publicLeaguesResponse.data.success) {
+        setPublicLeagues(publicLeaguesResponse.data.data);
       }
     } catch (error) {
       console.error('Error loading leagues:', error);
@@ -42,11 +52,12 @@ export default function LeaguesPage() {
 
     try {
       setCreating(true);
-      const response = await leaguesAPI.createLeague(newLeagueName.trim(), selectedPositions);
+      const response = await leaguesAPI.createLeague(newLeagueName.trim(), selectedPositions, isPublic);
       if (response.data.success) {
         setShowCreateModal(false);
         setNewLeagueName('');
         setSelectedPositions([]);
+        setIsPublic(false);
         loadLeagues();
       }
     } catch (error) {
@@ -71,6 +82,7 @@ export default function LeaguesPage() {
     setShowCreateModal(false);
     setNewLeagueName('');
     setSelectedPositions([]);
+    setIsPublic(false);
   };
 
   if (loading) {
@@ -82,10 +94,10 @@ export default function LeaguesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+    <div className="bg-gray-50 w-full">
+      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 mb-20">
         <PageTitle
-          title="My Leagues"
+          title="Leagues"
           subtitle="Manage your F1 prediction game"
         >
           <div className="flex items-center space-x-3">
@@ -104,68 +116,143 @@ export default function LeaguesPage() {
           </div>
         </PageTitle>
 
-        {leagues.length === 0 ? (
-          <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No leagues</h3>
-            <p className="mt-1 text-sm text-gray-500">Get started by creating your first league.</p>
-            <div className="mt-6">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Create League
-              </button>
+        {/* My Leagues Section */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">My Leagues</h2>
+            <div className="text-sm text-gray-500">
+              {myLeagues.length} league{myLeagues.length !== 1 ? 's' : ''}
             </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {leagues.map((league) => (
-              <div key={league.id} className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-blue-600 font-medium text-lg">{league.name.charAt(0)}</span>
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-1">
+          {myLeagues.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 mb-4">You haven&apos;t joined any leagues yet.</p>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Create Your First League
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {myLeagues.map((league) => (
+                <div
+                  key={league.id}
+                  className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="px-4 py-5 sm:p-6">
+                    <div className="flex items-center justify-between">
                       <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        Season {league.seasonYear} • {league.memberCount || 1} member{league.memberCount !== 1 ? 's' : ''}
-                        {league.userRole && (
-                          <span className={`ml-2 px-2 py-1 text-xs rounded-full ${league.userRole === 'Owner'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-gray-100 text-gray-800'
-                            }`}>
-                            {league.userRole}
-                          </span>
-                        )}
-                      </p>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${league.isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                        {league.isPublic ? 'Public' : 'Private'}
+                      </span>
                     </div>
-                  </div>
-                  <div className="mt-6 flex space-x-3">
-                    <Link
-                      href={`/leagues/${league.id}?redirect=${encodeURIComponent(redirectTo)}`}
-                      className="flex-1 bg-blue-600 text-white text-center px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
-                    >
-                      View League
-                    </Link>
-                    <Link
-                      href={`/picks?league=${league.id}&redirect=${encodeURIComponent(redirectTo)}`}
-                      className="flex-1 bg-gray-100 text-gray-700 text-center px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200"
-                    >
-                      Make Picks
-                    </Link>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {league.memberCount} member{league.memberCount !== 1 ? 's' : ''} • {league.userRole}
+                    </p>
+                    <div className="mt-4">
+                      <Link
+                        href={`/leagues/${league.id}`}
+                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
+                      >
+                        View League
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Public Leagues Section */}
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Public Leagues</h2>
+            <div className="text-sm text-gray-500">
+              Browse and join public leagues • Limited preview only
+            </div>
           </div>
-        )}
+
+          {publicLeagues.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No public leagues available to join.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {publicLeagues.map((league) => (
+                <div
+                  key={league.id}
+                  className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="px-4 py-5 sm:p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Public
+                      </span>
+                    </div>
+
+                    {/* Limited League Info for Public Leagues */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Members:</span>
+                        <span className="font-medium text-gray-900">{league.memberCount}</span>
+                      </div>
+
+                      {/* Required Positions */}
+                      {league.requiredPositions && league.requiredPositions.length > 0 && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Positions:</span>
+                          <div className="flex space-x-1">
+                            {league.requiredPositions.map((position, index) => (
+                              <span
+                                key={position}
+                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                              >
+                                P{position}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Activity Level Indicator (vague) */}
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Activity Level:</span>
+                        <span className={`font-medium ${(league.lastTwoRaceWeeksActivity || 0) > 15 ? 'text-green-600' :
+                          (league.lastTwoRaceWeeksActivity || 0) > 8 ? 'text-yellow-600' : 'text-gray-500'
+                          }`}>
+                          {(league.lastTwoRaceWeeksActivity || 0) > 15 ? 'Very Active' :
+                            (league.lastTwoRaceWeeksActivity || 0) > 8 ? 'Active' : 'Quiet'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Join Button */}
+                    <div className="mt-4">
+                      <button
+                        onClick={() => {
+                          // Handle joining the league
+                          window.location.href = `/joinleague/${league.joinCode}`;
+                        }}
+                        className="w-full inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200"
+                      >
+                        Join League
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
+
+      {/* Spacer for bottom navigation bar */}
+      <div className="h-20 md:hidden"></div>
 
       {/* Create League Modal */}
       {showCreateModal && (
@@ -188,47 +275,77 @@ export default function LeaguesPage() {
                     required
                   />
                 </div>
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Positions (Max 2)
+                    League Visibility
                   </label>
-                  <p className="text-sm text-gray-500 mb-3">
-                    Choose up to 2 positions that will be scored in this league
+                  <div className="flex items-center space-x-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        checked={!isPublic}
+                        onChange={() => setIsPublic(false)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Private</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        checked={isPublic}
+                        onChange={() => setIsPublic(true)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Public</span>
+                    </label>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {isPublic
+                      ? 'Anyone can discover and join your league'
+                      : 'Only people with the join code can join your league'
+                    }
                   </p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {Array.from({ length: 20 }, (_, i) => i + 1).map((position) => (
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Required Positions
+                  </label>
+                  <div className="grid grid-cols-5 gap-2">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((position) => (
                       <button
                         key={position}
                         type="button"
                         onClick={() => handlePositionToggle(position)}
-                        className={`p-2 rounded-md text-sm font-medium border transition-colors ${selectedPositions.includes(position)
+                        className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors ${selectedPositions.includes(position)
                           ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-                          } ${selectedPositions.length >= 2 && !selectedPositions.includes(position) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={selectedPositions.length >= 2 && !selectedPositions.includes(position)}
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                          }`}
                       >
                         P{position}
                       </button>
                     ))}
                   </div>
-                  {selectedPositions.length > 0 && (
-                    <p className="text-sm text-gray-600 mt-2">
-                      Selected: {selectedPositions.map(p => `P${p}`).join(', ')}
-                    </p>
-                  )}
+                  <p className="mt-1 text-xs text-gray-500">
+                    Select 1-2 positions that league members must predict
+                  </p>
                 </div>
+
                 <div className="flex justify-end space-x-3">
                   <button
                     type="button"
                     onClick={resetModal}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    disabled={creating}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    disabled={creating || !newLeagueName.trim() || selectedPositions.length === 0}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {creating ? 'Creating...' : 'Create League'}
                   </button>

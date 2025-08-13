@@ -89,10 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.data.success) {
         const userData = response.data.user;
-        // Extract filename from avatar URL if present
-        if (userData.avatar) {
-          userData.avatar = userData.avatar.split('/').pop();
-        }
+        // Don't strip the avatar path - the backend returns the correct format
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('token', response.data.token);
@@ -149,10 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (response.data.success) {
           const userData = response.data.user;
-          // Extract filename from avatar URL if present
-          if (userData.avatar) {
-            userData.avatar = userData.avatar.split('/').pop();
-          }
+          // Don't strip the avatar path - the backend returns the correct format
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.setItem('token', response.data.token);
@@ -213,9 +207,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authAPI.googleAuth(idToken);
       if (response.data.success) {
         const userData = response.data.user;
-        if (userData.avatar) {
-          userData.avatar = userData.avatar.split('/').pop();
-        }
+        // Don't strip the avatar path - the backend returns the correct format
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('token', response.data.token);
@@ -270,12 +262,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const response = await authAPI.updateAvatar(formData);
       if (response.data.success && user) {
-        // Extract filename from the backend response URL
-        // Backend returns "/uploads/avatars/filename.jpg", we want just "filename.jpg"
+        // Don't strip the avatar path - the backend returns the correct format
         const avatarUrl = response.data.avatar;
-        const filename = avatarUrl ? avatarUrl.split('/').pop() : null;
-
-        const updatedUser = { ...user, avatar: filename };
+        const updatedUser = { ...user, avatar: avatarUrl };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
         return true;
@@ -311,9 +300,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authAPI.getProfile();
       if (response.data.success && response.data.data) {
         const userData = response.data.data;
-        if (userData.avatar) {
-          userData.avatar = userData.avatar.split('/').pop();
-        }
+        // Don't strip the avatar path - the backend returns the correct format
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         return true;

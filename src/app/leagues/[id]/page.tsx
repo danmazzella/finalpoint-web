@@ -174,6 +174,28 @@ export default function LeagueDetailPage() {
     }
   };
 
+  const updateLeagueVisibility = async (isPublic: boolean) => {
+    if (!league) return;
+
+    try {
+      setUpdating(true);
+      const response = await leaguesAPI.updateLeague(league.id, league.name, isPublic);
+      if (response.data.success) {
+        showToast('League visibility updated successfully!', 'success');
+        setLeague({ ...league, isPublic });
+        setShowSettings(false);
+        setEditingName('');
+        // Refresh recent activity to show the visibility change
+        loadRecentActivity(parseInt(leagueId));
+      }
+    } catch (error: any) {
+      console.error('Error updating league visibility:', error);
+      showToast(error.response?.data?.message || 'Failed to update league visibility. Please try again.', 'error');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const deleteLeague = async () => {
     if (!league) return;
 
@@ -439,9 +461,10 @@ export default function LeagueDetailPage() {
                               activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'bg-purple-100' :
                                 activity.activityType === 'member_left' ? 'bg-red-100' :
                                   activity.activityType === 'league_name_changed' ? 'bg-indigo-100' :
-                                    activity.activityType === 'league_created' ? 'bg-yellow-100' :
-                                      activity.activityType === 'race_result_processed' ? 'bg-orange-100' :
-                                        'bg-gray-100'
+                                    activity.activityType === 'league_visibility_changed' ? 'bg-blue-100' :
+                                      activity.activityType === 'league_created' ? 'bg-yellow-100' :
+                                        activity.activityType === 'race_result_processed' ? 'bg-orange-100' :
+                                          'bg-gray-100'
                           }`}>
                           <svg className={`h-4 w-4 ${activity.activityType === 'pick_created' ? 'text-green-600' :
                             activity.activityType === 'pick_changed' ? 'text-blue-600' :
@@ -449,9 +472,10 @@ export default function LeagueDetailPage() {
                                 activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'text-purple-600' :
                                   activity.activityType === 'member_left' ? 'text-red-600' :
                                     activity.activityType === 'league_name_changed' ? 'text-indigo-600' :
-                                      activity.activityType === 'league_created' ? 'text-yellow-600' :
-                                        activity.activityType === 'race_result_processed' ? 'text-orange-600' :
-                                          'text-gray-600'
+                                      activity.activityType === 'league_visibility_changed' ? 'text-blue-600' :
+                                        activity.activityType === 'league_created' ? 'text-yellow-600' :
+                                          activity.activityType === 'race_result_processed' ? 'text-orange-600' :
+                                            'text-gray-600'
                             }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             {activity.activityType === 'pick_created' ? (
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -464,9 +488,11 @@ export default function LeagueDetailPage() {
                             ) : activity.activityType === 'member_left' ? (
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             ) : activity.activityType === 'league_created' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             ) : activity.activityType === 'league_name_changed' ? (
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            ) : activity.activityType === 'league_visibility_changed' ? (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             ) : activity.activityType === 'race_result_processed' ? (
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                             ) : (
@@ -489,6 +515,8 @@ export default function LeagueDetailPage() {
                             `${activity.userName} left the league`
                           ) : activity.activityType === 'league_name_changed' ? (
                             `${activity.userName} changed the league name`
+                          ) : activity.activityType === 'league_visibility_changed' ? (
+                            `${activity.userName} changed the league visibility`
                           ) : activity.activityType === 'league_created' ? (
                             `${activity.userName} created the league ${activity.leagueName}`
                           ) : activity.activityType === 'race_result_processed' ? (
@@ -514,6 +542,8 @@ export default function LeagueDetailPage() {
                             `Goodbye!`
                           ) : activity.activityType === 'league_name_changed' ? (
                             `Changed from "${activity.previousDriverName}" to "${activity.driverName}"`
+                          ) : activity.activityType === 'league_visibility_changed' ? (
+                            `Changed league visibility from "${activity.previousDriverName}"`
                           ) : activity.activityType === 'league_created' ? (
                             `League created successfully`
                           ) : (
@@ -574,6 +604,41 @@ export default function LeagueDetailPage() {
                     >
                       {updating ? 'Updating...' : 'Update Name'}
                     </button>
+                  </div>
+
+                  {/* League Visibility Toggle - Owner Only */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      League Visibility
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="visibility"
+                          checked={!league?.isPublic}
+                          onChange={() => updateLeagueVisibility(false)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Private</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="visibility"
+                          checked={league?.isPublic}
+                          onChange={() => updateLeagueVisibility(true)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Public</span>
+                      </label>
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500">
+                      {league?.isPublic
+                        ? 'Public leagues can be discovered and joined by any user on the platform.'
+                        : 'Private leagues can only be joined using the join code.'
+                      }
+                    </p>
                   </div>
 
                   {/* Delete League - Owner Only */}

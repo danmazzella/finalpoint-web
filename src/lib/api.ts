@@ -182,7 +182,9 @@ export const authAPI = {
 
 export const leaguesAPI = {
   getLeagues: () => apiService.get('/leagues/get'),
-  createLeague: (name: string, positions: number[] = []) => apiService.post('/leagues/create', { name, positions }),
+  getPublicLeagues: () => apiService.get('/leagues/public'),
+  createLeague: (name: string, positions: number[] = [], isPublic: boolean = false) =>
+    apiService.post('/leagues/create', { name, positions, isPublic }),
   getLeague: (leagueId: number) => apiService.get(`/leagues/get/${leagueId}`),
   joinLeague: (leagueId: number) => apiService.post(`/leagues/${leagueId}/join`),
   joinByCode: (joinCode: string) => apiService.post('/leagues/join-by-code', { joinCode }),
@@ -191,7 +193,7 @@ export const leaguesAPI = {
   getLeagueStandings: (leagueId: number) => apiService.get(`/leagues/${leagueId}/standings`),
   getDetailedLeagueStandings: (leagueId: number) => apiService.get(`/leagues/${leagueId}/standings/detailed`),
   getLeagueStats: (leagueId: number) => apiService.get(`/leagues/${leagueId}/stats`),
-  updateLeague: (leagueId: number, name: string) => apiService.put(`/leagues/${leagueId}`, { name }),
+  updateLeague: (leagueId: number, name: string, isPublic?: boolean) => apiService.put(`/leagues/${leagueId}`, { name, isPublic }),
   deleteLeague: (leagueId: number) => apiService.delete(`/leagues/${leagueId}`),
   leaveLeague: (leagueId: number) => apiService.post(`/leagues/${leagueId}/leave`),
 };
@@ -292,6 +294,14 @@ export interface League {
   isMember?: boolean;
   userRole?: 'Owner' | 'Member';
   requiredPositions?: number[];
+  isPublic?: boolean;
+  seasonActivity?: number;
+  lastTwoRaceWeeksActivity?: number;
+  seasonPicks?: number;
+  lastTwoRaceWeeksPicks?: number;
+  totalPicks?: number;
+  totalActivity?: number;
+  activityScore?: number;
 }
 
 export interface Driver {
