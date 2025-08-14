@@ -46,6 +46,21 @@ export default function LeaguesPage() {
     }
   };
 
+  const hasPickForPosition = (league: League, position: number): boolean => {
+    if (!league.positionStatus || !league.positionStatus.positions) {
+      return false;
+    }
+    const positionStatus = league.positionStatus.positions.find(p => p.position === position);
+    return positionStatus ? positionStatus.hasPick : false;
+  };
+
+  const getPositionBadgeClass = (league: League, position: number): string => {
+    const hasPick = hasPickForPosition(league, position);
+    return hasPick
+      ? 'inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300'
+      : 'inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300';
+  };
+
   const createLeague = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newLeagueName.trim() || selectedPositions.length === 0) return;
@@ -152,6 +167,26 @@ export default function LeaguesPage() {
                     <p className="mt-1 text-sm text-gray-500">
                       {league.memberCount} member{league.memberCount !== 1 ? 's' : ''} • {league.userRole}
                     </p>
+
+                    {/* Required Positions with Status */}
+                    {league.requiredPositions && league.requiredPositions.length > 0 && (
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-gray-500">Positions:</span>
+                        </div>
+                        <div className="flex space-x-1">
+                          {league.requiredPositions.map((position, index) => (
+                            <span
+                              key={position}
+                              className={getPositionBadgeClass(league, position)}
+                            >
+                              P{position}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="mt-4">
                       <Link
                         href={`/leagues/${league.id}`}
@@ -210,7 +245,7 @@ export default function LeaguesPage() {
                             {league.requiredPositions.map((position, index) => (
                               <span
                                 key={position}
-                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-white text-gray-700 border border-gray-300"
                               >
                                 P{position}
                               </span>

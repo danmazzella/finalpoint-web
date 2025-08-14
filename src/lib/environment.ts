@@ -2,6 +2,10 @@
 
 // Helper function to check if Google Sign In should be shown
 export const shouldShowGoogleSignIn = (): boolean => {
+    // TEMPORARY: Enable Google Sign-In in production for testing
+    // TODO: Revert this change after testing is complete
+    return true;
+
     // Check for environment variable first
     if (process.env.NEXT_PUBLIC_SHOW_GOOGLE_SIGNIN) {
         return process.env.NEXT_PUBLIC_SHOW_GOOGLE_SIGNIN === 'true';
