@@ -15,6 +15,7 @@ import {
 } from '@/lib/api';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
 
 interface CurrentRace {
     weekNumber: number;
@@ -342,6 +343,12 @@ function PicksV2Form() {
                         ))}
                     </select>
                 </div>
+
+                {/* Notification Prompt */}
+                <ComprehensiveNotificationPrompt
+                    currentPage="picks"
+                    leagues={leagues}
+                />
 
                 {/* Current Race Information */}
                 {currentRace && (

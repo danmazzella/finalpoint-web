@@ -6,6 +6,7 @@ import { leaguesAPI, authAPI, League } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
 import { logPageView } from '@/lib/analytics';
+import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
 
 interface UserStats {
   totalPicks: number;
@@ -99,6 +100,12 @@ export default function DashboardPage() {
         <PageTitle
           title="Dashboard"
           subtitle="Welcome to your F1 prediction game"
+        />
+
+        {/* Notification Prompt */}
+        <ComprehensiveNotificationPrompt
+          currentPage="dashboard"
+          leagues={leagues}
         />
 
         {/* Quick Actions */}

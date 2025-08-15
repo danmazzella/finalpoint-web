@@ -7,6 +7,7 @@ import { leaguesAPI, activityAPI, League, f1racesAPI } from '@/lib/api';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import PageTitle from '@/components/PageTitle';
+import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
 
 interface CurrentRace {
   weekNumber: number;
@@ -278,6 +279,12 @@ export default function LeagueDetailPage() {
         <PageTitle
           title={league.name}
           subtitle={`Season ${league.seasonYear}`}
+        />
+
+        {/* Notification Prompt */}
+        <ComprehensiveNotificationPrompt
+          currentPage="league"
+          leagues={[league]}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
