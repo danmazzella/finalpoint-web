@@ -269,6 +269,40 @@ export default function ScoringPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile App Download */}
+                <div className="mt-8">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                        <div className="text-center">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Download FinalPoint Mobile</h3>
+                            <p className="text-gray-600 mb-4">Get the best experience with our mobile app</p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <a
+                                    href="https://apps.apple.com/us/app/finalpoint/id6749827283"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center justify-center"
+                                >
+                                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                                    </svg>
+                                    App Store
+                                </a>
+                                <a
+                                    href="https://play.google.com/store/apps/details?id=com.finalpoint.mobile&hl=en_US"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors inline-flex items-center justify-center"
+                                >
+                                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 -960 960 960">
+                                        <path d="M40-240q9-107 65.5-197T256-580l-74-128q-6-9-3-19t13-15q8-5 18-2t16 12l74 128q86-36 180-36t180 36l74-128q6-9 16-12t18 2q10 5 13 15t-3 19l-74 128q94 53 150.5 143T920-240H40Zm240-110q21 0 35.5-14.5T330-400q0-21-14.5-35.5T280-450q-21 0-35.5 14.5T230-400q0 21 14.5 35.5T280-350Zm400 0q21 0 35.5-14.5T730-400q0-21-14.5-35.5T680-450q-21 0-35.5 14.5T630-400q0 21 14.5 35.5T680-350Z" />
+                                    </svg>
+                                    Google Play
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </>
     );

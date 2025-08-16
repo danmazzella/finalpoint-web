@@ -33,8 +33,42 @@ Located at `src/utils/platformDetection.ts`, this utility provides:
 
 ### App Store Links
 
-- **iOS**: `https://apps.apple.com/app/finalpoint/id1234567890` (Replace with actual App Store ID)
-- **Android**: `https://play.google.com/store/apps/details?id=com.finalpoint.mobile`
+- **iOS**: `https://apps.apple.com/us/app/finalpoint/id6749827283`
+- **Android**: `https://play.google.com/store/apps/details?id=com.finalpoint.mobile&hl=en_US`
+
+## Mobile App Integration
+
+### MobileAppDownload Component
+
+A reusable component (`src/components/MobileAppDownload.tsx`) that automatically detects the user's platform and displays appropriate download buttons. Available in three variants:
+
+- **`default`**: Full-width card with app icon and download button
+- **`compact`**: Inline text with download link
+- **`banner`**: Prominent banner with gradient background
+
+### Integration Points
+
+The mobile app download component has been integrated throughout the webapp:
+
+1. **Footer** (`src/components/Footer.tsx`): Compact variant below the logo
+2. **Info Page** (`/info`): Banner variant below the main CTA buttons
+3. **Scoring Page** (`/scoring`): Default variant at the bottom of the content
+4. **Info Page Footer**: Direct app store links in the footer grid
+
+### Usage
+
+```typescript
+import MobileAppDownload from '@/components/MobileAppDownload';
+
+// Default variant
+<MobileAppDownload />
+
+// Compact variant for footers
+<MobileAppDownload variant="compact" />
+
+// Banner variant for prominent placement
+<MobileAppDownload variant="banner" />
+```
 
 ## Usage
 
@@ -66,7 +100,7 @@ const appStoreLink = getAppStoreLink();
 
 ### Updating App Store Links
 
-1. **iOS**: Replace the placeholder App Store ID in `platformDetection.ts`
+1. **iOS**: Update the App Store ID in `platformDetection.ts`
 2. **Android**: The package name is already correct (`com.finalpoint.mobile`)
 
 ### Styling
@@ -103,3 +137,5 @@ Adjust the redirect delay by modifying the `setTimeout` value in the `useEffect`
 - Implement deep linking for users who already have the app installed
 - Add A/B testing for different redirect strategies
 - Include app store ratings and reviews information
+- Expand mobile app integration to more pages
+- Add push notification prompts for mobile users
