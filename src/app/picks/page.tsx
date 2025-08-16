@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
+import DriverSelectionModal from '@/components/DriverSelectionModal';
 
 interface CurrentRace {
     weekNumber: number;
@@ -48,9 +49,22 @@ function PicksV2Form() {
     const [userPicks, setUserPicks] = useState<Map<number, number>>(new Map()); // position -> driverId
     const [existingPicks, setExistingPicks] = useState<UserPickV2[]>([]);
     const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+    const [showDriverModal, setShowDriverModal] = useState(false);
+    const [modalPosition, setModalPosition] = useState<number>(0);
 
     useEffect(() => {
         loadData();
+
+        // Check if device is mobile
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     const loadData = async () => {
@@ -238,7 +252,14 @@ function PicksV2Form() {
 
     // Handle position selection
     const handlePositionClick = (position: number) => {
-        setSelectedPosition(position);
+        if (isMobile) {
+            // On mobile, show modal instead of setting selected position
+            setModalPosition(position);
+            setShowDriverModal(true);
+        } else {
+            // On desktop, use existing behavior
+            setSelectedPosition(position);
+        }
     };
 
     // Handle driver selection for selected position
@@ -265,6 +286,32 @@ function PicksV2Form() {
         // Make the pick for the selected position
         makePick(selectedPosition, driver.id);
         setSelectedPosition(null);
+    };
+
+    // Handle driver selection from modal (mobile)
+    const handleModalDriverSelect = (driver: Driver) => {
+        const pickedPosition = getDriverPickedPosition(driver.id);
+
+        // Check if this driver is already picked for a different position
+        if (pickedPosition && pickedPosition !== modalPosition) {
+            showToast(`${driver.name} is already picked for ${getPositionLabel(pickedPosition)}. Please select a different driver.`, 'error');
+            return;
+        }
+
+        // Check if this driver is already picked for the current position
+        if (pickedPosition === modalPosition) {
+            showToast(`${driver.name} is already picked for ${getPositionLabel(modalPosition)}.`, 'error');
+            return;
+        }
+
+        // Make the pick for the selected position
+        makePick(modalPosition, driver.id);
+        setShowDriverModal(false);
+    };
+
+    const closeDriverModal = () => {
+        setShowDriverModal(false);
+        setModalPosition(0);
     };
 
     // Remove pick for a position
@@ -489,7 +536,12 @@ function PicksV2Form() {
                                                     <p className="text-gray-500">{pickedDriver.team}</p>
                                                 </div>
                                             ) : (
-                                                <p className="text-sm text-gray-500">Click to select driver</p>
+                                                <div className="text-sm">
+                                                    <p className="text-gray-500">Click to select driver</p>
+                                                    {isMobile && (
+                                                        <p className="text-xs text-blue-600 mt-1">Tap to open driver selection</p>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     );
@@ -520,55 +572,70 @@ function PicksV2Form() {
                             )}
                         </div>
 
-                        {/* Drivers Grid */}
-                        <div className="bg-white shadow rounded-lg p-6">
-                            <h2 className="text-lg font-medium text-gray-900 mb-4">Select Drivers</h2>
-                            <p className="text-sm text-gray-600 mb-4">
-                                {selectedPosition
-                                    ? `Click on a driver to assign them to ${getPositionLabel(selectedPosition)}`
-                                    : 'Click on a position above to start selecting drivers'
-                                }
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {drivers.map((driver) => {
-                                    const pickedPosition = getDriverPickedPosition(driver.id);
-                                    const isDisabled = submitting || (selectedPosition === null) || currentRace?.picksLocked;
-                                    const isAlreadyPicked = pickedPosition && pickedPosition !== selectedPosition;
+                        {/* Drivers Grid - Hidden on Mobile */}
+                        {!isMobile && (
+                            <div className="bg-white shadow rounded-lg p-6">
+                                <h2 className="text-lg font-medium text-gray-900 mb-4">Select Drivers</h2>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    {selectedPosition
+                                        ? `Click on a driver to assign them to ${getPositionLabel(selectedPosition)}`
+                                        : 'Click on a position above to start selecting drivers'
+                                    }
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    {drivers.map((driver) => {
+                                        const pickedPosition = getDriverPickedPosition(driver.id);
+                                        const isDisabled = submitting || (selectedPosition === null) || currentRace?.picksLocked;
+                                        const isAlreadyPicked = pickedPosition && pickedPosition !== selectedPosition;
 
-                                    return (
-                                        <button
-                                            key={driver.id}
-                                            onClick={() => handleDriverClick(driver)}
-                                            disabled={isDisabled}
-                                            className={`p-4 border rounded-lg text-left transition-colors ${pickedPosition
-                                                ? pickedPosition === selectedPosition
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-green-500 bg-green-50'
-                                                : isAlreadyPicked
-                                                    ? 'border-gray-300 bg-gray-100 opacity-50'
-                                                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                                                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        >
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm font-medium text-gray-500">#{driver.driverNumber}</span>
-                                                <span className="text-xs text-gray-400">{driver.country}</span>
-                                            </div>
-                                            <h3 className="font-medium text-gray-900 mb-1">{driver.name}</h3>
-                                            <p className="text-sm text-gray-500">{driver.team}</p>
-                                            {pickedPosition && (
-                                                <div className="mt-2">
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        {getPositionLabel(pickedPosition)}
-                                                    </span>
+                                        return (
+                                            <button
+                                                key={driver.id}
+                                                onClick={() => handleDriverClick(driver)}
+                                                disabled={isDisabled}
+                                                className={`p-4 border rounded-lg text-left transition-colors ${pickedPosition
+                                                    ? pickedPosition === selectedPosition
+                                                        ? 'border-blue-500 bg-blue-50'
+                                                        : 'border-green-500 bg-green-50'
+                                                    : isAlreadyPicked
+                                                        ? 'border-gray-300 bg-gray-100 opacity-50'
+                                                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                                                    } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-sm font-medium text-gray-500">#{driver.driverNumber}</span>
+                                                    <span className="text-xs text-gray-400">{driver.country}</span>
                                                 </div>
-                                            )}
-                                        </button>
-                                    );
-                                })}
+                                                <h3 className="font-medium text-gray-900 mb-1">{driver.name}</h3>
+                                                <p className="text-sm text-gray-500">{driver.team}</p>
+                                                {pickedPosition && (
+                                                    <div className="mt-2">
+                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            {getPositionLabel(pickedPosition)}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </>
                 )}
+
+                {/* Driver Selection Modal for Mobile */}
+                <DriverSelectionModal
+                    isOpen={showDriverModal}
+                    onClose={closeDriverModal}
+                    position={modalPosition}
+                    drivers={drivers}
+                    selectedDriverId={modalPosition ? userPicks.get(modalPosition) : undefined}
+                    onDriverSelect={handleModalDriverSelect}
+                    disabled={currentRace?.picksLocked}
+                    submitting={submitting}
+                    userPicks={userPicks}
+                />
             </main>
         </div>
     );
