@@ -50,22 +50,23 @@ export default function ScoringPage() {
                                 Points are calculated based on how close your predictions are to the actual race results.
                             </p>
                             <p className="text-gray-700">
-                                The system supports two different game modes, each with their own scoring approach.
+                                All leagues now support multiple position predictions, allowing you to pick up to 2 different finishing positions.
                             </p>
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-900 mb-4">📊 Version 1: P10 Only (Legacy Mode)</h2>
+                            <h2 className="text-2xl font-semibold text-gray-900 mb-4">🏆 Multiple Position Scoring System</h2>
                             <p className="text-gray-700 mb-4">
-                                In this mode, you predict which driver will finish in <strong>10th position (P10)</strong>.
-                                Points are awarded based on how close your prediction is to the actual P10 finisher.
+                                In this system, you can predict drivers for different finishing positions (e.g., P1 and P10).
+                                Points are awarded based on how close your prediction is to the actual finishing position.
+                                You get points for each position you predict, so your total score is the sum of all position scores.
                             </p>
 
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
                                 <h3 className="text-lg font-semibold text-blue-900 mb-4">Scoring Breakdown</h3>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="font-medium text-gray-900">Perfect pick (P10)</span>
+                                        <span className="font-medium text-gray-900">Perfect pick</span>
                                         <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">10 points</span>
                                     </div>
                                     <div className="flex items-center justify-between">
@@ -77,15 +78,19 @@ export default function ScoringPage() {
                                         <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">5 points</span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="font-medium text-gray-900">3-5 positions off</span>
+                                        <span className="font-medium text-gray-900">3 positions off</span>
                                         <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">3 points</span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="font-medium text-gray-900">6-10 positions off</span>
+                                        <span className="font-medium text-gray-900">4 positions off</span>
+                                        <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">2 points</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-medium text-gray-900">5 positions off</span>
                                         <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">1 point</span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="font-medium text-gray-900">More than 10 positions off</span>
+                                        <span className="font-medium text-gray-900">More than 5 positions off</span>
                                         <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">0 points</span>
                                     </div>
                                 </div>
@@ -94,60 +99,20 @@ export default function ScoringPage() {
                             <h3 className="text-xl font-semibold text-gray-800 mb-3">Example Scenarios</h3>
                             <div className="space-y-3 text-sm">
                                 <div className="bg-gray-50 p-4 rounded-lg">
-                                    <p className="font-medium text-gray-900">Scenario 1: Perfect Prediction</p>
-                                    <p className="text-gray-700">You pick Max Verstappen for P10, and he finishes P10 → <strong>10 points</strong></p>
+                                    <p className="font-medium text-gray-900">Scenario 1: Perfect Predictions</p>
+                                    <p className="text-gray-700">You pick Max Verstappen for P1 (he finishes P1) and Lewis Hamilton for P10 (he finishes P10) → <strong>20 points total</strong> (10 + 10)</p>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
-                                    <p className="font-medium text-gray-900">Scenario 2: Close Call</p>
-                                    <p className="text-gray-700">You pick Lewis Hamilton for P10, but he finishes P9 → <strong>7 points</strong> (1 position off)</p>
+                                    <p className="font-medium text-gray-900">Scenario 2: Mixed Results</p>
+                                    <p className="text-gray-700">You pick Charles Leclerc for P1 (he finishes P2) and Lando Norris for P10 (he finishes P8) → <strong>9 points total</strong> (7 + 2)</p>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
-                                    <p className="font-medium text-gray-900">Scenario 3: Decent Guess</p>
-                                    <p className="text-gray-700">You pick Charles Leclerc for P10, but he finishes P12 → <strong>3 points</strong> (2 positions off)</p>
+                                    <p className="font-medium text-gray-900">Scenario 3: Close Calls</p>
+                                    <p className="text-gray-700">You pick Sergio Perez for P1 (he finishes P2) and Fernando Alonso for P10 (he finishes P11) → <strong>14 points total</strong> (7 + 7)</p>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
-                                    <p className="font-medium text-gray-900">Scenario 4: Way Off</p>
-                                    <p className="text-gray-700">You pick Zhou Guanyu for P10, but he finishes P20 → <strong>1 point</strong> (10 positions off)</p>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-900 mb-4">🏆 Version 2: Multiple Positions (Advanced Mode)</h2>
-                            <p className="text-gray-700 mb-4">
-                                In this advanced mode, leagues can require predictions for multiple positions (e.g., P1, P5, P10).
-                                This creates more strategic depth and variety in the game.
-                            </p>
-
-                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
-                                <h3 className="text-lg font-semibold text-purple-900 mb-4">Scoring Breakdown</h3>
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-medium text-gray-900">Perfect pick</span>
-                                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">10 points</span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-medium text-gray-900">Incorrect pick</span>
-                                        <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">0 points</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h3 className="text-xl font-semibold text-gray-800 mb-3">Key Differences</h3>
-                            <ul className="list-disc pl-6 mb-4 text-gray-700">
-                                <li><strong>Binary scoring:</strong> You either get 10 points for a perfect prediction or 0 points for any incorrect prediction</li>
-                                <li><strong>Multiple positions:</strong> Predictions are required for multiple finishing positions (e.g., P1 + P10, P1 + P5 + P10)</li>
-                                <li><strong>Total score:</strong> Your final score is the sum of all position scores</li>
-                                <li><strong>Strategic depth:</strong> Requires more strategic thinking and knowledge of the sport</li>
-                            </ul>
-
-                            <h3 className="text-xl font-semibold text-gray-800 mb-3">Example Configuration</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <p className="font-medium text-gray-900 mb-2">League Setup: P1 + P10</p>
-                                <div className="space-y-2 text-sm">
-                                    <p className="text-gray-700">• You pick Max Verstappen for P1 (he finishes P1) → <strong>10 points</strong></p>
-                                    <p className="text-gray-700">• You pick Lewis Hamilton for P10 (he finishes P9) → <strong>0 points</strong></p>
-                                    <p className="text-gray-700">• <strong>Total score: 10 points</strong></p>
+                                    <p className="font-medium text-gray-900">Scenario 4: One Great, One Off</p>
+                                    <p className="text-gray-700">You pick George Russell for P1 (he finishes P1) and Zhou Guanyu for P10 (he finishes P15) → <strong>10 points total</strong> (10 + 0)</p>
                                 </div>
                             </div>
                         </section>
@@ -167,16 +132,23 @@ export default function ScoringPage() {
 
                             <h3 className="text-xl font-semibold text-gray-800 mb-3">Scoring Logic</h3>
                             <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                                <p className="text-gray-700 mb-2">For Version 1 (P10 only):</p>
+                                <p className="text-gray-700 mb-2">For each position you predict:</p>
                                 <ul className="list-disc pl-6 text-sm text-gray-700">
                                     <li>If positionDifference = 0 → 10 points (perfect)</li>
                                     <li>If positionDifference = 1 → 7 points</li>
                                     <li>If positionDifference = 2 → 5 points</li>
-                                    <li>If positionDifference ≤ 5 → 3 points</li>
-                                    <li>If positionDifference ≤ 10 → 1 point</li>
-                                    <li>If positionDifference &gt; 10 → 0 points</li>
+                                    <li>If positionDifference = 3 → 3 points</li>
+                                    <li>If positionDifference = 4 → 2 points</li>
+                                    <li>If positionDifference = 5 → 1 point</li>
+                                    <li>If positionDifference &gt; 5 → 0 points</li>
                                 </ul>
                             </div>
+
+                            <h3 className="text-xl font-semibold text-gray-800 mb-3">Total Score Calculation</h3>
+                            <p className="text-gray-700 mb-4">
+                                Your total score for a race is the sum of points earned for each position you predicted.
+                                If you predict 2 positions, you can earn up to 20 points per race.
+                            </p>
 
                             <h3 className="text-xl font-semibold text-gray-800 mb-3">Race Results</h3>
                             <p className="text-gray-700 mb-4">
@@ -190,24 +162,34 @@ export default function ScoringPage() {
 
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="bg-blue-50 p-6 rounded-lg">
-                                    <h3 className="text-lg font-semibold text-blue-900 mb-3">For P10 Predictions</h3>
+                                    <h3 className="text-lg font-semibold text-blue-900 mb-3">For P1 Predictions</h3>
                                     <ul className="space-y-2 text-sm text-blue-800">
-                                        <li>• Consider midfield teams (Alpine, Aston Martin, McLaren)</li>
-                                        <li>• Look at qualifying performance trends</li>
-                                        <li>• Consider track characteristics</li>
+                                        <li>• Focus on top teams (Red Bull, Mercedes, Ferrari)</li>
+                                        <li>• Consider qualifying performance trends</li>
                                         <li>• Watch for driver form and consistency</li>
+                                        <li>• Track characteristics matter significantly</li>
                                     </ul>
                                 </div>
 
                                 <div className="bg-purple-50 p-6 rounded-lg">
-                                    <h3 className="text-lg font-semibold text-purple-900 mb-3">For Multiple Positions</h3>
+                                    <h3 className="text-lg font-semibold text-purple-900 mb-3">For Lower Position Predictions</h3>
                                     <ul className="space-y-2 text-sm text-purple-800">
-                                        <li>• P1: Usually Red Bull, Mercedes, or Ferrari</li>
-                                        <li>• P5: Often midfield leaders</li>
-                                        <li>• P10: Midfield to backmarker teams</li>
-                                        <li>• Consider track-specific performance</li>
+                                        <li>• P5-P10: Often midfield teams (Alpine, Aston Martin, McLaren)</li>
+                                        <li>• P10-P15: Midfield to backmarker teams</li>
+                                        <li>• Consider qualifying performance trends</li>
+                                        <li>• Watch for driver form and consistency</li>
                                     </ul>
                                 </div>
+                            </div>
+
+                            <div className="bg-green-50 p-6 rounded-lg mt-6">
+                                <h3 className="text-lg font-semibold text-green-900 mb-3">Multiple Position Strategy</h3>
+                                <ul className="space-y-2 text-sm text-green-800">
+                                    <li>• <strong>Diversify your picks:</strong> Don't pick both drivers from the same team</li>
+                                    <li>• <strong>Consider track characteristics:</strong> Some tracks favor certain driving styles</li>
+                                    <li>• <strong>Watch qualifying:</strong> Often indicates race pace potential</li>
+                                    <li>• <strong>Balance risk:</strong> Mix safe picks with higher-risk, higher-reward choices</li>
+                                </ul>
                             </div>
                         </section>
 
@@ -219,7 +201,8 @@ export default function ScoringPage() {
                             </p>
                             <ol className="list-decimal pl-6 text-gray-700">
                                 <li>Total points earned</li>
-                                <li>Number of correct predictions</li>
+                                <li>Number of perfect predictions (10-point scores)</li>
+                                <li>Number of close predictions (7-point scores)</li>
                                 <li>Average points per race</li>
                                 <li>Alphabetical order by username</li>
                             </ol>
@@ -230,13 +213,18 @@ export default function ScoringPage() {
 
                             <div className="space-y-4">
                                 <div className="border border-gray-200 rounded-lg p-4">
+                                    <h3 className="font-semibold text-gray-900 mb-2">How many positions can I predict?</h3>
+                                    <p className="text-gray-700">All leagues now support up to 2 position predictions per race.</p>
+                                </div>
+
+                                <div className="border border-gray-200 rounded-lg p-4">
                                     <h3 className="font-semibold text-gray-900 mb-2">What happens if my driver doesn't finish the race?</h3>
-                                    <p className="text-gray-700">If your picked driver doesn't finish the race or isn't in the race, you receive 0 points.</p>
+                                    <p className="text-gray-700">If your picked driver doesn't finish the race or isn't in the race, you receive 0 points for that position.</p>
                                 </div>
 
                                 <div className="border border-gray-200 rounded-lg p-4">
                                     <h3 className="font-semibold text-gray-900 mb-2">Can I change my prediction after submitting it?</h3>
-                                    <p className="text-gray-700">No, predictions are final once submitted and cannot be changed.</p>
+                                    <p className="text-gray-700">Yes! You can change your predictions up until 1 hour before qualifying begins. After that, predictions are locked and cannot be modified.</p>
                                 </div>
 
                                 <div className="border border-gray-200 rounded-lg p-4">
@@ -245,8 +233,13 @@ export default function ScoringPage() {
                                 </div>
 
                                 <div className="border border-gray-200 rounded-lg p-4">
-                                    <h3 className="font-semibold text-gray-900 mb-2">How do I know which scoring system my league uses?</h3>
-                                    <p className="text-gray-700">Check your league settings or ask your league administrator. Most leagues use the P10-only system unless specifically configured for multiple positions.</p>
+                                    <h3 className="font-semibold text-gray-900 mb-2">What's the maximum points I can earn per race?</h3>
+                                    <p className="text-gray-700">If you predict 2 positions and get both perfect, you can earn up to 20 points per race (10 + 10).</p>
+                                </div>
+
+                                <div className="border border-gray-200 rounded-lg p-4">
+                                    <h3 className="font-semibold text-gray-900 mb-2">Do I get points for both positions even if one is wrong?</h3>
+                                    <p className="text-gray-700">Yes! You get points for each position independently. A perfect P1 prediction (10 points) plus a P1 prediction that's 2 positions off (5 points) = 15 total points.</p>
                                 </div>
                             </div>
                         </section>
