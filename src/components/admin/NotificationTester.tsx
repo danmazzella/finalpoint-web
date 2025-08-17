@@ -217,7 +217,6 @@ const NotificationTester: React.FC = () => {
                 if (usersResponse.data.success) setUsers(usersResponse.data.data || []);
                 if (racesResponse.data.success) setRaces(racesResponse.data.races || []);
                 if (leaguesResponse.data.success) {
-                    console.log('Leagues response:', leaguesResponse.data);
                     setLeagues(leaguesResponse.data.leagues || []);
                 }
             } catch (error) {

@@ -28,40 +28,24 @@ export const ComprehensiveNotificationPrompt = ({
 
     // Memoize the trigger update logic to prevent infinite loops
     const updatePageTrigger = useCallback(() => {
-        if (process.env.NODE_ENV === 'development') {
-            console.log('updatePageTrigger called:', { currentPage, leaguesLength: leagues.length });
-        }
-
         if (currentPage === 'dashboard') {
             if (leagues.length > 0) {
                 // For dashboard with leagues, show prompt for engaged users
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Dashboard trigger check: User has leagues, showing dashboard prompt');
-                }
                 updateTriggers({ hasJoinedLeague: true });
                 setCurrentTrigger('hasJoinedLeague');
             } else {
                 // For dashboard without leagues, show generic prompt to encourage engagement
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Dashboard trigger check: User has no leagues, showing generic prompt');
-                }
                 updateTriggers({ hasJoinedLeague: true });
                 setCurrentTrigger('hasJoinedLeague');
             }
         }
 
         if (currentPage === 'league') {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Setting league view trigger');
-            }
             updateTriggers({ isViewingLeague: true });
             setCurrentTrigger('isViewingLeague');
         }
 
         if (currentPage === 'picks') {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Setting picks page trigger');
-            }
             updateTriggers({ isOnPicksPage: true });
             setCurrentTrigger('isOnPicksPage');
         }
@@ -146,9 +130,6 @@ export const ComprehensiveNotificationPrompt = ({
         const success = await requestPermission();
         if (success) {
             markPromptShown();
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Notifications enabled successfully!');
-            }
         }
     }, [requestPermission, markPromptShown]);
 
@@ -156,9 +137,6 @@ export const ComprehensiveNotificationPrompt = ({
     const handleDismiss = useCallback((strategy: 'not-now' | 'maybe-later' = 'not-now') => {
         dismiss();
         dismissPrompt(strategy);
-        if (process.env.NODE_ENV === 'development') {
-            console.log(`User dismissed with strategy: ${strategy}`);
-        }
     }, [dismiss, dismissPrompt]);
 
     // Don't show if we shouldn't show prompt

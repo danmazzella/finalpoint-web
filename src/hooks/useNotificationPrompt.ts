@@ -40,14 +40,6 @@ export const useNotificationPrompt = (
             setIsFirefox(navigator.userAgent.includes('Firefox'));
 
             // Log for debugging (only in development)
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Notification support check:', {
-                    supported,
-                    permission: currentPermission,
-                    isFirefox,
-                    userAgent: navigator.userAgent
-                });
-            }
         }
     }, []);
 
@@ -62,24 +54,8 @@ export const useNotificationPrompt = (
         // 3. Permission is still default (not granted/denied)
         // 4. We haven't already shown it
         if (triggerCondition && isSupported && permission === 'default') {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Showing notification prompt:', {
-                    triggerCondition,
-                    isSupported,
-                    permission,
-                    config: finalConfig
-                });
-            }
             setShowPrompt(true);
         } else {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Not showing notification prompt:', {
-                    triggerCondition,
-                    isSupported,
-                    permission,
-                    shouldShow: triggerCondition && isSupported && permission === 'default'
-                });
-            }
             setShowPrompt(false);
         }
     }, [triggerCondition, isSupported, permission, finalConfig]);
@@ -89,13 +65,7 @@ export const useNotificationPrompt = (
 
         setIsRequesting(true);
         try {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Requesting notification permission...');
-            }
             const result = await Notification.requestPermission();
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Permission request result:', result);
-            }
             setPermission(result);
 
             if (result === 'granted') {
@@ -118,9 +88,6 @@ export const useNotificationPrompt = (
                             userVisibleOnly: true,
                             applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
                         });
-                        console.log('Push subscription created:', subscription);
-                    } else {
-                        console.log('Push subscription already exists:', subscription);
                     }
 
                     // Send subscription to server (you'll need to implement this)
@@ -134,9 +101,6 @@ export const useNotificationPrompt = (
                 return true;
             } else if (result === 'denied') {
                 // Provide Firefox-specific guidance
-                if (isFirefox && process.env.NODE_ENV === 'development') {
-                    console.log('Firefox: Notifications blocked. User needs to click the shield icon in the address bar.');
-                }
                 setShowPrompt(false);
             }
             return false;
@@ -151,9 +115,6 @@ export const useNotificationPrompt = (
     }, [permission, isSupported, isFirefox]);
 
     const dismiss = useCallback(() => {
-        if (process.env.NODE_ENV === 'development') {
-            console.log('Dismissing notification prompt');
-        }
         setShowPrompt(false);
     }, []);
 

@@ -15,12 +15,8 @@ export default function MobileAppDownload({ variant = 'default', className = '' 
 
     useEffect(() => {
         try {
-            console.log('MobileAppDownload: Component mounted');
             const platformInfo = detectPlatform();
             const link = getAppStoreLink();
-
-            console.log('MobileAppDownload: Platform detected:', platformInfo);
-            console.log('MobileAppDownload: App store link:', link);
 
             setPlatform(platformInfo.platform);
             setAppStoreLink(link);
@@ -71,7 +67,6 @@ export default function MobileAppDownload({ variant = 'default', className = '' 
     };
 
     // Debug: Always show something
-    console.log('MobileAppDownload: Rendering with variant:', variant, 'platform:', platform, 'link:', appStoreLink);
 
     // Fallback: If we're still detecting or have an error, show a basic version
     if (platform === 'detecting...' || error) {

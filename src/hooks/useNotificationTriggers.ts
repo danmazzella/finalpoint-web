@@ -59,22 +59,14 @@ export const useNotificationTriggers = () => {
                 }));
             }
         } catch (error) {
-            if (process.env.NODE_ENV === 'development') {
-                console.error('Error checking upcoming races:', error);
-            }
+            console.error('Error checking upcoming races:', error);
         }
     }, []);
 
     // Update triggers based on current context
     const updateTriggers = useCallback((updates: Partial<NotificationTriggers>) => {
-        if (process.env.NODE_ENV === 'development') {
-            console.log('Updating triggers:', updates);
-        }
         setTriggers(prev => {
             const newTriggers = { ...prev, ...updates };
-            if (process.env.NODE_ENV === 'development') {
-                console.log('New triggers state:', newTriggers);
-            }
             return newTriggers;
         });
     }, []);
@@ -85,10 +77,6 @@ export const useNotificationTriggers = () => {
 
         // Check if we're still within the dismissal period
         if (dismissedUntil && now < dismissedUntil) {
-            if (process.env.NODE_ENV === 'development') {
-                const timeLeft = Math.ceil((dismissedUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-                console.log(`Prompt dismissed until ${dismissedUntil.toLocaleDateString()}, ${timeLeft} days left`);
-            }
             return false;
         }
 
@@ -101,23 +89,11 @@ export const useNotificationTriggers = () => {
             triggers.hasRecentScoreUpdate
         );
 
-        if (process.env.NODE_ENV === 'development') {
-            console.log('Should show prompt calculation:', {
-                hasShownPrompt,
-                dismissedUntil,
-                triggers,
-                shouldShow
-            });
-        }
-
         return shouldShow;
-    }, [triggers, hasShownPrompt, dismissedUntil]);
+    }, [triggers, dismissedUntil]);
 
     // Mark that we've shown a prompt
     const markPromptShown = useCallback(() => {
-        if (process.env.NODE_ENV === 'development') {
-            console.log('Marking prompt as shown');
-        }
         setHasShownPrompt(true);
         // Store in localStorage to remember across sessions
         localStorage.setItem('notification-prompt-shown', 'true');
@@ -132,25 +108,16 @@ export const useNotificationTriggers = () => {
             case 'not-now':
                 // Show again in 3 days
                 dismissUntil = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Dismissing until 3 days from now:', dismissUntil.toLocaleDateString());
-                }
                 break;
 
             case 'maybe-later':
                 // Show again in 1 week
                 dismissUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Dismissing until 1 week from now:', dismissUntil.toLocaleDateString());
-                }
                 break;
 
             case 'never':
                 // Never show again (or show in 30 days as a fallback)
                 dismissUntil = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Dismissing until 30 days from now (never):', dismissUntil.toLocaleDateString());
-                }
                 break;
         }
 
@@ -160,9 +127,6 @@ export const useNotificationTriggers = () => {
 
     // Reset triggers (useful for testing)
     const resetTriggers = useCallback(() => {
-        if (process.env.NODE_ENV === 'development') {
-            console.log('Resetting all triggers');
-        }
         setTriggers({
             hasJoinedLeague: false,
             isViewingLeague: false,
@@ -183,14 +147,7 @@ export const useNotificationTriggers = () => {
         const dismissedUntilStr = localStorage.getItem('notification-prompt-dismissed-until');
 
         if (shown) {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('Found notification-prompt-shown in localStorage, marking as shown');
-            }
             setHasShownPrompt(true);
-        } else {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('No notification-prompt-shown found in localStorage');
-            }
         }
 
         if (dismissedUntilStr) {
@@ -198,19 +155,9 @@ export const useNotificationTriggers = () => {
             const now = new Date();
 
             if (now < dismissedUntil) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Found dismissal until date in localStorage:', dismissedUntil.toLocaleDateString());
-                }
                 setDismissedUntil(dismissedUntil);
             } else {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Dismissal period expired, removing from localStorage');
-                }
                 localStorage.removeItem('notification-prompt-dismissed-until');
-            }
-        } else {
-            if (process.env.NODE_ENV === 'development') {
-                console.log('No dismissal date found in localStorage');
             }
         }
     }, []);
