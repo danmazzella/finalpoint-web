@@ -5,6 +5,7 @@ import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CONTACT_EMAIL } from '@/lib/environment';
 
 export default function DeleteAccountPage() {
     const { user, deleteAccount } = useAuth();
@@ -206,7 +207,7 @@ export default function DeleteAccountPage() {
                             If you're having issues with your account, consider contacting support before deleting your account.
                         </p>
                         <a
-                            href="mailto:dan@mazzella.me?subject=FinalPoint%20Account%20Help"
+                            href={`mailto:${CONTACT_EMAIL}?subject=FinalPoint%20Account%20Help`}
                             className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700"
                         >
                             Contact Support

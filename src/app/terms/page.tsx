@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { CONTACT_EMAIL } from '@/lib/environment';
 
 export default function TermsAndConditionsPage() {
     return (
@@ -219,7 +220,7 @@ export default function TermsAndConditionsPage() {
                             </p>
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <p className="text-gray-700">
-                                    <strong>Email:</strong> dan@mazzella.me<br />
+                                    <strong>Email:</strong> {CONTACT_EMAIL}<br />
                                     <strong>Address:</strong> [Your Company Address]<br />
                                     <strong>Phone:</strong> [Your Contact Number]
                                 </p>

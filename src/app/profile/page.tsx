@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Link from 'next/link';
+import { CONTACT_EMAIL } from '@/lib/environment';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Avatar from '@/components/Avatar';
@@ -408,7 +409,7 @@ export default function ProfilePage() {
                 </Link>
 
                 <a
-                  href="mailto:dan@mazzella.me?subject=FinalPoint%20Support%20Request"
+                  href={`mailto:${CONTACT_EMAIL}?subject=FinalPoint%20Support%20Request`}
                   className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block"
                 >
                   <div className="flex items-center justify-between">

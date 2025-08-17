@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { CONTACT_EMAIL } from '@/lib/environment';
 
 export default function MarketingPage() {
     const { user, isLoading } = useAuth();
@@ -278,7 +279,7 @@ export default function MarketingPage() {
                         <div>
                             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Support</h3>
                             <ul className="space-y-2">
-                                <li><a href="mailto:dan@mazzella.me" className="text-gray-300 hover:text-white">Contact</a></li>
+                                <li><a href={`mailto:${CONTACT_EMAIL}`} className="text-gray-300 hover:text-white">Contact</a></li>
                             </ul>
                         </div>
 
