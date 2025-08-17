@@ -46,7 +46,7 @@ export default function ScoringPage() {
                         <section className="mb-8">
                             <h2 className="text-2xl font-semibold text-gray-900 mb-4">🎯 Overview</h2>
                             <p className="text-gray-700 mb-4">
-                                FinalPoint uses a sophisticated scoring system that rewards both accuracy and strategic thinking.
+                                FinalPoint uses a scoring system that rewards both accuracy and strategic thinking.
                                 Points are calculated based on how close your predictions are to the actual race results.
                             </p>
                             <p className="text-gray-700">
@@ -108,7 +108,7 @@ export default function ScoringPage() {
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <p className="font-medium text-gray-900">Scenario 3: Close Calls</p>
-                                    <p className="text-gray-700">You pick Sergio Perez for P1 (he finishes P2) and Fernando Alonso for P10 (he finishes P11) → <strong>14 points total</strong> (7 + 7)</p>
+                                    <p className="text-gray-700">You pick Oscar Piastri for P1 (he finishes P2) and Fernando Alonso for P10 (he finishes P11) → <strong>14 points total</strong> (7 + 7)</p>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <p className="font-medium text-gray-900">Scenario 4: One Great, One Off</p>
@@ -164,7 +164,7 @@ export default function ScoringPage() {
                                 <div className="bg-blue-50 p-6 rounded-lg">
                                     <h3 className="text-lg font-semibold text-blue-900 mb-3">For P1 Predictions</h3>
                                     <ul className="space-y-2 text-sm text-blue-800">
-                                        <li>• Focus on top teams (Red Bull, Mercedes, Ferrari)</li>
+                                        <li>• Focus on top teams</li>
                                         <li>• Consider qualifying performance trends</li>
                                         <li>• Watch for driver form and consistency</li>
                                         <li>• Track characteristics matter significantly</li>
@@ -174,22 +174,12 @@ export default function ScoringPage() {
                                 <div className="bg-purple-50 p-6 rounded-lg">
                                     <h3 className="text-lg font-semibold text-purple-900 mb-3">For Lower Position Predictions</h3>
                                     <ul className="space-y-2 text-sm text-purple-800">
-                                        <li>• P5-P10: Often midfield teams (Alpine, Aston Martin, McLaren)</li>
+                                        <li>• P5-P10: Often midfield teams</li>
                                         <li>• P10-P15: Midfield to backmarker teams</li>
                                         <li>• Consider qualifying performance trends</li>
                                         <li>• Watch for driver form and consistency</li>
                                     </ul>
                                 </div>
-                            </div>
-
-                            <div className="bg-green-50 p-6 rounded-lg mt-6">
-                                <h3 className="text-lg font-semibold text-green-900 mb-3">Multiple Position Strategy</h3>
-                                <ul className="space-y-2 text-sm text-green-800">
-                                    <li>• <strong>Diversify your picks:</strong> Don't pick both drivers from the same team</li>
-                                    <li>• <strong>Consider track characteristics:</strong> Some tracks favor certain driving styles</li>
-                                    <li>• <strong>Watch qualifying:</strong> Often indicates race pace potential</li>
-                                    <li>• <strong>Balance risk:</strong> Mix safe picks with higher-risk, higher-reward choices</li>
-                                </ul>
                             </div>
                         </section>
 
@@ -204,7 +194,6 @@ export default function ScoringPage() {
                                 <li>Number of perfect predictions (10-point scores)</li>
                                 <li>Number of close predictions (7-point scores)</li>
                                 <li>Average points per race</li>
-                                <li>Alphabetical order by username</li>
                             </ol>
                         </section>
 
@@ -255,7 +244,7 @@ export default function ScoringPage() {
                                     <h3 className="text-sm font-medium text-yellow-800">Need Help?</h3>
                                     <p className="text-sm text-yellow-700 mt-1">
                                         If you have questions about the scoring system or need clarification,
-                                        please contact your league administrator or reach out to our support team.
+                                        please contact us at finalpointapp@gmail.com.
                                     </p>
                                 </div>
                             </div>
