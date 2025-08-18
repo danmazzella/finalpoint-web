@@ -26,18 +26,18 @@ export default function LandingPage() {
                     </div>
 
                     {/* Primary CTA Buttons */}
-                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center mb-8">
+                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center items-center mb-8">
                         {!user ? (
                             <>
                                 <button
                                     onClick={() => router.push('/signup')}
-                                    className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                                    className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[180px]"
                                 >
                                     Get Started Free
                                 </button>
                                 <button
                                     onClick={() => router.push('/login')}
-                                    className="inline-flex items-center px-8 py-4 border border-gray-300 text-lg font-semibold rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
+                                    className="inline-flex items-center justify-center px-10 py-4 border-2 border-gray-300 text-lg font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 min-w-[180px]"
                                 >
                                     Sign In
                                 </button>
@@ -45,7 +45,7 @@ export default function LandingPage() {
                         ) : (
                             <button
                                 onClick={() => router.push('/dashboard')}
-                                className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                                className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[180px]"
                             >
                                 Go to Dashboard
                             </button>
@@ -179,12 +179,12 @@ export default function LandingPage() {
                 <div className="py-8 border-t border-gray-200 text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Download FinalPoint Mobile</h2>
                     <p className="text-lg text-gray-600 mb-6">Make predictions on the go!</p>
-                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center">
+                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center items-center">
                         <a
                             href="https://apps.apple.com/us/app/finalpoint/id6749827283"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
+                            className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[200px]"
                         >
                             <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
@@ -195,10 +195,10 @@ export default function LandingPage() {
                             href="https://play.google.com/store/apps/details?id=com.finalpoint.mobile&hl=en_US"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                            className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[200px]"
                         >
-                            <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M17.523 11.3414c-.3711 0-.7422.1694-.9902.5176L11.734 18.4736c-.3711.7422.1694 1.6562 1.0117 1.6562.1694 0 .3389-.042.5078-.1694l3.7734-2.6953c.1694-.127.3711-.127.5401 0l3.7734 2.6953c.1694.127.3389.1694.5078.1694.8423 0 1.3828-.9141 1.0117-1.6562L18.5137 11.859c-.248-.3482-.6191-.5176-.9902-.5176zM.9863 15.1641c-.3711 0-.7422.1694-.9902.5176L4.7217 22.4766c.3711.7422.1694 1.6562 1.0117 1.6562.1694 0 .3389-.042.5078-.1694l3.7734-2.6953c.1694-.127.3711-.127.5401 0l3.7734 2.6953c.1694.127.3389.1694.5078.1694.8423 0 1.3828-.9141 1.0117-1.6562L17.5237 15.6816c-.248-.3482-.6191-.5176-.9902-.5176H.9863z" />
+                            <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 -960 960 960">
+                                <path d="M40-240q9-107 65.5-197T256-580l-74-128q-6-9-3-19t13-15q8-5 18-2t16 12l74 128q86-36 180-36t180 36l74-128q6-9 16-12t18 2q10 5 13 15t-3 19l-74 128q94 53 150.5 143T920-240H40Zm240-110q21 0 35.5-14.5T330-400q0-21-14.5-35.5T280-450q-21 0-35.5 14.5T230-400q0 21 14.5 35.5T280-350Zm400 0q21 0 35.5-14.5T730-400q0-21-14.5-35.5T680-450q-21 0-35.5 14.5T630-400q0 21 14.5 35.5T680-350Z" />
                             </svg>
                             Download Android
                         </a>
@@ -221,25 +221,25 @@ export default function LandingPage() {
                 <div className="py-6 border-t border-gray-200 text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Ready to Start Predicting?</h2>
                     <p className="text-lg text-gray-600 mb-6">Join thousands of F1 fans making predictions and competing in leagues</p>
-                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center">
+                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center items-center">
                         {!user ? (
                             <button
                                 onClick={() => router.push('/signup')}
-                                className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                                className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[200px]"
                             >
                                 Create Free Account
                             </button>
                         ) : (
                             <button
                                 onClick={() => router.push('/dashboard')}
-                                className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                                className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[200px]"
                             >
                                 Go to Dashboard
                             </button>
                         )}
                         <button
                             onClick={() => router.push('/dashboard')}
-                            className="inline-flex items-center px-8 py-4 border border-gray-300 text-lg font-semibold rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
+                            className="inline-flex items-center justify-center px-10 py-4 border-2 border-gray-300 text-lg font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 min-w-[200px]"
                         >
                             Explore More
                         </button>
