@@ -34,7 +34,7 @@ export default function ScoringPage() {
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
+            <div className="container mx-auto px-4 py-8 max-w-4xl mb-16 sm:mb-0">
                 <div className="bg-white rounded-lg shadow-lg p-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-8">How Points Are Calculated</h1>
 
@@ -253,8 +253,8 @@ export default function ScoringPage() {
                 </div>
 
                 {/* Mobile App Download */}
-                <div className="mt-8">
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                <div className="mt-8 mb-8 sm:mb-12">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 max-w-2xl mx-auto">
                         <div className="text-center">
                             <h3 className="text-lg font-semibold text-gray-900 mb-2">Download FinalPoint Mobile</h3>
                             <p className="text-gray-600 mb-4">Get the best experience with our mobile app</p>

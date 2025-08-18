@@ -25,7 +25,7 @@ export default function AvatarDebug({
 
     const baseClasses = 'rounded-full object-cover bg-gray-200 flex items-center justify-center text-gray-600 font-medium';
     const sizeClass = sizeClasses[size];
-    const avatarUrl = getAvatarUrl(src);
+    const avatarUrl = src ? getAvatarUrl(src) : null;
 
     if (!avatarUrl) {
         return (

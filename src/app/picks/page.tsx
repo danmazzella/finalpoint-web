@@ -358,6 +358,95 @@ function PicksV2Form() {
         );
     }
 
+    // Show limited view for logged-out users
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                    <div className="bg-white shadow rounded-lg p-6 mb-6">
+                        <div className="text-center">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <h2 className="mt-2 text-lg font-medium text-gray-900">Picks Page Preview</h2>
+                            <p className="mt-1 text-sm text-gray-500 mb-6">This is what the picks page looks like. Log in to make your own picks!</p>
+                            <div className="flex space-x-2 justify-center">
+                                <Link
+                                    href="/login"
+                                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                >
+                                    Log In
+                                </Link>
+                                <Link
+                                    href="/signup"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                                >
+                                    Sign Up
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Current Race Information - Show for logged-out users */}
+                    {currentRace && (
+                        <div className="bg-white shadow rounded-lg p-6 mb-6">
+                            <h2 className="text-lg font-medium text-gray-900 mb-4">Current Race</h2>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-blue-900">{currentRace.raceName}</h3>
+                                        <p className="text-sm text-blue-700">{currentRace.circuitName}, {currentRace.country}</p>
+                                        <p className="text-sm text-blue-600">Week {currentRace.weekNumber} • {new Date(currentRace.raceDate).toLocaleDateString()}</p>
+                                        {currentRace.qualifyingDate && (
+                                            <p className="text-sm text-blue-600">Qualifying: {new Date(currentRace.qualifyingDate).toLocaleDateString()}</p>
+                                        )}
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {currentRace.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Sample League Selection Preview */}
+                    <div className="bg-white shadow rounded-lg p-6 mb-6">
+                        <h2 className="text-lg font-medium text-gray-900 mb-4">League Selection</h2>
+                        <div className="text-center py-8">
+                            <p className="text-gray-500 mb-4">Log in to see your leagues and make picks</p>
+                            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8">
+                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <h3 className="mt-2 text-sm font-medium text-gray-900">League Selection</h3>
+                                <p className="mt-1 text-sm text-gray-500">Choose from your leagues to make position predictions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Sample Position Selection Preview */}
+                    <div className="bg-white shadow rounded-lg p-6 mb-6">
+                        <h2 className="text-lg font-medium text-gray-900 mb-4">Position Selection Preview</h2>
+                        <div className="text-center py-8">
+                            <p className="text-gray-500 mb-4">See how position predictions work</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {[1, 3, 10].map((position) => (
+                                    <div key={position} className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                                        <div className="text-2xl font-bold text-gray-400 mb-2">P{position}</div>
+                                        <div className="text-sm text-gray-500">Position {position}</div>
+                                        <div className="mt-2 text-xs text-gray-400">Select driver</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -606,7 +695,7 @@ function PicksV2Form() {
                                                     <span className="text-sm font-medium text-gray-500">#{driver.driverNumber}</span>
                                                     <span className="text-xs text-gray-400">{driver.country}</span>
                                                 </div>
-                                                <h3 className="font-medium text-gray-900 mb-1">{driver.name}</h3>
+                                                <h3 className="font-medium text-gray-900 mb-2 sm:mb-1">{driver.name}</h3>
                                                 <p className="text-sm text-gray-500">{driver.team}</p>
                                                 {pickedPosition && (
                                                     <div className="mt-2">

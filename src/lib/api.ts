@@ -26,8 +26,32 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Create a separate API service for public endpoints (no auth required)
+export const publicApiService = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache'
+  },
+  timeout: 10000,
+});
+
+// Request interceptor for public API service (no auth token)
+publicApiService.interceptors.request.use(
+  async (config) => {
+    // Add cache-busting headers
+    config.headers['Cache-Control'] = 'no-cache';
+    config.headers['Pragma'] = 'no-cache';
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Helper function to get full avatar URL
-export const getAvatarUrl = (avatarPath: string | null | undefined): string | null => {
+export const getAvatarUrl = (avatarPath: string, baseUrl?: string) => {
   // Handle null, undefined, empty string, or the string "null"
   if (!avatarPath || avatarPath === 'null' || avatarPath.trim() === '') {
     return null;
@@ -48,8 +72,8 @@ export const getAvatarUrl = (avatarPath: string | null | undefined): string | nu
       }
     }
     // For development, remove /api from the base URL since avatar paths don't include it
-    const baseUrl = API_BASE_URL.replace('/api', '');
-    return `${baseUrl}${avatarPath}`;
+    const devBaseUrl = API_BASE_URL.replace('/api', '');
+    return `${devBaseUrl}${avatarPath}`;
   }
 
   // For production (finalpoint.app), use the API domain for avatars
@@ -63,8 +87,8 @@ export const getAvatarUrl = (avatarPath: string | null | undefined): string | nu
   }
 
   // For development, remove /api from the base URL since avatar paths don't include it
-  const baseUrl = API_BASE_URL.replace('/api', '');
-  const url = `${baseUrl}/uploads/avatars/${avatarPath}`;
+  const devBaseUrl = API_BASE_URL.replace('/api', '');
+  const url = `${devBaseUrl}/uploads/avatars/${avatarPath}`;
   return url;
 };
 
@@ -106,19 +130,30 @@ apiService.interceptors.response.use(
   async (error) => {
     // Only handle 401 errors with automatic redirect
     if (error?.response?.status === 401 && typeof window !== 'undefined') {
+      // Check if we're on a route that allows logged-out access
+      const currentPath = window.location.pathname;
+      const limitedAccessRoutes = ['/dashboard', '/leagues', '/picks', '/profile'];
+      const isLimitedAccessRoute = limitedAccessRoutes.some(route => currentPath === route);
+
+      // Don't redirect if we're on a limited access route for logged-out users
+      if (isLimitedAccessRoute) {
+        console.log('401 error on limited access route, not redirecting');
+        return Promise.reject(error);
+      }
+
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 
       // Preserve current URL for redirect after login
-      const currentPath = window.location.pathname + window.location.search;
+      const currentPathWithSearch = window.location.pathname + window.location.search;
 
       // Validate redirect URL to prevent open redirects
-      const isValidRedirect = currentPath.startsWith('/') &&
-        !currentPath.startsWith('//') &&
-        !currentPath.includes('javascript:') &&
-        !currentPath.includes('data:');
+      const isValidRedirect = currentPathWithSearch.startsWith('/') &&
+        !currentPathWithSearch.startsWith('//') &&
+        !currentPathWithSearch.includes('javascript:') &&
+        !currentPathWithSearch.includes('data:');
 
-      const redirectPath = isValidRedirect ? currentPath : '/dashboard';
+      const redirectPath = isValidRedirect ? currentPathWithSearch : '/dashboard';
       const encodedRedirect = encodeURIComponent(redirectPath);
       window.location.href = `/login?redirect=${encodedRedirect}`;
     }
@@ -182,7 +217,7 @@ export const authAPI = {
 
 export const leaguesAPI = {
   getLeagues: () => apiService.get('/leagues/get'),
-  getPublicLeagues: () => apiService.get('/leagues/public'),
+  // getPublicLeagues removed - /leagues/get now handles both authenticated and unauthenticated users
   createLeague: (name: string, positions: number[] = [], isPublic: boolean = false) =>
     apiService.post('/leagues/create', { name, positions, isPublic }),
   getLeague: (leagueId: number) => apiService.get(`/leagues/get/${leagueId}`),

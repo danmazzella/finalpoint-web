@@ -42,6 +42,8 @@ export default function LeagueDetailPage() {
   const router = useRouter();
   const leagueId = params.id as string;
 
+
+
   const [league, setLeague] = useState<League | null>(null);
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
@@ -60,11 +62,14 @@ export default function LeagueDetailPage() {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   useEffect(() => {
+    // Load league data for both authenticated and unauthenticated users
+    loadLeague();
+    loadCurrentRace();
+    loadLeagueStats(parseInt(leagueId)); // League stats are public data
+
+    // Only load user-specific data if authenticated
     if (user) {
-      loadLeague();
-      loadCurrentRace();
       loadRecentActivity(parseInt(leagueId));
-      loadLeagueStats(parseInt(leagueId));
     }
   }, [user, leagueId]);
 
@@ -74,11 +79,12 @@ export default function LeagueDetailPage() {
       const response = await leaguesAPI.getLeague(parseInt(leagueId));
       if (response.data.success) {
         setLeague(response.data.data);
-        setIsMember(response.data.data.isMember);
-        // Load recent activity after league is loaded
-        loadRecentActivity(parseInt(leagueId));
-        // Load stats
-        loadLeagueStats(parseInt(leagueId));
+        // Only set member status if user is authenticated
+        if (user) {
+          setIsMember(response.data.data.isMember);
+        } else {
+          setIsMember(false); // Unauthenticated users are not members
+        }
       }
     } catch (error) {
       console.error('Error loading league:', error);
@@ -294,21 +300,52 @@ export default function LeagueDetailPage() {
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
               <div className="space-y-3">
-                <Link
-                  href={`/picks?league=${league.id}`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  Make Picks
-                </Link>
-                {!isMember && (
-                  <button
-                    onClick={joinLeague}
-                    disabled={joining}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {joining ? 'Joining...' : 'Join League'}
-                  </button>
+                {user ? (
+                  <>
+                    <Link
+                      href={`/picks?league=${league.id}`}
+                      className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      Make Picks
+                    </Link>
+                    {!isMember && (
+                      <button
+                        onClick={joinLeague}
+                        disabled={joining}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {joining ? 'Joining...' : 'Join League'}
+                      </button>
+                    )}
+                    {league?.userRole && (
+                      <button
+                        onClick={openSettings}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        League Settings
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-500 mb-3">Log in to make picks and join this league</p>
+                    <div className="space-y-2">
+                      <Link
+                        href="/login"
+                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                      >
+                        Log In
+                      </Link>
+                      <Link
+                        href="/signup"
+                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        Sign Up
+                      </Link>
+                    </div>
+                  </div>
                 )}
+
                 <Link
                   href={`/leagues/${leagueId}/standings`}
                   className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -322,14 +359,6 @@ export default function LeagueDetailPage() {
                 >
                   {loadingCurrentRace ? 'Loading...' : 'View Results'}
                 </Link>
-                {league?.userRole && (
-                  <button
-                    onClick={openSettings}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    League Settings
-                  </button>
-                )}
               </div>
             </div>
 
@@ -419,15 +448,21 @@ export default function LeagueDetailPage() {
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Your Status</dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isMember
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
-                      }`}>
-                      {isMember ? 'Member' : 'Not a Member'}
-                    </span>
+                    {user ? (
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isMember
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                        }`}>
+                        {isMember ? 'Member' : 'Not a Member'}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Guest Viewer
+                      </span>
+                    )}
                   </dd>
                 </div>
-                {league.joinCode && (
+                {league.joinCode && user && (
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Join Code</dt>
                     <dd className="mt-1 text-sm text-gray-900">
@@ -441,142 +476,156 @@ export default function LeagueDetailPage() {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white shadow rounded-lg p-6 mt-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
-                <Link
-                  href={`/leagues/${leagueId}/activity`}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  View All Activity →
-                </Link>
-              </div>
-              {activityLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2 text-sm text-gray-500">Loading activity...</p>
+            {user ? (
+              <div className="bg-white shadow rounded-lg p-6 mt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
+                  <Link
+                    href={`/leagues/${leagueId}/activity`}
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    View All Activity →
+                  </Link>
                 </div>
-              ) : recentActivity.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="text-sm text-gray-500 mb-2">Found {recentActivity.length} activities</div>
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-shrink-0">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${activity.activityType === 'pick_created' ? 'bg-green-100' :
-                          activity.activityType === 'pick_changed' ? 'bg-blue-100' :
-                            activity.activityType === 'pick_removed' ? 'bg-red-100' :
-                              activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'bg-purple-100' :
-                                activity.activityType === 'member_left' ? 'bg-red-100' :
-                                  activity.activityType === 'league_name_changed' ? 'bg-indigo-100' :
-                                    activity.activityType === 'league_visibility_changed' ? 'bg-blue-100' :
-                                      activity.activityType === 'league_created' ? 'bg-yellow-100' :
-                                        activity.activityType === 'race_result_processed' ? 'bg-orange-100' :
-                                          'bg-gray-100'
-                          }`}>
-                          <svg className={`h-4 w-4 ${activity.activityType === 'pick_created' ? 'text-green-600' :
-                            activity.activityType === 'pick_changed' ? 'text-blue-600' :
-                              activity.activityType === 'pick_removed' ? 'text-red-600' :
-                                activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'text-purple-600' :
-                                  activity.activityType === 'member_left' ? 'text-red-600' :
-                                    activity.activityType === 'league_name_changed' ? 'text-indigo-600' :
-                                      activity.activityType === 'league_visibility_changed' ? 'text-blue-600' :
-                                        activity.activityType === 'league_created' ? 'text-yellow-600' :
-                                          activity.activityType === 'race_result_processed' ? 'text-orange-600' :
-                                            'text-gray-600'
-                            }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {activityLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-2 text-sm text-gray-500">Loading activity...</p>
+                  </div>
+                ) : recentActivity.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-500 mb-2">Found {recentActivity.length} activities</div>
+                    {recentActivity.map((activity, index) => (
+                      <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-shrink-0">
+                          <div className={`h-8 w-8 rounded-full flex items-center justify-center ${activity.activityType === 'pick_created' ? 'bg-green-100' :
+                            activity.activityType === 'pick_changed' ? 'bg-blue-100' :
+                              activity.activityType === 'pick_removed' ? 'bg-red-100' :
+                                activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'bg-purple-100' :
+                                  activity.activityType === 'member_left' ? 'bg-red-100' :
+                                    activity.activityType === 'league_name_changed' ? 'bg-indigo-100' :
+                                      activity.activityType === 'league_visibility_changed' ? 'bg-blue-100' :
+                                        activity.activityType === 'league_created' ? 'bg-yellow-100' :
+                                          activity.activityType === 'race_result_processed' ? 'bg-orange-100' :
+                                            'bg-gray-100'
+                            }`}>
+                            <svg className={`h-4 w-4 ${activity.activityType === 'pick_created' ? 'text-green-600' :
+                              activity.activityType === 'pick_changed' ? 'text-blue-600' :
+                                activity.activityType === 'pick_removed' ? 'text-red-600' :
+                                  activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'text-purple-600' :
+                                    activity.activityType === 'member_left' ? 'text-red-600' :
+                                      activity.activityType === 'league_name_changed' ? 'text-indigo-600' :
+                                        activity.activityType === 'league_visibility_changed' ? 'text-blue-600' :
+                                          activity.activityType === 'league_created' ? 'text-yellow-600' :
+                                            activity.activityType === 'race_result_processed' ? 'text-orange-600' :
+                                              'text-gray-600'
+                              }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              {activity.activityType === 'pick_created' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              ) : activity.activityType === 'pick_changed' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              ) : activity.activityType === 'pick_removed' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                              ) : activity.activityType === 'member_left' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                              ) : activity.activityType === 'league_created' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              ) : activity.activityType === 'league_name_changed' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              ) : activity.activityType === 'league_visibility_changed' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              ) : activity.activityType === 'race_result_processed' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              )}
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900">
                             {activity.activityType === 'pick_created' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              `${activity.userName} made a pick`
                             ) : activity.activityType === 'pick_changed' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              `${activity.userName} changed their pick from ${activity.previousDriverName || 'Unknown'} to ${activity.driverName || 'Unknown'}`
                             ) : activity.activityType === 'pick_removed' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              `${activity.userName} removed their pick`
                             ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                              `${activity.userName} joined the league`
                             ) : activity.activityType === 'member_left' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            ) : activity.activityType === 'league_created' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              `${activity.userName} left the league`
                             ) : activity.activityType === 'league_name_changed' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              `${activity.userName} changed the league name`
                             ) : activity.activityType === 'league_visibility_changed' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              `${activity.userName} changed the league visibility`
+                            ) : activity.activityType === 'league_created' ? (
+                              `${activity.userName} created the league ${activity.leagueName}`
                             ) : activity.activityType === 'race_result_processed' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                              `Race results processed for Week ${activity.weekNumber || 'Unknown'}`
+                            ) : activity.activityType.includes('pick') && activity.previousDriverName && activity.driverName ? (
+                              `${activity.userName} changed their pick from ${activity.previousDriverName} to ${activity.driverName}`
                             ) : (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              `${activity.userName || 'System'} ${activity.activityType.replace(/_/g, ' ')}`
                             )}
-                          </svg>
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {activity.activityType === 'pick_created' ? (
+                              `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
+                            ) : activity.activityType === 'pick_changed' ? (
+                              `Position P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
+                            ) : activity.activityType === 'pick_removed' ? (
+                              `Removed ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) from P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
+                            ) : activity.activityType === 'race_result_processed' ? (
+                              `${activity.raceName ? `${activity.raceName} - ` : ''}${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) finished in P${activity.position || '?'}`
+                            ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
+                              `Welcome to the league!`
+                            ) : activity.activityType === 'member_left' ? (
+                              `Goodbye!`
+                            ) : activity.activityType === 'league_name_changed' ? (
+                              `Changed from "${activity.previousDriverName}" to "${activity.driverName}"`
+                            ) : activity.activityType === 'league_visibility_changed' ? (
+                              `Changed league visibility from "${activity.previousDriverName}"`
+                            ) : activity.activityType === 'league_created' ? (
+                              `League created successfully`
+                            ) : (
+                              `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`
+                            )}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0 text-sm text-gray-500">
+                          {new Date(activity.createdAt).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
-                          {activity.activityType === 'pick_created' ? (
-                            `${activity.userName} made a pick`
-                          ) : activity.activityType === 'pick_changed' ? (
-                            `${activity.userName} changed their pick from ${activity.previousDriverName || 'Unknown'} to ${activity.driverName || 'Unknown'}`
-                          ) : activity.activityType === 'pick_removed' ? (
-                            `${activity.userName} removed their pick`
-                          ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
-                            `${activity.userName} joined the league`
-                          ) : activity.activityType === 'member_left' ? (
-                            `${activity.userName} left the league`
-                          ) : activity.activityType === 'league_name_changed' ? (
-                            `${activity.userName} changed the league name`
-                          ) : activity.activityType === 'league_visibility_changed' ? (
-                            `${activity.userName} changed the league visibility`
-                          ) : activity.activityType === 'league_created' ? (
-                            `${activity.userName} created the league ${activity.leagueName}`
-                          ) : activity.activityType === 'race_result_processed' ? (
-                            `Race results processed for Week ${activity.weekNumber || 'Unknown'}`
-                          ) : activity.activityType.includes('pick') && activity.previousDriverName && activity.driverName ? (
-                            `${activity.userName} changed their pick from ${activity.previousDriverName} to ${activity.driverName}`
-                          ) : (
-                            `${activity.userName || 'System'} ${activity.activityType.replace(/_/g, ' ')}`
-                          )}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {activity.activityType === 'pick_created' ? (
-                            `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
-                          ) : activity.activityType === 'pick_changed' ? (
-                            `Position P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
-                          ) : activity.activityType === 'pick_removed' ? (
-                            `Removed ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) from P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
-                          ) : activity.activityType === 'race_result_processed' ? (
-                            `${activity.raceName ? `${activity.raceName} - ` : ''}${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) finished in P${activity.position || '?'}`
-                          ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
-                            `Welcome to the league!`
-                          ) : activity.activityType === 'member_left' ? (
-                            `Goodbye!`
-                          ) : activity.activityType === 'league_name_changed' ? (
-                            `Changed from "${activity.previousDriverName}" to "${activity.driverName}"`
-                          ) : activity.activityType === 'league_visibility_changed' ? (
-                            `Changed league visibility from "${activity.previousDriverName}"`
-                          ) : activity.activityType === 'league_created' ? (
-                            `League created successfully`
-                          ) : (
-                            `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`
-                          )}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0 text-sm text-gray-500">
-                        {new Date(activity.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
+                    <p className="mt-1 text-sm text-gray-500">Activity will appear here as members make picks.</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white shadow rounded-lg p-6 mt-6">
                 <div className="text-center py-8">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
-                  <p className="mt-1 text-sm text-gray-500">Activity will appear here as members make picks.</p>
+                  <h2 className="text-lg font-medium text-gray-900 mb-2">League Activity</h2>
+                  <p className="text-gray-500 mb-4">Log in to see recent activity and member interactions</p>
+                  <div className="space-y-2">
+                    <Link
+                      href="/login"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      Log In
+                    </Link>
+                  </div>
                 </div>
-              )}
-            </div>
-
-
-
+              </div>
+            )}
 
           </div>
         </div>

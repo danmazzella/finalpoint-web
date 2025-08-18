@@ -8,7 +8,7 @@ import PageTitle from '@/components/PageTitle';
 import { useSearchParams } from 'next/navigation';
 
 export default function LeaguesPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const [myLeagues, setMyLeagues] = useState<League[]>([]);
@@ -21,23 +21,31 @@ export default function LeaguesPage() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    loadLeagues();
-  }, []);
+    // Only load data if auth is not loading
+    if (!authLoading) {
+      loadLeagues();
+    }
+  }, [authLoading, user]);
 
   const loadLeagues = async () => {
     try {
       setLoading(true);
-      const [myLeaguesResponse, publicLeaguesResponse] = await Promise.all([
-        leaguesAPI.getLeagues(),
-        leaguesAPI.getPublicLeagues()
-      ]);
 
-      if (myLeaguesResponse.data.success) {
-        setMyLeagues(myLeaguesResponse.data.data);
-      }
-
-      if (publicLeaguesResponse.data.success) {
-        setPublicLeagues(publicLeaguesResponse.data.data);
+      if (user) {
+        // Authenticated user - get their leagues (includes public and private)
+        const response = await leaguesAPI.getLeagues();
+        if (response.data.success) {
+          setMyLeagues(response.data.data);
+          // For authenticated users, public leagues are included in their leagues
+          setPublicLeagues(response.data.data.filter((league: League) => league.isPublic));
+        }
+      } else {
+        // Unauthenticated user - get only public leagues
+        const response = await leaguesAPI.getLeagues();
+        if (response.data.success) {
+          setMyLeagues([]); // No personal leagues for unauthenticated users
+          setPublicLeagues(response.data.data);
+        }
       }
     } catch (error) {
       console.error('Error loading leagues:', error);
@@ -100,7 +108,7 @@ export default function LeaguesPage() {
     setIsPublic(false);
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -116,18 +124,36 @@ export default function LeaguesPage() {
           subtitle="Manage your F1 prediction game"
         >
           <div className="flex items-center space-x-3">
-            <Link
-              href={`/join?redirect=${encodeURIComponent(redirectTo)}`}
-              className="text-gray-600 hover:text-gray-700 font-medium"
-            >
-              Join League
-            </Link>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Create League
-            </button>
+            {user ? (
+              <Link
+                href={`/join?redirect=${encodeURIComponent(redirectTo)}`}
+                className="text-gray-600 hover:text-gray-700 font-medium"
+              >
+                Join League
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="text-gray-600 hover:text-gray-700 font-medium"
+              >
+                Login to Join
+              </Link>
+            )}
+            {user ? (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Create League
+              </button>
+            ) : (
+              <Link
+                href="/signup"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Sign Up to Create
+              </Link>
+            )}
           </div>
         </PageTitle>
 
@@ -135,11 +161,38 @@ export default function LeaguesPage() {
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">My Leagues</h2>
-            <div className="text-sm text-gray-500">
-              {myLeagues.length} league{myLeagues.length !== 1 ? 's' : ''}
-            </div>
+            {user && (
+              <div className="text-sm text-gray-500">
+                {myLeagues.length} league{myLeagues.length !== 1 ? 's' : ''}
+              </div>
+            )}
           </div>
-          {myLeagues.length === 0 ? (
+
+          {!user ? (
+            <div className="text-center py-12 bg-white rounded-lg shadow">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">Log in to see your leagues</h3>
+              <p className="mt-1 text-sm text-gray-500">Sign up or log in to create and manage your own leagues.</p>
+              <div className="mt-6">
+                <div className="flex space-x-2 justify-center">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : myLeagues.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 mb-4">You haven&apos;t joined any leagues yet.</p>
               <button
@@ -207,7 +260,7 @@ export default function LeaguesPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Public Leagues</h2>
             <div className="text-sm text-gray-500">
-              Browse and join public leagues • Limited preview only
+              {user ? 'Browse and join public leagues' : 'Browse and preview public leagues'}
             </div>
           </div>
 
@@ -266,17 +319,26 @@ export default function LeaguesPage() {
                       </div>
                     </div>
 
-                    {/* Join Button */}
+                    {/* Action Button */}
                     <div className="mt-4">
-                      <button
-                        onClick={() => {
-                          // Handle joining the league
-                          window.location.href = `/joinleague/${league.joinCode}`;
-                        }}
-                        className="w-full inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200"
-                      >
-                        Join League
-                      </button>
+                      {user ? (
+                        <button
+                          onClick={() => {
+                            // Handle joining the league
+                            window.location.href = `/joinleague/${league.joinCode}`;
+                          }}
+                          className="w-full inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200"
+                        >
+                          Join League
+                        </button>
+                      ) : (
+                        <Link
+                          href={`/leagues/${league.id}`}
+                          className="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          Preview League
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

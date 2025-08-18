@@ -425,19 +425,19 @@ export default function StandingsPage() {
                                     <div className="grid grid-cols-2 gap-5 p-4 bg-gray-50 rounded-lg">
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points</div>
-                                            <div className="text-xl font-bold text-gray-900 mb-1">{member.totalPoints}</div>
+                                            <div className="text-xl font-bold text-gray-900 mb-2 sm:mb-1">{member.totalPoints}</div>
                                             <div className="text-xs text-gray-500">{member.averagePointsPerRace} avg/race</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Accuracy</div>
-                                            <div className={`text-xl font-bold mb-1 ${getAccuracyColor(member.accuracy)}`}>
+                                            <div className={`text-xl font-bold mb-2 sm:mb-1 ${getAccuracyColor(member.accuracy)}`}>
                                                 {member.accuracy}%
                                             </div>
                                             <div className="text-xs text-gray-500">{member.perfectPicks} perfect</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Avg Distance</div>
-                                            <div className={`text-xl font-bold mb-1 ${getDistanceColor(member.averageDistanceFromCorrect)}`}>
+                                            <div className={`text-xl font-bold mb-2 sm:mb-1 ${getDistanceColor(member.averageDistanceFromCorrect)}`}>
                                                 {member.averageDistanceFromCorrect || 0} positions
                                             </div>
                                             <div className="text-xs text-gray-500">from target</div>

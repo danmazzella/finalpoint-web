@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import LandingPage from '@/components/LandingPage';
 
 export default function HomePage() {
   const { user, isLoading } = useAuth();
@@ -11,9 +12,8 @@ export default function HomePage() {
   useEffect(() => {
     if (!isLoading) {
       if (user) {
+        // Logged in users go to dashboard
         router.push('/dashboard');
-      } else {
-        router.push('/info');
       }
     }
   }, [user, isLoading, router]);
@@ -24,6 +24,11 @@ export default function HomePage() {
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  // Show a comprehensive welcome page for logged-out users
+  if (!user) {
+    return <LandingPage />;
   }
 
   return null;

@@ -60,6 +60,38 @@ export default function ProfilePage() {
     fetchProfileData();
   }, []);
 
+  // Show login prompt for logged-out users
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+          <div className="bg-white shadow-lg rounded-lg p-8 text-center">
+            <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <h1 className="mt-4 text-2xl font-bold text-gray-900">Profile Page</h1>
+            <p className="mt-2 text-lg text-gray-600">You must be logged in to access your profile</p>
+            <p className="mt-1 text-sm text-gray-500 mb-8">Sign up or log in to manage your account settings, avatar, and preferences.</p>
+            <div className="flex space-x-4 justify-center">
+              <Link
+                href="/login"
+                className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Sign Up
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
       logout();

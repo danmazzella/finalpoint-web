@@ -47,16 +47,16 @@ export default function RaceResultsPage() {
     const selectedWeekRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
-        if (user) {
-            loadLeague();
-            loadRaces();
-            loadRaceResults();
-        }
-    }, [user, leagueId, selectedWeek]);
+        // Load data for both authenticated and unauthenticated users
+        loadLeague();
+        loadRaces();
+        loadRaceResults();
+    }, [leagueId, selectedWeek]);
 
     const loadLeague = async () => {
         try {
             const response = await leaguesAPI.getLeague(parseInt(leagueId));
+
             if (response.data.success) {
                 setLeague(response.data.data);
             }
@@ -68,6 +68,7 @@ export default function RaceResultsPage() {
     const loadRaces = async () => {
         try {
             const response = await f1racesAPI.getAllRaces();
+
             if (response.data.success) {
                 setRaces(response.data.data);
             }
@@ -80,14 +81,27 @@ export default function RaceResultsPage() {
         try {
             setLoading(true);
             const response = await picksAPI.getRaceResultsV2(parseInt(leagueId), selectedWeek);
+
             if (response.data.success) {
                 // The API returns an object with a 'results' property containing the array
-                setResults(response.data.data.results || []);
+                const resultsData = response.data.data.results || [];
+                console.log('Setting results:', resultsData);
+                console.log('Results data type:', typeof resultsData);
+                console.log('Results is array:', Array.isArray(resultsData));
+                if (Array.isArray(resultsData)) {
+                    console.log('First result item:', resultsData[0]);
+                }
+                setResults(resultsData);
+            } else {
+                console.log('API response not successful:', response.data);
             }
         } catch (error: unknown) {
             console.error('Error loading race results:', error);
             const errorMessage = error instanceof Error ? error.message : 'Failed to load race results';
-            showToast(errorMessage, 'error');
+            // Only show toast if user is authenticated (toast context might not be available)
+            if (user && showToast) {
+                showToast(errorMessage, 'error');
+            }
         } finally {
             setLoading(false);
         }
@@ -105,6 +119,7 @@ export default function RaceResultsPage() {
     };
 
     useEffect(() => {
+        // Load required positions for both authenticated and unauthenticated users
         loadRequiredPositions();
     }, [leagueId]);
 
@@ -178,13 +193,27 @@ export default function RaceResultsPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-lg text-gray-600">Loading race results...</p>
+                    <p className="mt-2 text-sm text-gray-500">League: {leagueId}, Week: {selectedWeek}</p>
+                    <p className="mt-1 text-sm text-gray-500">User: {user ? 'Authenticated' : 'Unauthenticated'}</p>
+                    <p className="mt-1 text-sm text-gray-500">Results count: {results.length}</p>
+                </div>
             </div>
         );
     }
 
     if (!results || results.length === 0) {
         const currentRace = getCurrentRace();
+        console.log('No results available. Debug info:', {
+            results,
+            resultsLength: results?.length,
+            league,
+            currentRace,
+            selectedWeek,
+            user: !!user
+        });
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto">
@@ -204,6 +233,9 @@ export default function RaceResultsPage() {
                             ) : (
                                 <>No results are available for Week {selectedWeek}. The race may not have finished yet or results haven&apos;t been entered.</>
                             )}
+                        </p>
+                        <p className="text-xs text-gray-500 mb-4">
+                            Debug: Results length: {results?.length || 0}, League: {league?.name || 'None'}, User: {user ? 'Authenticated' : 'Unauthenticated'}
                         </p>
                         <div className="flex space-x-3 justify-center">
                             <Link
@@ -668,12 +700,18 @@ export default function RaceResultsPage() {
                                             </>
                                         )}
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <Link
-                                                href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}`}
-                                                className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
-                                            >
-                                                View All Picks
-                                            </Link>
+                                            {user ? (
+                                                <Link
+                                                    href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}`}
+                                                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
+                                                >
+                                                    View All Picks
+                                                </Link>
+                                            ) : (
+                                                <span className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-500 bg-gray-100 cursor-not-allowed">
+                                                    Login to View
+                                                </span>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -741,15 +779,21 @@ export default function RaceResultsPage() {
                                     )}
 
                                     <div className="flex justify-end">
-                                        <Link
-                                            href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}`}
-                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
-                                        >
-                                            View All Picks
-                                            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </Link>
+                                        {user ? (
+                                            <Link
+                                                href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}`}
+                                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
+                                            >
+                                                View All Picks
+                                                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </Link>
+                                        ) : (
+                                            <span className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-500 bg-gray-100 cursor-not-allowed">
+                                                Login to View Picks
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             ))}
