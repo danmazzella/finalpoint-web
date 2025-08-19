@@ -119,6 +119,9 @@ export default function AdminLeaguesPage() {
                                 Members
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Positions
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -149,6 +152,22 @@ export default function AdminLeaguesPage() {
                                     {league.memberCount} members
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
+                                    {league.requiredPositions && league.requiredPositions.length > 0 ? (
+                                        <div className="flex flex-wrap gap-1">
+                                            {[...league.requiredPositions].sort((a, b) => a - b).map((position) => (
+                                                <span
+                                                    key={position}
+                                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                                                >
+                                                    P{position}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <span className="text-sm text-gray-400 italic">No positions set</span>
+                                    )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${league.isActive
                                         ? 'bg-green-100 text-green-800'
                                         : 'bg-gray-100 text-gray-800'
@@ -171,9 +190,28 @@ export default function AdminLeaguesPage() {
                     <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
                         <div className="mt-3">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-medium text-gray-900">
-                                    {selectedLeague.name} - Member Details
-                                </h3>
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">
+                                        {selectedLeague.name} - Member Details
+                                    </h3>
+                                    <div className="mt-1 text-sm text-gray-500">
+                                        {selectedLeague.requiredPositions && selectedLeague.requiredPositions.length > 0 ? (
+                                            <span>
+                                                Required Positions: {' '}
+                                                {[...selectedLeague.requiredPositions].sort((a, b) => a - b).map((position, index) => (
+                                                    <span key={position}>
+                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                            P{position}
+                                                        </span>
+                                                        {index < selectedLeague.requiredPositions.length - 1 && ' '}
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        ) : (
+                                            <span className="text-gray-400 italic">No positions set</span>
+                                        )}
+                                    </div>
+                                </div>
                                 <button
                                     onClick={closeMembersModal}
                                     className="text-gray-400 hover:text-gray-600 text-xl font-bold"
@@ -242,8 +280,8 @@ export default function AdminLeaguesPage() {
                                                     </td>
                                                     <td className="px-4 py-4 whitespace-nowrap">
                                                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${member.role === 'Owner'
-                                                                ? 'bg-purple-100 text-purple-800'
-                                                                : 'bg-blue-100 text-blue-800'
+                                                            ? 'bg-purple-100 text-purple-800'
+                                                            : 'bg-blue-100 text-blue-800'
                                                             }`}>
                                                             {member.role}
                                                         </span>
