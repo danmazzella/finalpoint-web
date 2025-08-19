@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Logo from './Logo';
+import { CONTACT_EMAIL } from '@/lib/environment';
 
 export default function Footer() {
     return (
@@ -51,6 +52,17 @@ export default function Footer() {
                     >
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 -960 960 960">
                             <path d="M40-240q9-107 65.5-197T256-580l-74-128q-6-9-3-19t13-15q8-5 18-2t16 12l74 128q86-36 180-36t180 36l74-128q6-9 16-12t18 2q10 5 13 15t-3 19l-74 128q94 53 150.5 143T920-240H40Zm240-110q21 0 35.5-14.5T330-400q0-21-14.5-35.5T280-450q-21 0-35.5 14.5T230-400q0 21 14.5 35.5T280-350Zm400 0q21 0 35.5-14.5T730-400q0-21-14.5-35.5T680-450q-21 0-35.5 14.5T630-400q0 21 14.5 35.5T680-350Z" />
+                        </svg>
+                    </a>
+
+                    {/* Support/Contact */}
+                    <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        className="text-gray-500 hover:text-indigo-500 transition-colors duration-200"
+                        aria-label="Contact FinalPoint Support"
+                    >
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                         </svg>
                     </a>
                 </div>
