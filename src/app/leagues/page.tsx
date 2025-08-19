@@ -32,12 +32,18 @@ export default function LeaguesPage() {
       setLoading(true);
 
       if (user) {
-        // Authenticated user - get their leagues (includes public and private)
-        const response = await leaguesAPI.getLeagues();
-        if (response.data.success) {
-          setMyLeagues(response.data.data);
-          // For authenticated users, public leagues are included in their leagues
-          setPublicLeagues(response.data.data.filter((league: League) => league.isPublic));
+        // Authenticated user - get their leagues and public leagues they can join
+        const [myLeaguesResponse, publicLeaguesResponse] = await Promise.all([
+          leaguesAPI.getLeagues(),
+          leaguesAPI.getPublicLeagues()
+        ]);
+
+        if (myLeaguesResponse.data.success) {
+          setMyLeagues(myLeaguesResponse.data.data);
+        }
+
+        if (publicLeaguesResponse.data.success) {
+          setPublicLeagues(publicLeaguesResponse.data.data);
         }
       } else {
         // Unauthenticated user - get only public leagues

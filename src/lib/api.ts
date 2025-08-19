@@ -217,7 +217,7 @@ export const authAPI = {
 
 export const leaguesAPI = {
   getLeagues: () => apiService.get('/leagues/get'),
-  // getPublicLeagues removed - /leagues/get now handles both authenticated and unauthenticated users
+  getPublicLeagues: () => apiService.get('/leagues/public'), // Get only public leagues user is not a member of
   createLeague: (name: string, positions: number[] = [], isPublic: boolean = false) =>
     apiService.post('/leagues/create', { name, positions, isPublic }),
   getLeague: (leagueId: number) => apiService.get(`/leagues/get/${leagueId}`),
