@@ -11,11 +11,26 @@ interface AdminUser {
     role: 'user' | 'admin';
     createdAt: string;
     updatedAt: string;
+    leagueCount: number;
+}
+
+interface UserLeague {
+    id: number;
+    name: string;
+    role: 'Owner' | 'Member';
+    joinCode: string;
+    memberCount: number;
+    isActive: boolean;
+    createdAt: string;
 }
 
 export default function AdminUsersPage() {
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+    const [userLeagues, setUserLeagues] = useState<UserLeague[]>([]);
+    const [leaguesLoading, setLeaguesLoading] = useState(false);
+    const [showLeaguesModal, setShowLeaguesModal] = useState(false);
 
     useEffect(() => {
         loadUsers();
@@ -38,6 +53,37 @@ export default function AdminUsersPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const loadUserLeagues = async (userId: number) => {
+        try {
+            setLeaguesLoading(true);
+            const response = await adminAPI.getUserLeagues(userId);
+
+            if (response.status === 200) {
+                setUserLeagues(response.data.data);
+            } else {
+                console.error('Failed to load user leagues:', response.data);
+            }
+        } catch (error) {
+            console.error('Error loading user leagues:', error);
+        } finally {
+            setLeaguesLoading(false);
+        }
+    };
+
+    const handleLeagueCountClick = async (user: AdminUser) => {
+        if (user.leagueCount === 0) return;
+
+        setSelectedUser(user);
+        setShowLeaguesModal(true);
+        await loadUserLeagues(user.id);
+    };
+
+    const closeLeaguesModal = () => {
+        setShowLeaguesModal(false);
+        setSelectedUser(null);
+        setUserLeagues([]);
     };
 
     const updateUserRole = async (userId: number, newRole: 'user' | 'admin') => {
@@ -67,7 +113,7 @@ export default function AdminUsersPage() {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-medium text-gray-900">User Management</h2>
-                <p className="text-sm text-gray-500 mt-1">Manage user roles and view user information</p>
+                <p className="text-sm text-gray-500 mt-1">Manage user roles and view user information. Click on league counts to see which leagues each user belongs to.</p>
             </div>
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -78,6 +124,9 @@ export default function AdminUsersPage() {
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Role
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Leagues
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Joined
@@ -122,6 +171,18 @@ export default function AdminUsersPage() {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <button
+                                        onClick={() => handleLeagueCountClick(user)}
+                                        disabled={user.leagueCount === 0}
+                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors duration-150 ${user.leagueCount === 0
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                : 'bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer'
+                                            }`}
+                                    >
+                                        {user.leagueCount} {user.leagueCount === 1 ? 'league' : 'leagues'}
+                                    </button>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {new Date(user.createdAt).toLocaleDateString()}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -146,6 +207,97 @@ export default function AdminUsersPage() {
                     </tbody>
                 </table>
             </div>
+
+            {/* User Leagues Modal */}
+            {showLeaguesModal && selectedUser && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                    <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+                        <div className="mt-3">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium text-gray-900">
+                                    {selectedUser.name} - League Memberships
+                                </h3>
+                                <button
+                                    onClick={closeLeaguesModal}
+                                    className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            {leaguesLoading ? (
+                                <div className="flex justify-center items-center h-32">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    {userLeagues.length === 0 ? (
+                                        <div className="text-center py-8 text-gray-500">
+                                            This user is not a member of any leagues.
+                                        </div>
+                                    ) : (
+                                        <table className="min-w-full divide-y divide-gray-200">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        League
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Role
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Members
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Status
+                                                    </th>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Joined
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {userLeagues.map((league) => (
+                                                    <tr key={league.id}>
+                                                        <td className="px-4 py-4 whitespace-nowrap">
+                                                            <div>
+                                                                <div className="text-sm font-medium text-gray-900">{league.name}</div>
+                                                                <div className="text-sm text-gray-500">Code: {league.joinCode}</div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-4 whitespace-nowrap">
+                                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${league.role === 'Owner'
+                                                                    ? 'bg-purple-100 text-purple-800'
+                                                                    : 'bg-blue-100 text-blue-800'
+                                                                }`}>
+                                                                {league.role}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            {league.memberCount} members
+                                                        </td>
+                                                        <td className="px-4 py-4 whitespace-nowrap">
+                                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${league.isActive
+                                                                    ? 'bg-green-100 text-green-800'
+                                                                    : 'bg-gray-100 text-gray-800'
+                                                                }`}>
+                                                                {league.isActive ? 'Active' : 'Archived'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            {new Date(league.createdAt).toLocaleDateString()}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

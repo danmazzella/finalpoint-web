@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, getAvatarUrl } from '@/lib/api';
 
 interface League {
     id: number;
@@ -18,9 +18,26 @@ interface League {
     updatedAt: string;
 }
 
+interface LeagueMember {
+    id: number;
+    name: string;
+    avatar: string | null;
+    role: string;
+    joinedAt: string;
+    allTimePicks: number;
+    thisWeekPicks: number;
+    thisMonthPicks: number;
+    correctPicks: number;
+    totalPoints: number;
+}
+
 export default function AdminLeaguesPage() {
     const [leagues, setLeagues] = useState<League[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedLeague, setSelectedLeague] = useState<League | null>(null);
+    const [leagueMembers, setLeagueMembers] = useState<LeagueMember[]>([]);
+    const [membersLoading, setMembersLoading] = useState(false);
+    const [showMembersModal, setShowMembersModal] = useState(false);
 
     useEffect(() => {
         loadLeagues();
@@ -45,6 +62,35 @@ export default function AdminLeaguesPage() {
         }
     };
 
+    const loadLeagueMembers = async (leagueId: number) => {
+        try {
+            setMembersLoading(true);
+            const response = await adminAPI.getLeagueMembers(leagueId);
+
+            if (response.status === 200) {
+                setLeagueMembers(response.data.data);
+            } else {
+                console.error('Failed to load league members:', response.data);
+            }
+        } catch (error) {
+            console.error('Error loading league members:', error);
+        } finally {
+            setMembersLoading(false);
+        }
+    };
+
+    const handleLeagueClick = async (league: League) => {
+        setSelectedLeague(league);
+        setShowMembersModal(true);
+        await loadLeagueMembers(league.id);
+    };
+
+    const closeMembersModal = () => {
+        setShowMembersModal(false);
+        setSelectedLeague(null);
+        setLeagueMembers([]);
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -57,7 +103,7 @@ export default function AdminLeaguesPage() {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-medium text-gray-900">League Management</h2>
-                <p className="text-sm text-gray-500 mt-1">View and manage all leagues on the platform</p>
+                <p className="text-sm text-gray-500 mt-1">View and manage all leagues on the platform. Click on a league to see member details.</p>
             </div>
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -82,7 +128,11 @@ export default function AdminLeaguesPage() {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {leagues.map((league) => (
-                            <tr key={league.id}>
+                            <tr
+                                key={league.id}
+                                className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                                onClick={() => handleLeagueClick(league)}
+                            >
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div>
                                         <div className="text-sm font-medium text-gray-900">{league.name}</div>
@@ -114,6 +164,115 @@ export default function AdminLeaguesPage() {
                     </tbody>
                 </table>
             </div>
+
+            {/* League Members Modal */}
+            {showMembersModal && selectedLeague && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                    <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+                        <div className="mt-3">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium text-gray-900">
+                                    {selectedLeague.name} - Member Details
+                                </h3>
+                                <button
+                                    onClick={closeMembersModal}
+                                    className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            {membersLoading ? (
+                                <div className="flex justify-center items-center h-32">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Member
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Role
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    All Time Picks
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    This Week
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    This Month
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Correct Picks
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Total Points
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {leagueMembers.map((member) => (
+                                                <tr key={member.id}>
+                                                    <td className="px-4 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center">
+                                                            <div className="flex-shrink-0 h-8 w-8">
+                                                                {member.avatar && getAvatarUrl(member.avatar) ? (
+                                                                    <img
+                                                                        className="h-8 w-8 rounded-full"
+                                                                        src={getAvatarUrl(member.avatar)!}
+                                                                        alt={member.name}
+                                                                    />
+                                                                ) : (
+                                                                    <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                                                        <span className="text-xs font-medium text-gray-700">
+                                                                            {member.name.charAt(0).toUpperCase()}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="ml-3">
+                                                                <div className="text-sm font-medium text-gray-900">{member.name}</div>
+                                                                <div className="text-sm text-gray-500">Joined {new Date(member.joinedAt).toLocaleDateString()}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-4 whitespace-nowrap">
+                                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${member.role === 'Owner'
+                                                                ? 'bg-purple-100 text-purple-800'
+                                                                : 'bg-blue-100 text-blue-800'
+                                                            }`}>
+                                                            {member.role}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                                        {member.allTimePicks}
+                                                    </td>
+                                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                                        {member.thisWeekPicks}
+                                                    </td>
+                                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                                        {member.thisMonthPicks}
+                                                    </td>
+                                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                                        {member.correctPicks}
+                                                    </td>
+                                                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center font-medium">
+                                                        {member.totalPoints}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

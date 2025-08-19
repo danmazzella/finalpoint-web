@@ -168,6 +168,8 @@ export const adminAPI = {
   // Admin functions
   getAllUsers: () => apiService.get('/admin/users'),
   getAllLeagues: () => apiService.get('/admin/leagues'),
+  getLeagueMembers: (leagueId: number) => apiService.get(`/admin/leagues/${leagueId}/members`),
+  getUserLeagues: (userId: number) => apiService.get(`/admin/users/${userId}/leagues`),
   updateUserRole: (userId: number, role: string) =>
     apiService.put(`/admin/users/${userId}/role`, { role }),
   getAdminDashboardStats: () => apiService.get('/admin/dashboard-stats'),
