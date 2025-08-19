@@ -317,14 +317,6 @@ export default function LeagueDetailPage() {
                         {joining ? 'Joining...' : 'Join League'}
                       </button>
                     )}
-                    {league?.userRole && (
-                      <button
-                        onClick={openSettings}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        League Settings
-                      </button>
-                    )}
                   </>
                 ) : (
                   <div className="text-center py-4">
@@ -359,6 +351,15 @@ export default function LeagueDetailPage() {
                 >
                   {loadingCurrentRace ? 'Loading...' : 'View Results'}
                 </Link>
+
+                {user && league?.userRole && (
+                  <button
+                    onClick={openSettings}
+                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    League Settings
+                  </button>
+                )}
               </div>
             </div>
 
