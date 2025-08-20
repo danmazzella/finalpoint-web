@@ -175,8 +175,8 @@ export default function AdminUsersPage() {
                                         onClick={() => handleLeagueCountClick(user)}
                                         disabled={user.leagueCount === 0}
                                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors duration-150 ${user.leagueCount === 0
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                : 'bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer'
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 cursor-pointer'
                                             }`}
                                     >
                                         {user.leagueCount} {user.leagueCount === 1 ? 'league' : 'leagues'}
@@ -267,8 +267,8 @@ export default function AdminUsersPage() {
                                                         </td>
                                                         <td className="px-4 py-4 whitespace-nowrap">
                                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${league.role === 'Owner'
-                                                                    ? 'bg-purple-100 text-purple-800'
-                                                                    : 'bg-blue-100 text-blue-800'
+                                                                ? 'bg-purple-100 text-purple-800'
+                                                                : 'bg-blue-100 text-blue-800'
                                                                 }`}>
                                                                 {league.role}
                                                             </span>
@@ -278,8 +278,8 @@ export default function AdminUsersPage() {
                                                         </td>
                                                         <td className="px-4 py-4 whitespace-nowrap">
                                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${league.isActive
-                                                                    ? 'bg-green-100 text-green-800'
-                                                                    : 'bg-gray-100 text-gray-800'
+                                                                ? 'bg-green-100 text-green-800'
+                                                                : 'bg-gray-100 text-gray-800'
                                                                 }`}>
                                                                 {league.isActive ? 'Active' : 'Archived'}
                                                             </span>

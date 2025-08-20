@@ -70,7 +70,7 @@ export default function Footer() {
                 {/* Copyright */}
                 <div className="text-center">
                     <p className="text-gray-500 text-sm">
-                        © {new Date().getFullYear()} FinalPoint. All rights reserved.
+                        {new Date().getFullYear()} FinalPoint.
                     </p>
                 </div>
             </div>

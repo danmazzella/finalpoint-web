@@ -355,13 +355,13 @@ const NotificationTester: React.FC = () => {
                 }
             });
 
-            const response = await adminAPI.testNotifications(
-                selectedUser,
+            const response = await adminAPI.testNotifications({
+                userId: selectedUser,
                 notificationType,
-                customMessage || undefined,
-                selectedTemplate,
-                backendTemplateFields
-            );
+                customMessage: customMessage || undefined,
+                templateId: selectedTemplate,
+                templateFields: backendTemplateFields
+            });
 
             if (response.status === 200) {
                 setResult({

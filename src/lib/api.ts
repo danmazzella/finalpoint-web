@@ -165,7 +165,6 @@ apiService.interceptors.response.use(
 
 // API methods
 export const adminAPI = {
-  // Admin functions
   getAllUsers: () => apiService.get('/admin/users'),
   getAllLeagues: () => apiService.get('/admin/leagues'),
   getLeagueMembers: (leagueId: number) => apiService.get(`/admin/leagues/${leagueId}/members`),
@@ -173,18 +172,12 @@ export const adminAPI = {
   updateUserRole: (userId: number, role: string) =>
     apiService.put(`/admin/users/${userId}/role`, { role }),
   getAdminDashboardStats: () => apiService.get('/admin/dashboard-stats'),
-  getPickStatsByWeek: () => apiService.get('/admin/pick-stats-by-week'),
-  getPickLockingStatus: () => apiService.get('/admin/pick-locking-status'),
-
-  // Template data for notifications
   getAvailableRaces: () => apiService.get('/admin/available-races'),
   getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
-
-  // Notification testing
-  testNotifications: (userId: number, notificationType: 'email' | 'push' | 'both', customMessage?: string, templateId?: string, templateFields?: Record<string, string>) =>
-    apiService.post('/admin/test-notifications', { userId, notificationType, customMessage, templateId, templateFields }),
-  getUserNotificationHistory: (userId: number) =>
-    apiService.get(`/admin/users/${userId}/notification-history`),
+  testNotifications: (data: { userId: number; notificationType: 'email' | 'push' | 'both'; customMessage?: string; templateId?: string; templateFields?: Record<string, string> }) => apiService.post('/admin/test-notifications', data),
+  getUserNotificationHistory: (userId: number) => apiService.get(`/admin/users/${userId}/notification-history`),
+  getPickLockingStatus: () => apiService.get('/admin/pick-locking-status'),
+  updatePickLockingStatus: (data: { enabled: boolean; lockTime: string; unlockTime: string }) => apiService.put('/admin/pick-locking-status', data)
 };
 
 export const authAPI = {

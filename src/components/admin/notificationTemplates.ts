@@ -48,6 +48,15 @@ export const notificationTemplates: NotificationTemplate[] = [
         category: 'promotional',
         description: 'Invite users to join a specific league'
     },
+    {
+        id: 'join_leagues_engagement',
+        name: 'Join Leagues Engagement',
+        title: '🏁 Ready to Race? Join the Action on FinalPoint!',
+        body: 'Welcome to FinalPoint! Join one of our popular leagues and start making your picks for the upcoming races.',
+        emailSubject: '🏁 Ready to Race? Join the Action on FinalPoint!',
+        category: 'promotional',
+        description: 'Encourage new users to join leagues and get active on the platform'
+    },
 
     // System Templates
     {
