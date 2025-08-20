@@ -697,3 +697,28 @@
 .dark .border-t {
   border-color: #404040 !important;
 }
+
+/* Fix top toolbar and bottom navigation bar backgrounds */
+.dark .bg-card {
+  background-color: #1a1a1a !important;
+}
+
+.dark .bg-card.shadow {
+  background-color: #1a1a1a !important;
+}
+
+.dark .bg-card.border-b {
+  background-color: #1a1a1a !important;
+}
+
+.dark .bg-card.border-t {
+  background-color: #1a1a1a !important;
+}
+
+.dark .fixed.bottom-0 {
+  background-color: #1a1a1a !important;
+}
+
+.dark .fixed.bottom-0.bg-card {
+  background-color: #1a1a1a !important;
+}
