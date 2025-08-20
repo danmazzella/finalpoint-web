@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import Link from 'next/link';
 import { CONTACT_EMAIL } from '@/lib/environment';
 import { useState, useRef, useEffect } from 'react';
@@ -13,9 +14,12 @@ import { authAPI } from '@/lib/api';
 export default function ProfilePage() {
   const { user, logout, updateProfile, changePassword, updateAvatar, refreshUserData } = useAuth();
   const { showToast } = useToast();
+  const { resolvedTheme, toggleTheme } = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
+
+  // Debug theme values
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
@@ -95,8 +99,8 @@ export default function ProfilePage() {
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
       logout();
-      // Redirect to login page after logout
-      window.location.href = '/login';
+      // Redirect to root page after logout
+      window.location.href = '/';
     }
   };
 
@@ -363,6 +367,34 @@ export default function ProfilePage() {
                     </svg>
                   </div>
                 </button>
+
+                {/* Theme Toggle */}
+                <div className="px-4 py-3 border border-gray-200 rounded-md">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Theme</p>
+                      <p className="text-sm text-gray-800">Switch between light and dark mode</p>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-sm text-gray-500">Light</span>
+                      <div
+                        className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 cursor-pointer"
+                        onClick={() => {
+                          toggleTheme();
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={resolvedTheme === 'dark'}
+                          readOnly
+                        />
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${resolvedTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </div>
+                      <span className="text-sm text-gray-500">Dark</span>
+                    </div>
+                  </div>
+                </div>
 
                 <Link
                   href="/profile/delete-account"

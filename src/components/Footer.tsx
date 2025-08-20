@@ -6,12 +6,12 @@ import { CONTACT_EMAIL } from '@/lib/environment';
 
 export default function Footer() {
     return (
-        <footer className="bg-white border-t border-gray-200 py-8 mb-16 sm:mb-0">
+        <footer className="bg-card border-t border-border py-8 mb-16 sm:mb-0">
             <div className="container mx-auto px-4">
                 {/* Logo and Brand */}
                 <div className="flex items-center justify-center mb-4">
                     <Logo size="sm" />
-                    <span className="text-lg font-bold text-gray-900 ml-3">FinalPoint</span>
+                    <span className="text-lg font-bold text-card-foreground ml-3">FinalPoint</span>
                 </div>
 
                 {/* Social and App Store Links */}
@@ -21,7 +21,7 @@ export default function Footer() {
                         href="https://www.reddit.com/r/FinalPoint/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-500 hover:text-red-500 transition-colors duration-200"
+                        className="text-muted-foreground hover:text-red-500 transition-colors duration-200"
                         aria-label="Visit FinalPoint on Reddit"
                     >
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -34,7 +34,7 @@ export default function Footer() {
                         href="https://apps.apple.com/us/app/finalpoint/id6749827283"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-500 hover:text-blue-500 transition-colors duration-200"
+                        className="text-muted-foreground hover:text-blue-500 transition-colors duration-200"
                         aria-label="Download FinalPoint on the App Store"
                     >
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -47,7 +47,7 @@ export default function Footer() {
                         href="https://play.google.com/store/apps/details?id=com.finalpoint.mobile&hl=en_US"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-500 hover:text-green-500 transition-colors duration-200"
+                        className="text-muted-foreground hover:text-green-500 transition-colors duration-200"
                         aria-label="Download FinalPoint on Google Play"
                     >
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 -960 960 960">
@@ -58,7 +58,7 @@ export default function Footer() {
                     {/* Support/Contact */}
                     <a
                         href={`mailto:${CONTACT_EMAIL}`}
-                        className="text-gray-500 hover:text-indigo-500 transition-colors duration-200"
+                        className="text-muted-foreground hover:text-indigo-500 transition-colors duration-200"
                         aria-label="Contact FinalPoint Support"
                     >
                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -67,9 +67,31 @@ export default function Footer() {
                     </a>
                 </div>
 
+                {/* Additional Links */}
+                <div className="flex justify-center mb-4 space-x-6">
+                    <Link
+                        href="/theme-preferences"
+                        className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
+                    >
+                        Theme Preferences
+                    </Link>
+                    <Link
+                        href="/privacy"
+                        className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
+                    >
+                        Privacy
+                    </Link>
+                    <Link
+                        href="/terms"
+                        className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
+                    >
+                        Terms
+                    </Link>
+                </div>
+
                 {/* Copyright */}
                 <div className="text-center">
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-muted-foreground text-sm">
                         {new Date().getFullYear()} FinalPoint.
                     </p>
                 </div>

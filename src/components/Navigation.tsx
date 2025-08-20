@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import Logo from './Logo';
 
 export default function Navigation() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
+    const { resolvedTheme } = useTheme();
 
     const navigationItems = [
         {
@@ -76,9 +78,12 @@ export default function Navigation() {
         return pathname.startsWith(href);
     };
 
-    const handleLogout = () => {
-        logout();
-    };
+    // Mark that user has navigated internally
+    useEffect(() => {
+        if (user && pathname !== '/') {
+            sessionStorage.setItem('finalpoint-internal-navigation', 'true');
+        }
+    }, [pathname, user]);
 
     // Hide navigation on standings, results, activity, login, signup, privacy, terms, and reset-password pages
     const shouldHideNavigation = pathname.includes('/standings') ||
@@ -97,14 +102,14 @@ export default function Navigation() {
     return (
         <>
             {/* Desktop Navigation */}
-            <nav className="hidden md:block bg-white shadow">
+            <nav className="hidden md:block bg-card shadow border-b border-border">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-4">
                         {/* Logo */}
                         <div className="flex items-center">
                             <Link href="/" className="flex items-center space-x-3">
                                 <Logo size="md" />
-                                <span className="text-xl font-bold text-gray-900">FinalPoint</span>
+                                <span className="text-xl font-bold text-card-foreground">FinalPoint</span>
                             </Link>
                         </div>
 
@@ -115,8 +120,8 @@ export default function Navigation() {
                                     key={item.name}
                                     href={item.href}
                                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href)
-                                        ? 'text-blue-600 bg-blue-50'
-                                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                                        ? 'text-primary bg-primary/10'
+                                        : 'text-card-foreground hover:text-primary hover:bg-primary/10'
                                         }`}
                                 >
                                     {item.icon}
@@ -124,28 +129,20 @@ export default function Navigation() {
                                 </Link>
                             ))}
 
-                            {/* Desktop Logout/Login Section */}
-                            {user ? (
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                    <span>Logout</span>
-                                </button>
-                            ) : (
+
+
+                            {/* Desktop Login/Signup Section - Only show for unauthenticated users */}
+                            {!user && (
                                 <div className="flex items-center space-x-4">
                                     <Link
                                         href="/login"
-                                        className="text-sm font-medium text-gray-700 hover:text-gray-800 transition-colors"
+                                        className="text-sm font-medium text-card-foreground hover:text-primary transition-colors"
                                     >
                                         Log In
                                     </Link>
                                     <Link
                                         href="/signup"
-                                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 transition-colors"
                                     >
                                         Sign Up
                                     </Link>
@@ -159,30 +156,32 @@ export default function Navigation() {
             {/* Mobile Navigation */}
             <nav className="md:hidden">
                 {/* Top Bar */}
-                <div className="bg-white shadow">
+                <div className="bg-card shadow border-b border-border">
                     <div className="px-4 py-2">
                         <div className="flex items-center justify-between">
                             {/* Logo */}
                             <Link href="/" className="flex items-center space-x-2">
                                 <Logo size="sm" />
-                                <span className="text-lg font-bold text-gray-900">FinalPoint</span>
+                                <span className="text-lg font-bold text-card-foreground">FinalPoint</span>
                             </Link>
 
-                            {/* Hamburger Menu */}
-                            <button
-                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-                            >
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
+                            {/* Right side with hamburger */}
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                    className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
+                                >
+                                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     {/* Mobile Menu */}
                     {isMobileMenuOpen && (
-                        <div className="px-4 pb-4 border-t border-gray-200">
+                        <div className="px-4 pb-4 border-t border-border">
                             <div className="space-y-2">
                                 {allNavigationItems.map((item) => (
                                     <Link
@@ -190,34 +189,21 @@ export default function Navigation() {
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className={`flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href)
-                                            ? 'text-blue-600 bg-blue-50'
-                                            : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                                            ? 'text-primary bg-primary/10'
+                                            : 'text-card-foreground hover:text-primary hover:bg-primary/10'
                                             }`}
                                     >
                                         {item.icon}
                                         <span>{item.name}</span>
                                     </Link>
                                 ))}
-                                <div className="pt-2 border-t border-gray-200">
-                                    {user ? (
-                                        <button
-                                            onClick={() => {
-                                                handleLogout();
-                                                setIsMobileMenuOpen(false);
-                                            }}
-                                            className="flex items-center space-x-3 px-3 py-2 w-full text-left text-sm font-medium text-gray-700 hover:text-gray-800 hover:bg-gray-50 rounded-md"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                            </svg>
-                                            <span>Logout</span>
-                                        </button>
-                                    ) : (
+                                <div className="pt-2 border-t border-border">
+                                    {!user && (
                                         <div className="space-y-2">
                                             <Link
                                                 href="/login"
                                                 onClick={() => setIsMobileMenuOpen(false)}
-                                                className="flex items-center space-x-3 px-3 py-2 w-full text-left text-sm font-medium text-gray-700 hover:text-gray-800 hover:bg-gray-50 rounded-md"
+                                                className="flex items-center space-x-3 px-3 py-2 w-full text-left text-sm font-medium text-card-foreground hover:text-primary hover:bg-primary/10 rounded-md"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -227,7 +213,7 @@ export default function Navigation() {
                                             <Link
                                                 href="/signup"
                                                 onClick={() => setIsMobileMenuOpen(false)}
-                                                className="flex items-center space-x-3 px-3 py-2 w-full text-left text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md"
+                                                className="flex items-center space-x-3 px-3 py-2 w-full text-left text-sm font-medium text-primary hover:text-primary/90 hover:bg-primary/10 rounded-md"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -243,15 +229,15 @@ export default function Navigation() {
                 </div>
 
                 {/* Bottom Navigation Bar */}
-                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-50">
+                <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border md:hidden z-50">
                     <div className="flex justify-around py-2">
                         {allNavigationItems.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
                                 className={`flex flex-col items-center py-2 px-3 min-w-0 flex-1 ${isActive(item.href)
-                                    ? 'text-blue-600'
-                                    : 'text-gray-600 hover:text-gray-800'
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground hover:text-foreground'
                                     }`}
                             >
                                 <div className="mb-1">{item.icon}</div>

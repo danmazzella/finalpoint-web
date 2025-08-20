@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import ConditionalLayout from '@/components/ConditionalLayout';
 import ServiceWorkerManager from '@/components/ServiceWorkerManager';
 import PageViewTracker from '@/components/PageViewTracker';
@@ -27,13 +28,15 @@ export default function RootLayout({
           <PageViewTracker />
         </Suspense>
         <ServiceWorkerManager />
-        <AuthProvider>
-          <ToastProvider>
-            <ConditionalLayout>
-              {children}
-            </ConditionalLayout>
-          </ToastProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <ConditionalLayout>
+                {children}
+              </ConditionalLayout>
+            </ToastProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

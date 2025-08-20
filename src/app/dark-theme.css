@@ -1,0 +1,699 @@
+/* Dark Theme Styles - Extracted from globals.css for better organization */
+
+/* Dark theme - Harmonious Color Palette */
+.dark {
+  --background: #0f0f0f;
+  --foreground: #e5e5e5;
+  --card: #1a1a1a;
+  --card-foreground: #e5e5e5;
+  --popover: #1a1a1a;
+  --popover-foreground: #e5e5e5;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #262626;
+  --secondary-foreground: #d4d4d4;
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  --accent: #262626;
+  --accent-foreground: #d4d4d4;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #404040;
+  --input: #404040;
+  --ring: #3b82f6;
+}
+
+/* Dark theme for main background colors - Single source of truth */
+.dark .bg-gray-50 {
+  background-color: #171717 !important;
+}
+
+/* Dark theme for footer - match main page background */
+.dark footer.bg-card {
+  background-color: #171717 !important;
+}
+
+/* Dark theme for body background - ensures empty areas use correct color */
+.dark body {
+  background-color: #171717 !important;
+}
+
+/* Dark theme for all background colors - Comprehensive and organized */
+.dark .bg-white {
+  background-color: #262626 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1a1a1a !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: #262626 !important;
+}
+
+.dark .bg-gray-300 {
+  background-color: #404040 !important;
+}
+
+.dark .bg-gray-400 {
+  background-color: #525252 !important;
+}
+
+.dark .bg-gray-500 {
+  background-color: #737373 !important;
+}
+
+.dark .bg-gray-600 {
+  background-color: #a3a3a3 !important;
+}
+
+.dark .bg-gray-700 {
+  background-color: #d4d4d4 !important;
+}
+
+.dark .bg-gray-800 {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-900 {
+  background-color: #111827 !important;
+}
+
+/* Dark theme for blue backgrounds */
+.dark .bg-blue-50 {
+  background-color: #1e3a8a !important;
+}
+
+.dark .bg-blue-100 {
+  background-color: #1e3a8a !important;
+}
+
+.dark .bg-blue-200 {
+  background-color: #1d4ed8 !important;
+}
+
+.dark .bg-blue-600 {
+  background-color: #1e40af !important;
+}
+
+.dark .bg-blue-700 {
+  background-color: #1d4ed8 !important;
+}
+
+.dark .bg-blue-800 {
+  background-color: #1e3a8a !important;
+}
+
+/* Dark theme for green backgrounds */
+.dark .bg-green-50 {
+  background-color: #14532d !important;
+}
+
+.dark .bg-green-100 {
+  background-color: #14532d !important;
+}
+
+.dark .bg-green-200 {
+  background-color: #166534 !important;
+}
+
+.dark .bg-green-500 {
+  background-color: #059669 !important;
+}
+
+.dark .bg-green-600 {
+  background-color: #047857 !important;
+}
+
+/* Dark theme for red backgrounds */
+.dark .bg-red-50 {
+  background-color: #750b0b !important;
+}
+
+.dark .bg-red-100 {
+  background-color: #7f1d1d !important;
+}
+
+.dark .bg-red-200 {
+  background-color: #991b1b !important;
+}
+
+.dark .bg-red-500 {
+  background-color: #dc2626 !important;
+}
+
+.dark .bg-red-600 {
+  background-color: #b91c1c !important;
+}
+
+/* Dark theme for slate backgrounds */
+.dark .bg-slate-50 {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-slate-200 {
+  background-color: #374151 !important;
+}
+
+.dark .bg-slate-700 {
+  background-color: #262626 !important;
+}
+
+.dark .bg-slate-800 {
+  background-color: #171717 !important;
+}
+
+.dark .bg-slate-900 {
+  background-color: #0a0a0a !important;
+}
+
+/* Dark theme for all text colors - Comprehensive and organized */
+.dark .text-white {
+  color: #e5e5e5 !important;
+}
+
+.dark .text-card-foreground {
+  color: #e5e5e5 !important;
+}
+
+.dark .text-muted-foreground {
+  color: #a3a3a3 !important;
+}
+
+.dark .text-gray-500 {
+  color: #a3a3a3 !important;
+}
+
+.dark .text-gray-600 {
+  color: #d4d4d4 !important;
+}
+
+.dark .text-gray-700 {
+  color: #e5e5e5 !important;
+}
+
+.dark .text-gray-800 {
+  color: #f5f5f5 !important;
+}
+
+.dark .text-gray-900 {
+  color: #ffffff !important;
+}
+
+.dark .text-slate-500 {
+  color: #a3a3a3 !important;
+}
+
+.dark .text-slate-600 {
+  color: #d4d4d4 !important;
+}
+
+.dark .text-slate-700 {
+  color: #e5e5e5 !important;
+}
+
+.dark .text-slate-800 {
+  color: #f5f5f5 !important;
+}
+
+.dark .text-slate-900 {
+  color: #ffffff !important;
+}
+
+/* Dark theme for blue text colors */
+.dark .text-blue-500 {
+  color: #3b82f6 !important;
+}
+
+.dark .text-blue-600 {
+  color: #ffffffdb !important;
+}
+
+.dark .text-blue-700 {
+  color: #ffffff !important;
+}
+
+.dark .text-blue-800 {
+  color: #ffffff !important;
+}
+
+.dark .text-blue-900 {
+  color: #ffffff !important;
+}
+
+/* Dark theme for green text colors */
+.dark .text-green-600 {
+  color: #34d399 !important;
+}
+
+/* Dark theme for green text colors */
+.dark .text-green-700 {
+  color: #00ec96 !important;
+}
+
+.dark .text-green-800 {
+  color: #f0fdf4 !important;
+}
+
+.dark .text-green-900 {
+  color: #f0fdf4 !important;
+}
+
+/* Dark theme for red text colors */
+.dark .text-red-600 {
+  color: #ffffff !important;
+}
+
+.dark .text-red-700 {
+  color: #ffffff !important;
+}
+
+.dark .text-red-800 {
+  color: #ffffff !important;
+}
+
+.dark .text-red-900 {
+  color: #ffffff !important;
+}
+
+/* Dark theme for purple text colors */
+.dark .text-purple-600 {
+  color: #a78bfa !important;
+}
+
+/* Dark theme for form elements and input fields - Comprehensive and organized */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="search"],
+.dark input[type="tel"],
+.dark input[type="url"],
+.dark input[type="number"],
+.dark select,
+.dark textarea {
+  background-color: #262626 !important;
+  color: #e5e5e5 !important;
+  border-color: #404040 !important;
+}
+
+/* Dark theme for button-like elements with borders */
+.dark .border-gray-300.bg-white {
+  background-color: #262626 !important;
+  border-color: #404040 !important;
+  color: #e5e5e5 !important;
+}
+
+.dark .border-gray-300.bg-white:hover {
+  background-color: #374151 !important;
+  border-color: #6b7280 !important;
+}
+
+.dark select option {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+/* Dark theme for sign up button - make it more visible */
+.dark .bg-gray-800 {
+  background-color: #3b82f6 !important;
+}
+
+.dark .hover\:bg-gray-900:hover {
+  background-color: #2563eb !important;
+}
+
+/* Dark theme for create account button - target the specific button classes */
+.dark .bg-white.hover\:bg-gray-50 {
+  background-color: #3b82f6 !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: #2563eb !important;
+}
+
+/* Dark theme for all hover states - Comprehensive and organized */
+.dark .hover\:bg-gray-50:hover {
+  background-color: #374151 !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: #4b5563 !important;
+}
+
+.dark .hover\:bg-gray-200:hover {
+  background-color: #6b7280 !important;
+}
+
+.dark .hover\:bg-blue-50:hover {
+  background-color: #1e3a8a !important;
+}
+
+.dark .hover\:bg-blue-100:hover {
+  background-color: #1d4ed8 !important;
+}
+
+.dark .hover\:bg-blue-200:hover {
+  background-color: #2563eb !important;
+}
+
+.dark .hover\:bg-blue-600:hover {
+  background-color: #1d4ed8 !important;
+}
+
+.dark .hover\:bg-blue-700:hover {
+  background-color: #1e40af !important;
+}
+
+.dark .hover\:bg-green-50:hover {
+  background-color: #14532d !important;
+}
+
+.dark .hover\:bg-green-600:hover {
+  background-color: #047857 !important;
+}
+
+.dark .hover\:bg-green-700:hover {
+  background-color: #065f46 !important;
+}
+
+.dark .hover\:bg-red-50:hover {
+  background-color: #450a0a !important;
+}
+
+.dark .hover\:bg-red-100:hover {
+  background-color: #7f1d1d !important;
+}
+
+.dark .hover\:bg-red-200:hover {
+  background-color: #991b1b !important;
+}
+
+.dark .hover\:bg-red-600:hover {
+  background-color: #b91c1c !important;
+}
+
+.dark .hover\:bg-red-700:hover {
+  background-color: #991b1b !important;
+}
+
+.dark .hover\:bg-purple-50:hover {
+  background-color: #581c87 !important;
+}
+
+/* Dark theme for borders - Comprehensive and organized */
+.dark .border-gray-200 {
+  border-color: #6b7280 !important;
+}
+
+/* Fix dashboard league row dividers - target all rows consistently */
+.dark .divide-gray-200>* {
+  border-color: #404040 !important;
+}
+
+.dark .divide-gray-200>*+* {
+  border-top-color: #404040 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #9ca3af !important;
+}
+
+.dark .border-gray-400 {
+  border-color: #9ca3af !important;
+}
+
+.dark .border-red-200 {
+  border-color: #dc2626 !important;
+}
+
+.dark .border-red-300 {
+  border-color: #b91c1c !important;
+}
+
+.dark .border-red-400 {
+  border-color: #991b1b !important;
+}
+
+.dark .border-red-500 {
+  border-color: #dc2626 !important;
+}
+
+.dark .border-red-600 {
+  border-color: #b91c1c !important;
+}
+
+.dark .border-red-700 {
+  border-color: #991b1b !important;
+}
+
+.dark .border-red-800 {
+  border-color: #7f1d1d !important;
+}
+
+.dark .border-red-900 {
+  border-color: #450a0a !important;
+}
+
+/* Dark theme variants for explore cards */
+.dark .explore-card {
+  background-color: #1a1a1a !important;
+  border-color: #334155 !important;
+}
+
+.dark .explore-card:hover {
+  border-color: currentColor !important;
+}
+
+.dark .explore-card.hover\:border-blue-400:hover {
+  border-color: #60a5fa !important;
+}
+
+.dark .explore-card.hover\:border-green-400:hover {
+  border-color: #34d399 !important;
+}
+
+.dark .explore-card.hover\:border-orange-400:hover {
+  border-color: #fbbf24 !important;
+}
+
+.dark .explore-card.hover\:border-purple-400:hover {
+  border-color: #a78bfa !important;
+}
+
+/* Dark theme for icon backgrounds */
+.dark .explore-card .bg-blue-100 {
+  background-color: #1e3a8a !important;
+}
+
+.dark .explore-card .bg-green-100 {
+  background-color: #14532d !important;
+}
+
+.dark .explore-card .bg-orange-100 {
+  background-color: #7c2d12 !important;
+}
+
+.dark .explore-card .bg-purple-100 {
+  background-color: #581c87 !important;
+}
+
+.dark .explore-card .group-hover\:bg-blue-200:hover .bg-blue-100 {
+  background-color: #1d4ed8 !important;
+}
+
+.dark .explore-card .group-hover\:bg-green-200:hover .bg-green-100 {
+  background-color: #166534 !important;
+}
+
+.dark .explore-card .group-hover\:bg-orange-200:hover .bg-orange-100 {
+  background-color: #9a3412 !important;
+}
+
+.dark .explore-card .group-hover\:bg-purple-200:hover .bg-purple-100 {
+  background-color: #6b21a8 !important;
+}
+
+/* Dark theme for LandingPage background - solid dark grey */
+.dark .bg-gradient-to-br.from-slate-50.via-blue-50.to-indigo-50 {
+  background: #171717 !important;
+}
+
+/* Dark theme for shadows and depth */
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Dark theme for focus states */
+.dark .focus\:ring-blue-500:focus {
+  --tw-ring-color: #3b82f6 !important;
+}
+
+.dark .focus\:border-blue-500:focus {
+  border-color: #3b82f6 !important;
+}
+
+/* Dark theme for disabled states */
+.dark .disabled\:opacity-50:disabled {
+  opacity: 0.5 !important;
+}
+
+.dark .disabled\:cursor-not-allowed:disabled {
+  cursor: not-allowed !important;
+}
+
+/* Dark theme for toggle switches */
+.dark .bg-gray-200 {
+  background-color: #404040 !important;
+}
+
+/* Dark theme for toggle slider */
+.dark .bg-white {
+  background-color: #e5e5e5 !important;
+}
+
+/* Dark theme for delete account button - more specific to override general border rules */
+.dark a.border-red-200 {
+  border-color: #dc2626 !important;
+}
+
+.dark .hover\:bg-red-50:hover {
+  background-color: #450a0a !important;
+}
+
+/* Dark theme for delete button specific styling */
+.dark .delete-account-button {
+  background-color: transparent !important;
+  color: #dc2626 !important;
+}
+
+.dark .delete-account-button:hover {
+  background-color: #450a0a !important;
+}
+
+/* Dark theme for table row alternating colors - using more specific selectors */
+.dark .even\:bg-white:nth-child(even) {
+  background: #1f2937 !important;
+}
+
+.dark .odd\:bg-gray-50:nth-child(odd) {
+  background: #111827 !important;
+}
+
+/* Alternative approach using data attributes or more specific classes */
+.dark [class*="bg-white"] {
+  background: #2c2c2c !important;
+}
+
+/* Alternative approach using data attributes or more specific classes */
+.dark table [class*="bg-white"] {
+  background: #1a1a1a !important;
+}
+
+.dark table [class*="bg-gray-50"] {
+  background: #242424 !important;
+}
+
+.dark .results-table [class*="bg-white"] {
+  background: #1f2937 !important;
+}
+
+.dark .results-table [class*="bg-gray-50"] {
+  background: #111827 !important;
+}
+
+/* Dark theme for table headers only */
+.dark .table-header.bg-gray-50 {
+  background-color: #374151 !important;
+}
+
+/* Dark theme for Dashboard - matching root page theme */
+.dark .dashboard-page {
+  background: #171717 !important;
+}
+
+/* Dark theme for navigation - consolidated and organized */
+.dark nav {
+  background-color: #1a1a1a !important;
+  border-color: #404040 !important;
+}
+
+.dark nav * {
+  color: #e5e5e5 !important;
+}
+
+.dark nav .text-primary {
+  color: #3b82f6 !important;
+}
+
+.dark nav .text-muted-foreground {
+  color: #a3a3a3 !important;
+}
+
+.dark nav .text-card-foreground {
+  color: #e5e5e5 !important;
+}
+
+.dark nav .border-border {
+  border-color: #404040 !important;
+}
+
+.dark nav .bg-primary\/10 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark nav .hover\:bg-primary\/10:hover {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark nav .hover\:text-primary:hover {
+  color: #3b82f6 !important;
+}
+
+.dark nav .hover\:bg-accent:hover {
+  background-color: #262626 !important;
+}
+
+.dark nav .hover\:text-foreground:hover {
+  color: #e5e5e5 !important;
+}
+
+/* Fix button borders - remove white borders in dark mode */
+.dark button,
+.dark .border {
+  border-color: transparent !important;
+}
+
+/* Fix position buttons (P1, P10) borders */
+.dark .bg-red-500,
+.dark .bg-green-500,
+.dark .bg-blue-500,
+.dark .bg-blue-600,
+.dark .bg-green-600 {
+  border-color: transparent !important;
+}
+
+/* Fix position card borders for P1 and P10 */
+.dark .border-blue-300 {
+  border-color: #1e40af !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #404040 !important;
+}
+
+/* Fix borders for actual race results sections */
+.dark .border-gray-200 {
+  border-color: #404040 !important;
+}
+
+.dark .border-t {
+  border-color: #404040 !important;
+}

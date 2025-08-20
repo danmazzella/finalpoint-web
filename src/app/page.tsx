@@ -10,9 +10,13 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (user) {
-        // Logged in users go to dashboard
+    if (!isLoading && user) {
+      // Check if user has been navigating within the app recently
+      const hasNavigatedInternally = sessionStorage.getItem('finalpoint-internal-navigation');
+      const isInternalNavigation = hasNavigatedInternally === 'true';
+
+      // Only redirect to dashboard if they haven't been navigating internally
+      if (!isInternalNavigation) {
         router.push('/dashboard');
       }
     }
@@ -20,8 +24,8 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -31,5 +35,6 @@ export default function HomePage() {
     return <LandingPage />;
   }
 
-  return null;
+  // Show landing page for logged-in users who have navigated internally
+  return <LandingPage />;
 }

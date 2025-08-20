@@ -39,10 +39,10 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     const shouldHideNavigation = isAuthPage || hasCustomHeaderFooter;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex flex-col">
+        <div className="min-h-screen bg-background flex flex-col">
             {/* Show navigation while loading or when it should be visible */}
             {(isLoading || !shouldHideNavigation) && <Navigation />}
-            <main className="flex-1">
+            <main className="flex-1 bg-gray-50">
                 {/* Public pages and auth pages bypass ProtectedRoute completely */}
                 {(isPublicPage || isAuthPage) ? (
                     children

@@ -123,7 +123,7 @@ export default function LeaguesPage() {
   }
 
   return (
-    <div className="bg-gray-50 w-full">
+    <div className="bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 mb-20">
         <PageTitle
           title="Leagues"
