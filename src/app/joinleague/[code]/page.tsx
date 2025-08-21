@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { leaguesAPI } from '@/lib/api';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 export default function JoinLeaguePage() {
     const { user, isLoading } = useAuth();
+    const { resolvedTheme } = useTheme();
     const params = useParams();
     const joinCode = params.code as string;
 
