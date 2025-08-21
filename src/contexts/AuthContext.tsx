@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as AxiosError;
-        if (axiosError.response?.data?.errors?.length > 0) {
+        if (axiosError.response?.data?.errors && axiosError.response.data.errors.length > 0) {
           // Handle ErrorClass format from backend
           const firstError = axiosError.response.data.errors[0];
           errorMessage = firstError.message || 'You have entered an invalid email or password';
