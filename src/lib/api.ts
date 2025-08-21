@@ -126,9 +126,16 @@ apiService.interceptors.request.use(
 
 // Response interceptor to handle errors
 apiService.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Check if the response contains a new token
+    const newToken = response.headers['x-new-token'];
+    if (newToken && typeof window !== 'undefined') {
+      localStorage.setItem('token', newToken);
+    }
+    return response;
+  },
   async (error) => {
-    // Only handle 401 errors with automatic redirect
+    // Handle 401 errors with automatic redirect
     if (error?.response?.status === 401 && typeof window !== 'undefined') {
       // Check if we're on a route that allows logged-out access
       const currentPath = window.location.pathname;

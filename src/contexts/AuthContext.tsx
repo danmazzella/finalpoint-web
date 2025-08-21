@@ -93,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('token', response.data.token);
+
         setLoginError(null); // Clear any error on success
         setLoginFormData({ email: '', password: '' }); // Clear form data on success
         return { success: true };
@@ -146,10 +147,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (response.data.success) {
           const userData = response.data.user;
-          // Don't strip the avatar path - the backend returns the correct format
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.setItem('token', response.data.token);
+
           setSignupError(null); // Clear any error on success
           setSignupFormData({ name: '', email: '', password: '', confirmPassword: '' }); // Clear form data on success
           return { success: true };
@@ -163,6 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.setItem('token', response.data.token);
+
           setSignupError(null); // Clear any error on success
           setSignupFormData({ name: '', email: '', password: '', confirmPassword: '' }); // Clear form data on success
           return { success: true };
