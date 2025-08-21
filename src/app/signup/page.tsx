@@ -169,7 +169,7 @@ function SignupForm() {
                   required
                   value={name}
                   onChange={(e) => setSignupFormData({ ...signupFormData, name: e.target.value })}
-                  placeholder="Enter your display name"
+                  placeholder="Enter your username (no spaces)"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                 />
               </div>
@@ -234,7 +234,7 @@ function SignupForm() {
             </div>
 
             {(signupError || validationError) && (
-              <div className="text-red-600 text-sm text-center">
+              <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm text-center font-medium">
                 {signupError || validationError}
               </div>
             )}

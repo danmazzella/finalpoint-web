@@ -3,6 +3,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '@/lib/api';
 
+// Type for axios error responses
+interface AxiosError {
+  response?: {
+    data?: {
+      errors?: Array<{ reason: string; message: string }>;
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
 interface User {
   id: number;
   email: string;
@@ -99,19 +110,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: true };
       }
       return { success: false, error: 'You have entered an invalid email or password' };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
 
       // Extract error message from API response
       let errorMessage = 'You have entered an invalid email or password';
 
-      if (error?.response?.data?.errors?.length > 0) {
-        // Handle ErrorClass format from backend - but use generic message for security
-        errorMessage = 'You have entered an invalid email or password';
-      } else if (error?.response?.data?.message) {
-        errorMessage = 'You have entered an invalid email or password';
-      } else if (error?.message) {
-        errorMessage = 'You have entered an invalid email or password';
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response?.data?.errors?.length > 0) {
+          // Handle ErrorClass format from backend
+          const firstError = axiosError.response.data.errors[0];
+          errorMessage = firstError.message || 'You have entered an invalid email or password';
+        } else if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        } else if (axiosError.message) {
+          errorMessage = axiosError.message;
+        }
       }
 
       setLoginError(errorMessage); // Store error in context
@@ -248,8 +263,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update profile error:', error);
+
+      // Extract error message from API response
+      let errorMessage = 'Failed to update profile. Please try again.';
+
+      if (error?.response?.data?.errors?.length > 0) {
+        errorMessage = error.response.data.errors[0].message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      console.error('Update profile error details:', errorMessage);
       return false;
     } finally {
       setIsLoading(false);
@@ -272,8 +298,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update avatar error:', error);
+
+      // Extract error message from API response
+      let errorMessage = 'Failed to update avatar. Please try again.';
+
+      if (error?.response?.data?.errors?.length > 0) {
+        errorMessage = error.response.data.errors[0].message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      console.error('Update avatar error details:', errorMessage);
       return false;
     } finally {
       setIsLoading(false);
@@ -288,8 +325,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Change password error:', error);
+
+      // Extract error message from API response
+      let errorMessage = 'Failed to change password. Please try again.';
+
+      if (error?.response?.data?.errors?.length > 0) {
+        errorMessage = error.response.data.errors[0].message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      // For now, we'll just log the error since this function returns boolean
+      // In the future, we might want to modify the interface to return error messages
+      console.error('Change password error details:', errorMessage);
       return false;
     } finally {
       setIsLoading(false);

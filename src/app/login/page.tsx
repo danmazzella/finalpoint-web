@@ -68,10 +68,13 @@ function LoginForm() {
 
       if (result?.success) {
         router.push(redirectTo);
+      } else if (result?.error) {
+        // Display the error from the login function
+        setValidationError(result.error);
       }
-      // Error handling is done in the AuthContext
     } catch (error) {
       console.error('Unexpected error in handleSubmit:', error);
+      setValidationError('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -201,7 +204,7 @@ function LoginForm() {
             </div>
 
             {(loginError || validationError) && (
-              <div className="text-red-600 text-sm text-center">
+              <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm text-center font-medium">
                 {loginError || validationError}
               </div>
             )}
@@ -252,7 +255,7 @@ function LoginForm() {
                 </div>
 
                 {forgotPasswordError && (
-                  <div className="text-red-600 text-sm">
+                  <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm font-medium">
                     {forgotPasswordError}
                   </div>
                 )}
