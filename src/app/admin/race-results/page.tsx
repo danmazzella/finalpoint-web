@@ -72,7 +72,14 @@ export default function RaceResultsEntryPage() {
             }
 
             if (racesResponse.status === 200) {
-                setRaces(racesResponse.data.data || []);
+                const racesData = racesResponse.data.data || [];
+                setRaces(racesData);
+
+                // Set the selected week to the first available race (lowest week number)
+                if (racesData.length > 0) {
+                    const firstRace = racesData.sort((a: Race, b: Race) => a.weekNumber - b.weekNumber)[0];
+                    setSelectedWeek(firstRace.weekNumber);
+                }
             }
         } catch (error) {
             console.error('Error loading initial data:', error);
