@@ -213,7 +213,7 @@ export default function ScoringPage() {
 
                                 <div className="border border-gray-200 rounded-lg p-4">
                                     <h3 className="font-semibold text-gray-900 mb-2">Can I change my prediction after submitting it?</h3>
-                                    <p className="text-gray-700">Yes! You can change your predictions up until 1 hour before qualifying begins. After that, predictions are locked and cannot be modified.</p>
+                                    <p className="text-gray-700">Yes! You can change your predictions up until 5 minutes before qualifying begins. After that, predictions are locked and cannot be modified.</p>
                                 </div>
 
                                 <div className="border border-gray-200 rounded-lg p-4">

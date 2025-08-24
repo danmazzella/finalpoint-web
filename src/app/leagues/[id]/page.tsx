@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { leaguesAPI, activityAPI, League, f1racesAPI } from '@/lib/api';
+import { copyToClipboardWithFeedback } from '@/utils/clipboardUtils';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import PageTitle from '@/components/PageTitle';
@@ -396,10 +397,14 @@ export default function LeagueDetailPage() {
                 {league.joinCode && (
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         const shareUrl = `${window.location.origin}/joinleague/${league.joinCode}`;
-                        navigator.clipboard.writeText(shareUrl);
-                        showToast('Invite link copied! Share it with friends to join your league.', 'success');
+                        await copyToClipboardWithFeedback(
+                          shareUrl,
+                          showToast,
+                          'Invite link copied! Share it with friends to join your league.',
+                          'Failed to copy invite link. Please try again.'
+                        );
                       }}
                       className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                     >
@@ -409,10 +414,14 @@ export default function LeagueDetailPage() {
                       Invite Friends
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         if (league.joinCode) {
-                          navigator.clipboard.writeText(league.joinCode);
-                          showToast('Join code copied to clipboard!', 'success');
+                          await copyToClipboardWithFeedback(
+                            league.joinCode,
+                            showToast,
+                            'Join code copied to clipboard!',
+                            'Failed to copy join code. Please try again.'
+                          );
                         }
                       }}
                       className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -590,6 +599,8 @@ export default function LeagueDetailPage() {
                               `Changed league visibility from "${activity.previousDriverName}"`
                             ) : activity.activityType === 'league_created' ? (
                               `League created successfully`
+                            ) : activity.activityType === 'picks_locked' ? (
+                              `Picks locked for ${activity.raceName || 'this race'} • Week ${activity.weekNumber || 'Unknown'}`
                             ) : (
                               `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`
                             )}

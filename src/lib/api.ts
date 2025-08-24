@@ -180,11 +180,14 @@ export const adminAPI = {
     apiService.put(`/admin/users/${userId}/role`, { role }),
   getAdminDashboardStats: () => apiService.get('/admin/dashboard-stats'),
   getAvailableRaces: () => apiService.get('/admin/available-races'),
+  getAvailableRacesForResults: () => apiService.get('/admin/available-races-for-results'),
   getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
   testNotifications: (data: { userId: number; notificationType: 'email' | 'push' | 'both'; customMessage?: string; templateId?: string; templateFields?: Record<string, string> }) => apiService.post('/admin/test-notifications', data),
   getUserNotificationHistory: (userId: number) => apiService.get(`/admin/users/${userId}/notification-history`),
   getPickLockingStatus: () => apiService.get('/admin/pick-locking-status'),
-  updatePickLockingStatus: (data: { enabled: boolean; lockTime: string; unlockTime: string }) => apiService.put('/admin/pick-locking-status', data)
+  updatePickLockingStatus: (data: { enabled: boolean; lockTime: string; unlockTime: string }) => apiService.put('/admin/pick-locking-status', data),
+  enterRaceResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>) =>
+    apiService.post('/admin/enter-race-results', { weekNumber, results })
 };
 
 export const authAPI = {

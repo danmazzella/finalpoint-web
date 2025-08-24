@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
 import DriverSelectionModal from '@/components/DriverSelectionModal';
+import { formatTimeRemainingLocal } from '@/utils/timeUtils';
 
 interface CurrentRace {
     weekNumber: number;
@@ -30,6 +31,7 @@ interface CurrentRace {
     timeUntilLock: number;
     qualifyingDate?: string;
     showCountdown?: boolean;
+    lockTime?: string; // Added for new countdown logic
 }
 
 function PicksV2Form() {
@@ -159,7 +161,7 @@ function PicksV2Form() {
 
         // Check if picks are locked
         if (currentRace?.picksLocked) {
-            showToast('Picks are currently locked for this race. Picks lock 1 hour before qualifying starts.', 'error');
+            showToast('Picks are currently locked for this race. Picks lock 5 minutes before qualifying starts.', 'error');
             return;
         }
 
@@ -250,6 +252,8 @@ function PicksV2Form() {
         return null;
     };
 
+    // Time formatting is now handled by the imported utility function
+
     // Handle position selection
     const handlePositionClick = (position: number) => {
         if (isMobile) {
@@ -323,7 +327,7 @@ function PicksV2Form() {
 
         // Check if picks are locked
         if (currentRace?.picksLocked) {
-            showToast('Picks are currently locked for this race. Picks lock 1 hour before qualifying starts.', 'error');
+            showToast('Picks are currently locked for this race. Picks lock 5 minutes before qualifying starts.', 'error');
             return;
         }
 
@@ -513,7 +517,7 @@ function PicksV2Form() {
                         )}
 
                         {/* Pick Locking Countdown */}
-                        {!currentRace.picksLocked && currentRace.showCountdown && (
+                        {!currentRace.picksLocked && (
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                                 <div className="flex">
                                     <div className="flex-shrink-0">
@@ -523,10 +527,39 @@ function PicksV2Form() {
                                     </div>
                                     <div className="ml-3">
                                         <h3 className="text-sm font-medium text-yellow-800">
-                                            Picks Lock Soon
+                                            Pick Locking Status
                                         </h3>
                                         <div className="mt-2 text-sm text-yellow-700">
-                                            <p>{currentRace.lockMessage}</p>
+                                            <p>
+                                                {currentRace.lockTime ? (
+                                                    (() => {
+                                                        const timeRemaining = formatTimeRemainingLocal(currentRace.lockTime);
+                                                        if (timeRemaining === 'Locked') {
+                                                            return (
+                                                                <>
+                                                                    Picks are now locked for {currentRace.raceName}
+                                                                    <br />
+                                                                    <span className="text-xs text-yellow-600">
+                                                                        Lock time: {new Date(currentRace.lockTime).toLocaleString()}
+                                                                    </span>
+                                                                </>
+                                                            );
+                                                        } else {
+                                                            return (
+                                                                <>
+                                                                    Picks will lock in {timeRemaining} for {currentRace.raceName}
+                                                                    <br />
+                                                                    <span className="text-xs text-yellow-600">
+                                                                        Lock time: {new Date(currentRace.lockTime).toLocaleString()}
+                                                                    </span>
+                                                                </>
+                                                            );
+                                                        }
+                                                    })()
+                                                ) : (
+                                                    currentRace.lockMessage
+                                                )}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
