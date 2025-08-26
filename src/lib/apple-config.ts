@@ -6,7 +6,8 @@ export const appleConfig = {
 
     // Redirect URI for Apple Sign-In
     // This should match what you configure in Apple Developer Console
-    redirectURI: typeof window !== 'undefined' ? window.location.origin : '',
+    redirectURI: process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI ||
+        (typeof window !== 'undefined' ? `${window.location.origin}/auth/apple/callback` : ''),
 
     // Scope for Apple Sign-In
     // 'email name' - requests both email and full name
@@ -41,6 +42,20 @@ export const isAppleSignInAvailable = (): boolean => {
 
     // Apple Sign-In works best on iOS Safari, but is available on other platforms too
     return true;
+};
+
+// Debug function to log Apple Sign-In configuration
+export const debugAppleConfig = () => {
+    console.log('🍎 Apple Sign-In Configuration Debug:', {
+        clientId: appleConfig.clientId,
+        redirectURI: appleConfig.redirectURI,
+        scope: appleConfig.scope,
+        state: appleConfig.state,
+        usePopup: appleConfig.usePopup,
+        envClientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
+        envRedirectURI: process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI,
+        currentOrigin: typeof window !== 'undefined' ? window.location.origin : 'N/A'
+    });
 };
 
 // Helper function to get the best Apple Sign-In experience

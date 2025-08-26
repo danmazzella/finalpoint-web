@@ -6,7 +6,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { shouldShowGoogleSignIn } from '@/lib/environment';
 import AppleSigninButton from 'react-apple-signin-auth';
-import { appleConfig, isAppleSignInAvailable } from '@/lib/apple-config';
+import { appleConfig, isAppleSignInAvailable, debugAppleConfig } from '@/lib/apple-config';
 
 interface SimpleSocialSignInProps {
     onSuccess?: () => void;
@@ -63,6 +63,11 @@ const SimpleSocialSignIn: React.FC<SimpleSocialSignInProps> = ({ onSuccess, onEr
     useEffect(() => {
         console.log('🔄 Component re-rendered with theme:', { resolvedTheme, isDarkMode });
     });
+
+    // Debug Apple Sign-In configuration on mount
+    useEffect(() => {
+        debugAppleConfig();
+    }, []);
 
     const handleGoogleSignIn = async () => {
         try {
