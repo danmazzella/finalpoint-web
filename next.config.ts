@@ -40,6 +40,20 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Add CSS MIME type headers
+      {
+        source: '/_next/static/css/(.*)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       // Service worker headers
       {
         source: '/sw.js',
