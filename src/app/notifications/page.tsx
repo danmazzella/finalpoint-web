@@ -18,9 +18,11 @@ export default function NotificationsPage() {
         emailReminder5Days: true,
         emailReminder3Days: true,
         emailReminder1Day: true,
+        emailReminder1Hour: true,
         pushReminder5Days: true,
         pushReminder3Days: true,
         pushReminder1Day: true,
+        pushReminder1Hour: true,
         emailOther: true,
         pushOther: true
     });
@@ -51,9 +53,11 @@ export default function NotificationsPage() {
                     emailReminder5Days: Boolean(rawData.emailReminder5Days ?? true),
                     emailReminder3Days: Boolean(rawData.emailReminder3Days ?? true),
                     emailReminder1Day: Boolean(rawData.emailReminder1Day ?? true),
+                    emailReminder1Hour: Boolean(rawData.emailReminder1Hour ?? true),
                     pushReminder5Days: Boolean(rawData.pushReminder5Days ?? true),
                     pushReminder3Days: Boolean(rawData.pushReminder3Days ?? true),
                     pushReminder1Day: Boolean(rawData.pushReminder1Day ?? true),
+                    pushReminder1Hour: Boolean(rawData.pushReminder1Hour ?? true),
                     emailOther: Boolean(rawData.emailOther ?? true),
                     pushOther: Boolean(rawData.pushOther ?? true)
                 });
@@ -350,6 +354,25 @@ export default function NotificationsPage() {
                                     </button>
                                 </div>
 
+                                {/* 1-Hour Reminder */}
+                                <div className="flex items-center justify-between ml-6">
+                                    <div>
+                                        <p className="font-medium text-gray-900">1-Hour Reminder</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get reminded 1 hour before races
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('emailReminder1Hour')}
+                                        disabled={!preferences.emailReminders}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.emailReminder1Hour && preferences.emailReminders ? 'bg-blue-600' : 'bg-gray-200'} ${!preferences.emailReminders ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.emailReminder1Hour && preferences.emailReminders ? 'translate-x-5' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+                                </div>
+
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="font-medium text-gray-900">Score Updates</p>
@@ -529,6 +552,25 @@ export default function NotificationsPage() {
                                     >
                                         <span
                                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushReminder1Day && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* 1-Hour Reminder */}
+                                <div className="flex items-center justify-between ml-6">
+                                    <div>
+                                        <p className="font-medium text-gray-900">1-Hour Reminder</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get reminded 1 hour before races
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('pushReminder1Hour')}
+                                        disabled={!pushSupported || pushPermission !== 'granted'}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushReminder1Hour && pushPermission === 'granted' ? 'bg-blue-600' : 'bg-gray-200'} ${!pushSupported || pushPermission !== 'granted' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushReminder1Hour && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'}`}
                                         />
                                     </button>
                                 </div>

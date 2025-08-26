@@ -38,6 +38,16 @@ export const notificationTemplates: NotificationTemplate[] = [
         description: 'Final urgent reminder 1 day before a race'
     },
 
+    {
+        id: 'pick_reminder_1_hour',
+        name: '1-Hour Pick Reminder',
+        title: 'URGENT: {raceName} in 1 hour!',
+        body: 'Race starts in 1 hour - Make your picks NOW!',
+        emailSubject: 'URGENT: {raceName} starts in 1 hour!',
+        category: 'reminder',
+        description: 'Last-minute urgent reminder 1 hour before a race'
+    },
+
     // Promotional Templates
     {
         id: 'league_invitation',
