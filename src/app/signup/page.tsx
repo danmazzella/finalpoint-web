@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
 import Avatar from '@/components/Avatar';
 import PasswordStrengthIndicator, { validatePasswordComplexity } from '@/components/PasswordStrengthIndicator';
+import SimpleSocialSignIn from '@/components/SimpleSocialSignIn';
+import { shouldShowGoogleSignIn } from '@/lib/environment';
 
 function SignupForm() {
   const [avatar, setAvatar] = useState<File | null>(null);
@@ -24,6 +26,7 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
 
   const { name, email, password, confirmPassword } = signupFormData;
 
@@ -249,6 +252,9 @@ function SignupForm() {
               </button>
             </div>
           </form>
+
+          {/* Simple Social Sign-In */}
+          <SimpleSocialSignIn />
 
           <div className="mt-6">
             <div className="relative">

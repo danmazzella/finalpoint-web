@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Logo from '@/components/Logo';
 import { shouldShowGoogleSignIn } from '@/lib/environment';
+import SimpleSocialSignIn from '@/components/SimpleSocialSignIn';
 
 
 
@@ -284,25 +285,8 @@ function LoginForm() {
             </div>
           )}
 
-          {/* Google Sign-In Section */}
-          {shouldShowGoogleSignIn() && (
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div ref={googleButtonRef} className="w-full flex justify-center">
-                  {/* Google Sign-In button will be rendered here */}
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Simple Social Sign-In */}
+          <SimpleSocialSignIn />
 
           <div className="mt-6">
             <div className="relative">

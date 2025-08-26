@@ -204,6 +204,7 @@ export const authAPI = {
   },
   login: (data: LoginData) => apiService.post('/users/login', data),
   googleAuth: (idToken: string) => apiService.post('/users/google-auth', { idToken }),
+  appleAuth: (idToken: string) => apiService.post('/users/apple-auth', { idToken }),
   forgotPassword: (data: { email: string }) => apiService.post('/users/forgot-password', data),
   resetPassword: (data: { token: string; newPassword: string }) => apiService.post('/users/reset-password', data),
   getProfile: () => apiService.get('/users/profile'),
