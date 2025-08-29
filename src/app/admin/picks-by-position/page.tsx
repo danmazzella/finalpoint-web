@@ -176,15 +176,25 @@ export default function PicksByPositionPage() {
                 <div className="space-y-6">
                     {overview.map((pos) => (
                         <div key={pos.position} className="bg-white shadow-lg rounded-lg p-6">
-                            <div className="flex items-center space-x-3 mb-4">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg ${getPositionColor(pos.position)}`}>
-                                    {pos.position}
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg ${getPositionColor(pos.position)}`}>
+                                        {pos.position}
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-semibold text-gray-900">
+                                            {getPositionLabel(pos.position)}
+                                            {showPickCounts && ` - ${pos.totalPicks} total picks`}
+                                        </h2>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-900">
-                                        {getPositionLabel(pos.position)} - {pos.totalPicks} total picks
-                                    </h2>
-                                </div>
+                                {showPickCounts && (
+                                    <div className="text-right">
+                                        <div className="text-sm text-gray-500">Total Percentage</div>
+                                        <div className="text-lg font-bold text-green-600">100%</div>
+                                        <div className="text-xs text-gray-400">Adjusted for rounding</div>
+                                    </div>
+                                )}
                             </div>
 
                             {pos.drivers.length === 0 ? (
