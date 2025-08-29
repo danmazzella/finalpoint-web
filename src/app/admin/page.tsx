@@ -112,6 +112,40 @@ export default function AdminOverviewPage() {
             </div>
           </Link>
 
+          <Link
+            href="/admin/league-picks-overview"
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+          >
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 00-2 2v2h2V7z" />
+                </svg>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-900">League Picks Overview</h3>
+              <p className="text-sm text-gray-500">View all picks for each position across all leagues</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/picks-by-position"
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+          >
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-900">Popular Picks by Position</h3>
+              <p className="text-sm text-gray-500">View picks grouped by position across all leagues</p>
+            </div>
+          </Link>
+
           {/* Add more admin tools here in the future */}
           <div className="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50">
             <div className="flex-shrink-0">

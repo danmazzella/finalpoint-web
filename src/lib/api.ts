@@ -182,6 +182,9 @@ export const adminAPI = {
   getAvailableRaces: () => apiService.get('/admin/available-races'),
   getAvailableRacesForResults: () => apiService.get('/admin/available-races-for-results'),
   getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
+  getLeaguePicksOverview: (weekNumber: number) => apiService.get(`/admin/league-picks-overview?weekNumber=${weekNumber}`),
+  getPicksByPositionOverview: (weekNumber: number) => apiService.get(`/admin/picks-by-position-overview?weekNumber=${weekNumber}`),
+  getPicksByPositionDetailed: (weekNumber: number) => apiService.get(`/admin/picks-by-position-detailed?weekNumber=${weekNumber}`),
   testNotifications: (data: { userId: number; notificationType: 'email' | 'push' | 'both'; customMessage?: string; templateId?: string; templateFields?: Record<string, string> }) => apiService.post('/admin/test-notifications', data),
   getUserNotificationHistory: (userId: number) => apiService.get(`/admin/users/${userId}/notification-history`),
   getPickLockingStatus: () => apiService.get('/admin/pick-locking-status'),
@@ -466,6 +469,36 @@ export interface MemberPicksV2 {
   correctPicks: number;
   totalPicks: number;
   accuracy: string;
+}
+
+export interface LeaguePicksOverview {
+  leagueId: number;
+  leagueName: string;
+  requiredPositions: number[];
+  positions: {
+    position: number;
+    totalPicks: number;
+    picksSummary: string;
+  }[];
+}
+
+export interface PicksByPositionOverview {
+  position: number;
+  totalPicks: number;
+  picksSummary: string;
+  leaguesInvolved: string;
+}
+
+export interface PicksByPositionDetailed {
+  position: number;
+  totalPicks: number;
+  drivers: {
+    driverId: number;
+    driverName: string;
+    driverTeam: string;
+    pickCount: number;
+    percentage: number;
+  }[];
 }
 
 export interface NotificationPreferences {
