@@ -30,6 +30,7 @@ interface AdminStats {
 export default function AdminOverviewPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reschedulingPicks, setReschedulingPicks] = useState(false);
 
   useEffect(() => {
     loadAdminData();
@@ -51,6 +52,28 @@ export default function AdminOverviewPage() {
       console.error('Error loading admin data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRescheduleAllPicks = async () => {
+    if (!confirm('Are you sure you want to reschedule all picks? This will clear all existing scheduled pick locking jobs and create new ones based on current race times.')) {
+      return;
+    }
+
+    try {
+      setReschedulingPicks(true);
+      const response = await adminAPI.rescheduleAllPicks();
+
+      if (response.status === 200) {
+        alert('All picks have been rescheduled successfully!');
+      } else {
+        alert('Error rescheduling picks. Please check the console for details.');
+      }
+    } catch (error) {
+      console.error('Error rescheduling picks:', error);
+      alert('Error rescheduling picks. Please check the console for details.');
+    } finally {
+      setReschedulingPicks(false);
     }
   };
 
@@ -145,6 +168,35 @@ export default function AdminOverviewPage() {
               <p className="text-sm text-gray-500">View picks grouped by position across all leagues</p>
             </div>
           </Link>
+
+          <button
+            onClick={handleRescheduleAllPicks}
+            disabled={reschedulingPicks}
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                {reschedulingPicks ? (
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600"></div>
+                ) : (
+                  <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <div className="ml-4 text-left">
+              <h3 className="text-sm font-medium text-gray-900">
+                {reschedulingPicks ? 'Rescheduling Picks...' : 'Reschedule All Picks'}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {reschedulingPicks
+                  ? 'Please wait while picks are being rescheduled...'
+                  : 'Clear and reschedule all pick locking jobs based on current race times'
+                }
+              </p>
+            </div>
+          </button>
 
           {/* Add more admin tools here in the future */}
           <div className="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50">

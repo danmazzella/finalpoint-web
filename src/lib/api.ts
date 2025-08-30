@@ -190,7 +190,8 @@ export const adminAPI = {
   getPickLockingStatus: () => apiService.get('/admin/pick-locking-status'),
   updatePickLockingStatus: (data: { enabled: boolean; lockTime: string; unlockTime: string }) => apiService.put('/admin/pick-locking-status', data),
   enterRaceResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>) =>
-    apiService.post('/admin/enter-race-results', { weekNumber, results })
+    apiService.post('/admin/enter-race-results', { weekNumber, results }),
+  rescheduleAllPicks: () => apiService.post('/admin/reschedule-all-picks')
 };
 
 export const authAPI = {
