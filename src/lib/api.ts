@@ -191,7 +191,21 @@ export const adminAPI = {
   updatePickLockingStatus: (data: { enabled: boolean; lockTime: string; unlockTime: string }) => apiService.put('/admin/pick-locking-status', data),
   enterRaceResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>) =>
     apiService.post('/admin/enter-race-results', { weekNumber, results }),
-  rescheduleAllPicks: () => apiService.post('/admin/reschedule-all-picks')
+  rescheduleAllPicks: () => apiService.post('/admin/reschedule-all-picks'),
+
+  // New admin methods for managing picks and league memberships
+  addUserToLeague: (leagueId: number, userId: number) =>
+    apiService.post(`/admin/leagues/${leagueId}/add-user`, { userId }),
+  removeUserFromLeague: (leagueId: number, userId: number) =>
+    apiService.delete(`/admin/leagues/${leagueId}/remove-user/${userId}`),
+  createUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, driverId: number) =>
+    apiService.post(`/admin/users/${userId}/picks`, { leagueId, weekNumber, position, driverId }),
+  updateUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, driverId: number) =>
+    apiService.put(`/admin/users/${userId}/picks`, { leagueId, weekNumber, position, driverId }),
+  deleteUserPick: (userId: number, leagueId: number, weekNumber: number, position: number) =>
+    apiService.delete(`/admin/users/${userId}/picks`, { data: { leagueId, weekNumber, position } }),
+  getUserPicks: (userId: number, leagueId: number) =>
+    apiService.get(`/admin/users/${userId}/picks/${leagueId}`),
 };
 
 export const authAPI = {
@@ -517,4 +531,30 @@ export interface NotificationPreferences {
   pushReminder1Hour: boolean;
   emailOther: boolean;
   pushOther: boolean;
+}
+
+// Activity interface for league activities
+export interface Activity {
+  id: number;
+  leagueId: number;
+  userId: number;
+  activityType: string;
+  weekNumber: number | null;
+  driverId: number | null;
+  driverName: string | null;
+  driverTeam: string | null;
+  previousDriverId: number | null;
+  previousDriverName: string | null;
+  previousDriverTeam: string | null;
+  position: number | null;
+  raceName: string | null;
+  userName: string | null;
+  userAvatar: string | null;
+  leagueName: string | null;
+  createdAt: string;
+  // New fields for formatted messages from backend
+  primaryMessage?: string;
+  secondaryMessage?: string;
+  // New field for flexible activity data
+  activityData?: string;
 } 

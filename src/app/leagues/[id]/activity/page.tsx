@@ -8,26 +8,7 @@ import { useToast } from '@/contexts/ToastContext';
 import PageTitle from '@/components/PageTitle';
 import BackToLeagueButton from '@/components/BackToLeagueButton';
 import Avatar from '@/components/Avatar';
-
-interface Activity {
-    id: number;
-    leagueId: number;
-    userId: number | null;
-    userName: string | null;
-    userAvatar?: string;
-    activityType: string;
-    weekNumber: number | null;
-    driverId: number | null;
-    driverName: string | null;
-    driverTeam: string | null;
-    previousDriverId: number | null;
-    previousDriverName: string | null;
-    previousDriverTeam: string | null;
-    position: number | null;
-    raceName: string | null;
-    leagueName: string | null;
-    createdAt: string;
-}
+import { Activity } from '@/lib/api';
 
 export default function LeagueActivityPage() {
     const params = useParams();
@@ -143,6 +124,23 @@ export default function LeagueActivityPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                     </svg>
                 );
+            // Admin activity types
+            case 'admin_user_added_to_league':
+            case 'admin_user_removed_from_league':
+            case 'admin_pick_created':
+            case 'admin_pick_updated':
+            case 'admin_pick_deleted':
+            case 'admin_user_role_updated':
+            case 'admin_race_results_entered':
+            case 'admin_picks_rescheduled':
+            case 'admin_picks_locked':
+            case 'admin_picks_scored':
+            case 'admin_test_notification_sent':
+                return (
+                    <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                );
             default:
                 return (
                     <svg className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -171,49 +169,21 @@ export default function LeagueActivityPage() {
                 return 'bg-indigo-100';
             case 'race_result_processed':
                 return 'bg-orange-100';
+            // Admin activity types
+            case 'admin_user_added_to_league':
+            case 'admin_user_removed_from_league':
+            case 'admin_pick_created':
+            case 'admin_pick_updated':
+            case 'admin_pick_deleted':
+            case 'admin_user_role_updated':
+            case 'admin_race_results_entered':
+            case 'admin_picks_rescheduled':
+            case 'admin_picks_locked':
+            case 'admin_picks_scored':
+            case 'admin_test_notification_sent':
+                return 'bg-amber-100';
             default:
                 return 'bg-gray-100';
-        }
-    };
-
-    const getActivityMessage = (activity: Activity) => {
-        if (!activity.userName) return 'System activity';
-
-        switch (activity.activityType) {
-            case 'pick_created':
-                return `${activity.userName} made a pick`;
-            case 'pick_changed':
-                return `${activity.userName} changed their pick from ${activity.previousDriverName || 'Unknown'} to ${activity.driverName || 'Unknown'}`;
-            case 'member_joined':
-                return `${activity.userName} joined the league`;
-            case 'member_left':
-                return `${activity.userName} left the league`;
-            case 'league_created':
-                return `${activity.userName} created the league ${activity.leagueName}`;
-            default:
-                return `${activity.userName} performed an action`;
-        }
-    };
-
-    const getActivityDetails = (activity: Activity) => {
-        switch (activity.activityType) {
-            case 'pick_created':
-                if (activity.driverName && activity.position) {
-                    return `P${activity.position}: ${activity.driverName} (${activity.driverTeam})`;
-                }
-                return activity.driverName ? `${activity.driverName} (${activity.driverTeam})` : 'Driver selection';
-            case 'pick_changed':
-                if (activity.position) {
-                    return `Position P${activity.position} • Week ${activity.weekNumber || 'Unknown'}`;
-                }
-                return `Week ${activity.weekNumber || 'Unknown'}`;
-            case 'member_joined':
-            case 'member_left':
-                return 'League membership change';
-            case 'league_created':
-                return 'League created successfully';
-            default:
-                return 'Activity recorded';
         }
     };
 
@@ -279,11 +249,91 @@ export default function LeagueActivityPage() {
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-gray-900">
-                                                    {getActivityMessage(activity)}
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {activity.primaryMessage || (() => {
+                                                        // Fallback to old field logic for backwards compatibility
+                                                        switch (activity.activityType) {
+                                                            case 'pick_created':
+                                                                return `${activity.userName} created a pick`;
+                                                            case 'pick_changed':
+                                                                return `${activity.userName} changed a pick`;
+                                                            case 'pick_removed':
+                                                                return `${activity.userName} removed a pick`;
+                                                            case 'member_joined':
+                                                            case 'user_joined':
+                                                                return `${activity.userName} joined the league`;
+                                                            case 'member_left':
+                                                                return `${activity.userName} left the league`;
+                                                            case 'league_name_changed':
+                                                                return `${activity.userName} changed the league name`;
+                                                            case 'league_visibility_changed':
+                                                                return `${activity.userName} changed league visibility`;
+                                                            case 'league_created':
+                                                                return `${activity.userName} created the league`;
+                                                            case 'race_result_processed':
+                                                                return `Race results processed for Week ${activity.weekNumber || 'Unknown'}`;
+                                                            case 'picks_locked':
+                                                                return 'Picks locked';
+                                                            // Admin activities
+                                                            case 'admin_user_added_to_league':
+                                                                return `${activity.driverName || 'Admin added user to league'}`;
+                                                            case 'admin_user_removed_from_league':
+                                                                return `${activity.driverName || 'Admin removed user from league'}`;
+                                                            case 'admin_pick_created':
+                                                                return `${activity.driverName || 'Admin created pick for user'}`;
+                                                            case 'admin_pick_updated':
+                                                                return `${activity.driverName || 'Admin updated user\'s pick'}`;
+                                                            case 'admin_pick_deleted':
+                                                                return `${activity.driverName || 'Admin deleted user\'s pick'}`;
+                                                            case 'admin_user_role_updated':
+                                                                return `${activity.driverName || 'Admin updated user role'}`;
+                                                            default:
+                                                                return `${activity.userName || 'System'} ${activity.activityType.replace(/_/g, ' ')}`;
+                                                        }
+                                                    })()}
                                                 </p>
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    {getActivityDetails(activity)}
+                                                <p className="text-sm text-gray-500">
+                                                    {activity.secondaryMessage || (() => {
+                                                        // Fallback to old field logic for backwards compatibility
+                                                        switch (activity.activityType) {
+                                                            case 'pick_created':
+                                                                return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                                            case 'pick_changed':
+                                                                return `Position P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                                            case 'pick_removed':
+                                                                return `Removed ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) from P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                                            case 'member_joined':
+                                                            case 'user_joined':
+                                                                return 'Welcome to the league!';
+                                                            case 'member_left':
+                                                                return 'Goodbye!';
+                                                            case 'league_name_changed':
+                                                                return `Changed from "${activity.previousDriverName || 'Unknown'}" to "${activity.driverName || 'Unknown'}"`;
+                                                            case 'league_visibility_changed':
+                                                                return `Changed league visibility from "${activity.previousDriverName || 'Unknown'}"`;
+                                                            case 'league_created':
+                                                                return 'League created successfully';
+                                                            case 'race_result_processed':
+                                                                return `${activity.raceName ? `${activity.raceName} - ` : ''}${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) finished in P${activity.position || '?'}`;
+                                                            case 'picks_locked':
+                                                                return `Picks locked for ${activity.raceName || 'this race'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                                            // Admin activities
+                                                            case 'admin_user_added_to_league':
+                                                                return `${activity.driverTeam || 'Welcome to the league!'}`;
+                                                            case 'admin_user_removed_from_league':
+                                                                return `${activity.driverTeam || 'Goodbye!'}`;
+                                                            case 'admin_pick_created':
+                                                                return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                                            case 'admin_pick_updated':
+                                                                return `Changed pick from ${activity.previousDriverName || 'Unknown'} to ${activity.driverName || 'Unknown'} for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                                            case 'admin_pick_deleted':
+                                                                return `Removed ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) from P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                                            case 'admin_user_role_updated':
+                                                                return `${activity.driverTeam || 'User role updated by administrator'}`;
+                                                            default:
+                                                                return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'}`;
+                                                        }
+                                                    })()}
                                                 </p>
                                                 <p className="text-xs text-gray-500 mt-2">
                                                     {new Date(activity.createdAt).toLocaleDateString('en-US', {

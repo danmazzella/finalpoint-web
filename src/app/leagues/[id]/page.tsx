@@ -9,31 +9,35 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import PageTitle from '@/components/PageTitle';
 import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
+import { Activity } from '@/lib/api';
 
 interface CurrentRace {
+  id: number;
+  name: string;
+  date: string;
+  circuit: string;
+  country: string;
   weekNumber: number;
-  raceName: string;
-  raceDate: string;
-  status: string;
+  isLocked: boolean;
 }
 
-interface Activity {
+interface LeagueMember {
   id: number;
-  leagueId: number;
-  userId: number | null;
-  userName: string | null;
-  activityType: string;
-  weekNumber: number | null;
-  driverId: number | null;
-  driverName: string | null;
-  driverTeam: string | null;
-  previousDriverId: number | null;
-  previousDriverName: string | null;
-  previousDriverTeam: string | null;
-  position: number | null;
-  raceName: string | null;
-  leagueName: string | null;
-  createdAt: string;
+  name: string;
+  avatar: string | null;
+  isAdmin: boolean;
+  totalPoints: number;
+  currentRank: number;
+}
+
+interface UserPick {
+  id: number;
+  driverId: number;
+  driverName: string;
+  driverTeam: string;
+  position: number;
+  weekNumber: number;
+  isLocked: boolean;
 }
 
 export default function LeagueDetailPage() {
@@ -502,115 +506,143 @@ export default function LeagueDetailPage() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                     <p className="mt-2 text-sm text-gray-500">Loading activity...</p>
                   </div>
-                ) : recentActivity.length > 0 ? (
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-500 mb-2">Found {recentActivity.length} activities</div>
-                    {recentActivity.map((activity, index) => (
-                      <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="flex-shrink-0">
-                          <div className={`h-8 w-8 rounded-full flex items-center justify-center ${activity.activityType === 'pick_created' ? 'bg-green-100' :
-                            activity.activityType === 'pick_changed' ? 'bg-blue-100' :
-                              activity.activityType === 'pick_removed' ? 'bg-red-100' :
-                                activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'bg-purple-100' :
-                                  activity.activityType === 'member_left' ? 'bg-red-100' :
-                                    activity.activityType === 'league_name_changed' ? 'bg-indigo-100' :
-                                      activity.activityType === 'league_visibility_changed' ? 'bg-blue-100' :
-                                        activity.activityType === 'league_created' ? 'bg-yellow-100' :
-                                          activity.activityType === 'race_result_processed' ? 'bg-orange-100' :
-                                            'bg-gray-100'
-                            }`}>
-                            <svg className={`h-4 w-4 ${activity.activityType === 'pick_created' ? 'text-green-600' :
-                              activity.activityType === 'pick_changed' ? 'text-blue-600' :
-                                activity.activityType === 'pick_removed' ? 'text-red-600' :
-                                  activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'text-purple-600' :
-                                    activity.activityType === 'member_left' ? 'text-red-600' :
-                                      activity.activityType === 'league_name_changed' ? 'text-indigo-600' :
-                                        activity.activityType === 'league_visibility_changed' ? 'text-blue-600' :
-                                          activity.activityType === 'league_created' ? 'text-yellow-600' :
-                                            activity.activityType === 'race_result_processed' ? 'text-orange-600' :
-                                              'text-gray-600'
-                              }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              {activity.activityType === 'pick_created' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              ) : activity.activityType === 'pick_changed' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                              ) : activity.activityType === 'pick_removed' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                              ) : activity.activityType === 'member_left' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                              ) : activity.activityType === 'league_created' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              ) : activity.activityType === 'league_name_changed' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              ) : activity.activityType === 'league_visibility_changed' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              ) : activity.activityType === 'race_result_processed' ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              )}
-                            </svg>
+                ) : recentActivity && recentActivity.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentActivity.map((activity) => {
+                      // Debug logging to see what we're receiving
+                      console.log('Activity data:', {
+                        id: activity.id,
+                        type: activity.activityType,
+                        primaryMessage: activity.primaryMessage,
+                        secondaryMessage: activity.secondaryMessage,
+                        userName: activity.userName,
+                        driverName: activity.driverName,
+                        driverTeam: activity.driverTeam
+                      });
+
+                      return (
+                        <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-shrink-0">
+                            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${activity.activityType === 'pick_created' ? 'bg-green-100' :
+                              activity.activityType === 'pick_changed' ? 'bg-blue-100' :
+                                activity.activityType === 'pick_removed' ? 'bg-red-100' :
+                                  activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'bg-purple-100' :
+                                    activity.activityType === 'member_left' ? 'bg-red-100' :
+                                      activity.activityType === 'league_name_changed' ? 'bg-indigo-100' :
+                                        activity.activityType === 'league_visibility_changed' ? 'bg-blue-100' :
+                                          activity.activityType === 'league_created' ? 'bg-yellow-100' :
+                                            activity.activityType === 'race_result_processed' ? 'bg-orange-100' :
+                                              // Admin activity types
+                                              activity.activityType.startsWith('admin_') ? 'bg-amber-100' :
+                                                'bg-gray-100'
+                              }`}>
+                              <svg className={`h-4 w-4 ${activity.activityType === 'pick_created' ? 'text-green-600' :
+                                activity.activityType === 'pick_changed' ? 'text-blue-600' :
+                                  activity.activityType === 'pick_removed' ? 'text-red-600' :
+                                    activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? 'text-purple-600' :
+                                      activity.activityType === 'member_left' ? 'text-red-600' :
+                                        activity.activityType === 'league_name_changed' ? 'text-indigo-600' :
+                                          activity.activityType === 'league_visibility_changed' ? 'text-blue-600' :
+                                            activity.activityType === 'league_created' ? 'text-yellow-600' :
+                                              activity.activityType === 'race_result_processed' ? 'text-orange-600' :
+                                                // Admin activity types
+                                                activity.activityType.startsWith('admin_') ? 'text-amber-600' :
+                                                  'text-gray-600'
+                                }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                {activity.activityType === 'pick_created' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                ) : activity.activityType === 'pick_changed' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                ) : activity.activityType === 'pick_removed' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                ) : activity.activityType === 'member_left' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                ) : activity.activityType === 'league_created' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                ) : activity.activityType === 'league_name_changed' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                ) : activity.activityType === 'league_visibility_changed' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                ) : activity.activityType === 'race_result_processed' ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                                ) : activity.activityType.startsWith('admin_') ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                ) : (
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                )}
+                              </svg>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">
+                              {activity.primaryMessage || (() => {
+                                // Fallback to old field logic for backwards compatibility
+                                switch (activity.activityType) {
+                                  case 'pick_created':
+                                    return `${activity.userName} created a pick`;
+                                  case 'pick_changed':
+                                    return `${activity.userName} changed a pick`;
+                                  case 'pick_removed':
+                                    return `${activity.userName} removed a pick`;
+                                  case 'member_joined':
+                                  case 'user_joined':
+                                    return `${activity.userName} joined the league`;
+                                  case 'member_left':
+                                    return `${activity.userName} left the league`;
+                                  case 'league_name_changed':
+                                    return `${activity.userName} changed the league name`;
+                                  case 'league_visibility_changed':
+                                    return `${activity.userName} changed league visibility`;
+                                  case 'league_created':
+                                    return `${activity.userName} created the league`;
+                                  case 'race_result_processed':
+                                    return `Race results processed for Week ${activity.weekNumber || 'Unknown'}`;
+                                  case 'picks_locked':
+                                    return 'Picks locked';
+                                  default:
+                                    return `${activity.userName || 'System'} ${activity.activityType.replace(/_/g, ' ')}`;
+                                }
+                              })()}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {activity.secondaryMessage || (() => {
+                                // Fallback to old field logic for backwards compatibility
+                                switch (activity.activityType) {
+                                  case 'pick_created':
+                                    return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                  case 'pick_changed':
+                                    return `Position P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                  case 'pick_removed':
+                                    return `Removed ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) from P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                  case 'member_joined':
+                                  case 'user_joined':
+                                    return 'Welcome to the league!';
+                                  case 'member_left':
+                                    return 'Goodbye!';
+                                  case 'league_name_changed':
+                                    return `Changed from "${activity.previousDriverName || 'Unknown'}" to "${activity.driverName || 'Unknown'}"`;
+                                  case 'league_visibility_changed':
+                                    return `Changed league visibility from "${activity.previousDriverName || 'Unknown'}"`;
+                                  case 'league_created':
+                                    return 'League created successfully';
+                                  case 'race_result_processed':
+                                    return `${activity.raceName ? `${activity.raceName} - ` : ''}${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) finished in P${activity.position || '?'}`;
+                                  case 'picks_locked':
+                                    return `Picks locked for ${activity.raceName || 'this race'} • Week ${activity.weekNumber || 'Unknown'}`;
+                                  default:
+                                    return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'}`;
+                                }
+                              })()}
+                            </p>
+                          </div>
+                          <div className="flex-shrink-0 text-sm text-gray-500">
+                            {new Date(activity.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">
-                            {activity.activityType === 'pick_created' ? (
-                              `${activity.userName} made a pick`
-                            ) : activity.activityType === 'pick_changed' ? (
-                              `${activity.userName} changed their pick from ${activity.previousDriverName || 'Unknown'} to ${activity.driverName || 'Unknown'}`
-                            ) : activity.activityType === 'pick_removed' ? (
-                              `${activity.userName} removed their pick`
-                            ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
-                              `${activity.userName} joined the league`
-                            ) : activity.activityType === 'member_left' ? (
-                              `${activity.userName} left the league`
-                            ) : activity.activityType === 'league_name_changed' ? (
-                              `${activity.userName} changed the league name`
-                            ) : activity.activityType === 'league_visibility_changed' ? (
-                              `${activity.userName} changed the league visibility`
-                            ) : activity.activityType === 'league_created' ? (
-                              `${activity.userName} created the league ${activity.leagueName}`
-                            ) : activity.activityType === 'race_result_processed' ? (
-                              `Race results processed for Week ${activity.weekNumber || 'Unknown'}`
-                            ) : activity.activityType.includes('pick') && activity.previousDriverName && activity.driverName ? (
-                              `${activity.userName} changed their pick from ${activity.previousDriverName} to ${activity.driverName}`
-                            ) : (
-                              `${activity.userName || 'System'} ${activity.activityType.replace(/_/g, ' ')}`
-                            )}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {activity.activityType === 'pick_created' ? (
-                              `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
-                            ) : activity.activityType === 'pick_changed' ? (
-                              `Position P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
-                            ) : activity.activityType === 'pick_removed' ? (
-                              `Removed ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) from P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`
-                            ) : activity.activityType === 'race_result_processed' ? (
-                              `${activity.raceName ? `${activity.raceName} - ` : ''}${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) finished in P${activity.position || '?'}`
-                            ) : activity.activityType === 'member_joined' || activity.activityType === 'user_joined' ? (
-                              `Welcome to the league!`
-                            ) : activity.activityType === 'member_left' ? (
-                              `Goodbye!`
-                            ) : activity.activityType === 'league_name_changed' ? (
-                              `Changed from "${activity.previousDriverName}" to "${activity.driverName}"`
-                            ) : activity.activityType === 'league_visibility_changed' ? (
-                              `Changed league visibility from "${activity.previousDriverName}"`
-                            ) : activity.activityType === 'league_created' ? (
-                              `League created successfully`
-                            ) : activity.activityType === 'picks_locked' ? (
-                              `Picks locked for ${activity.raceName || 'this race'} • Week ${activity.weekNumber || 'Unknown'}`
-                            ) : (
-                              `Picked ${activity.driverName} (${activity.driverTeam}) for P${activity.position}`
-                            )}
-                          </p>
-                        </div>
-                        <div className="flex-shrink-0 text-sm text-gray-500">
-                          {new Date(activity.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8">
