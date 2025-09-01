@@ -381,8 +381,8 @@ export default function LeagueDetailPage() {
                   <span className="text-sm font-medium text-gray-900">{stats?.correctPicks || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Accuracy</span>
-                  <span className="text-sm font-medium text-gray-900">{stats?.overallAccuracy || 0}%</span>
+                  <span className="text-sm text-gray-500">Avg Distance</span>
+                  <span className="text-sm font-medium text-gray-900">{stats?.avgDistance || 0} positions</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Average Points</span>

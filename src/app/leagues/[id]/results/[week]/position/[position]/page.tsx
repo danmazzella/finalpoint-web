@@ -344,12 +344,30 @@ export default function PositionResultsPage() {
 
                                             {/* User Info */}
                                             <div className="flex-1">
-                                                <h4 className="text-lg font-semibold text-gray-900 mb-1">{pick.userName}</h4>
-                                                <div className="flex items-center text-sm text-green-600 mb-2">
-                                                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
-                                                    All 2 picks made
+                                                <div className="flex items-center mb-1">
+                                                    <h4 className="text-lg font-semibold text-gray-900">{pick.userName}</h4>
+                                                    {/* Status Icon */}
+                                                    {results.actualResult && (
+                                                        <span className={`ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-medium ${pick.isCorrect === null
+                                                            ? 'bg-gray-100 text-gray-600'
+                                                            : pick.isCorrect
+                                                                ? 'bg-green-100 text-green-600'
+                                                                : 'bg-red-100 text-red-600'
+                                                            }`}>
+                                                            {pick.isCorrect === null
+                                                                ? '?'
+                                                                : pick.isCorrect
+                                                                    ? '✓'
+                                                                    : 'x'
+                                                            }
+                                                        </span>
+                                                    )}
+                                                </div>
+
+
+                                                {/* Driver Pick Information */}
+                                                <div className="text-xs text-gray-600 mb-2">
+                                                    <span className="font-medium">Picked:</span> {pick.driverName} ({pick.driverTeam})
                                                 </div>
                                             </div>
                                         </div>
@@ -380,24 +398,7 @@ export default function PositionResultsPage() {
                                             </div>
                                         </div>
 
-                                        {/* Result Status */}
-                                        {results.actualResult && (
-                                            <div className="mt-3 text-center">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${pick.isCorrect === null
-                                                    ? 'bg-gray-100 text-gray-800'
-                                                    : pick.isCorrect
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-red-100 text-red-800'
-                                                    }`}>
-                                                    {pick.isCorrect === null
-                                                        ? 'Not Scored'
-                                                        : pick.isCorrect
-                                                            ? '✓ Correct'
-                                                            : '✗ Wrong'
-                                                    }
-                                                </span>
-                                            </div>
-                                        )}
+                                        {/* Result Status - Now shown as icon next to username */}
                                     </div>
                                 </div>
                             ))}

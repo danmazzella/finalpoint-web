@@ -14,6 +14,8 @@ interface UserStats {
   totalPoints: number;
   averagePoints: number;
   accuracy: number;
+  avgDistance: number;
+  perfectPicksRate: number;
 }
 
 interface GlobalStats {
@@ -38,7 +40,9 @@ export default function DashboardPage() {
     correctPicks: 0,
     totalPoints: 0,
     averagePoints: 0,
-    accuracy: 0
+    accuracy: 0,
+    avgDistance: 0,
+    perfectPicksRate: 0
   });
   const [globalStats, setGlobalStats] = useState<GlobalStats>({
     totalUsers: 0,
@@ -260,7 +264,7 @@ export default function DashboardPage() {
           {!user ? (
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">Log in to see your personal statistics</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-400">N/A</div>
                   <div className="text-sm text-gray-500">Total Picks</div>
@@ -275,12 +279,20 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-400">N/A</div>
-                  <div className="text-sm text-gray-500">Accuracy</div>
+                  <div className="text-sm text-gray-500">Avg Points</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-400">N/A</div>
+                  <div className="text-sm text-gray-500">Avg Distance</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-400">N/A</div>
+                  <div className="text-sm text-gray-500">Perfect Rate</div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">{userStats.totalPicks}</div>
                 <div className="text-sm text-gray-500">Total Picks</div>
@@ -294,8 +306,16 @@ export default function DashboardPage() {
                 <div className="text-sm text-gray-500">Total Points</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userStats.accuracy}%</div>
-                <div className="text-sm text-gray-500">Accuracy</div>
+                <div className="text-2xl font-bold text-gray-900">{userStats.averagePoints}</div>
+                <div className="text-sm text-gray-500">Avg Points</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{userStats.avgDistance}</div>
+                <div className="text-sm text-gray-500">Avg Distance</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{userStats.perfectPicksRate}%</div>
+                <div className="text-sm text-gray-500">Perfect Rate</div>
               </div>
             </div>
           )}

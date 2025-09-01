@@ -19,10 +19,11 @@ interface DetailedStanding {
     averagePoints: number;
     accuracy: number;
     racesParticipated: number;
-    averageDistanceFromCorrect: number;
+    avgDistance: number;
     perfectPicks: number;
     averagePointsPerRace: number;
     avatar: string;
+    newAccuracy?: number; // New position-based accuracy
 }
 
 interface League {
@@ -43,7 +44,7 @@ export default function StandingsPage() {
     const [league, setLeague] = useState<League | null>(null);
     const [standings, setStandings] = useState<DetailedStanding[]>([]);
     const [loading, setLoading] = useState(true);
-    const [sortBy, setSortBy] = useState<'points' | 'accuracy' | 'distance' | 'races' | 'name'>('points');
+    const [sortBy, setSortBy] = useState<'points' | 'accuracy' | 'newAccuracy' | 'distance' | 'races' | 'name'>('points');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
     useEffect(() => {
@@ -63,6 +64,7 @@ export default function StandingsPage() {
             }
 
             if (standingsResponse.data.success) {
+                // newAccuracy is now calculated directly in the SQL query
                 setStandings(standingsResponse.data.data);
             }
         } catch (error) {
@@ -95,9 +97,13 @@ export default function StandingsPage() {
                 aValue = a.accuracy;
                 bValue = b.accuracy;
                 break;
+            case 'newAccuracy':
+                aValue = a.newAccuracy || 0;
+                bValue = b.newAccuracy || 0;
+                break;
             case 'distance':
-                aValue = a.averageDistanceFromCorrect;
-                bValue = b.averageDistanceFromCorrect;
+                aValue = a.avgDistance;
+                bValue = b.avgDistance;
                 break;
             case 'races':
                 aValue = a.racesParticipated;
@@ -137,7 +143,9 @@ export default function StandingsPage() {
         return 'text-red-600';
     };
 
-    const getDistanceColor = (distance: number) => {
+    const getDistanceColor = (distance: number | null | undefined) => {
+        console.log('getDistanceColor called with:', distance, 'type:', typeof distance);
+        if (distance === null || distance === undefined || isNaN(distance)) return 'text-gray-600';
         if (distance <= 2) return 'text-green-600';
         if (distance <= 5) return 'text-yellow-600';
         return 'text-red-600';
@@ -202,7 +210,7 @@ export default function StandingsPage() {
                             <div className="ml-3">
                                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Perfect Picks</p>
                                 <p className="text-lg font-bold text-gray-900">
-                                    {standings.reduce((sum, s) => sum + s.perfectPicks, 0)}
+                                    {standings.reduce((sum, s) => sum + s.correctPicks, 0)}
                                 </p>
                             </div>
                         </div>
@@ -218,10 +226,15 @@ export default function StandingsPage() {
                                 </div>
                             </div>
                             <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Avg Accuracy</p>
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Points Accuracy</p>
                                 <p className="text-lg font-bold text-gray-900">
                                     {standings.length > 0
-                                        ? Math.round(standings.reduce((sum, s) => sum + s.accuracy, 0) / standings.length)
+                                        ? (() => {
+                                            const totalPicks = standings.reduce((sum, s) => sum + s.totalPicks, 0);
+                                            const totalPoints = standings.reduce((sum, s) => sum + s.totalPoints, 0);
+                                            const maxPotentialPoints = totalPicks * 10;
+                                            return maxPotentialPoints > 0 ? Math.round((totalPoints / maxPotentialPoints) * 100) : 0;
+                                        })()
                                         : 0}%
                                 </p>
                             </div>
@@ -275,8 +288,21 @@ export default function StandingsPage() {
                                         onClick={() => handleSort('accuracy')}
                                     >
                                         <div className="flex items-center">
-                                            Accuracy
+                                            Perfect Picks
                                             {sortBy === 'accuracy' && (
+                                                <svg className={`ml-1 h-4 w-4 ${sortOrder === 'asc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                                </svg>
+                                            )}
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                        onClick={() => handleSort('newAccuracy')}
+                                    >
+                                        <div className="flex items-center">
+                                            Points Accuracy
+                                            {sortBy === 'newAccuracy' && (
                                                 <svg className={`ml-1 h-4 w-4 ${sortOrder === 'asc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                                                 </svg>
@@ -357,11 +383,17 @@ export default function StandingsPage() {
                                             <div className={`text-sm font-medium ${getAccuracyColor(member.accuracy)}`}>
                                                 {member.accuracy}%
                                             </div>
-                                            <div className="text-sm text-gray-500">{member.perfectPicks} perfect</div>
+                                            <div className="text-sm text-gray-500">{member.correctPicks} perfect</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className={`text-sm font-medium ${getDistanceColor(member.averageDistanceFromCorrect)}`}>
-                                                {member.averageDistanceFromCorrect || 0} positions
+                                            <div className={`text-sm font-medium ${getAccuracyColor(member.newAccuracy || 0)}`}>
+                                                {member.newAccuracy || 0}%
+                                            </div>
+                                            <div className="text-sm text-gray-500">points-based</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className={`text-sm font-medium ${getDistanceColor(member.avgDistance)}`}>
+                                                {member.avgDistance || 0} positions
                                             </div>
                                             <div className="text-sm text-gray-500">from target</div>
                                         </td>
@@ -422,23 +454,35 @@ export default function StandingsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-5 p-4 bg-gray-50 rounded-lg">
+                                    {/* Primary Stats - 2 columns on mobile */}
+                                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg mb-3">
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points</div>
                                             <div className="text-xl font-bold text-gray-900 mb-2 sm:mb-1">{member.totalPoints}</div>
                                             <div className="text-xs text-gray-500">{member.averagePointsPerRace} avg/race</div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Accuracy</div>
+                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Perfect Picks</div>
                                             <div className={`text-xl font-bold mb-2 sm:mb-1 ${getAccuracyColor(member.accuracy)}`}>
                                                 {member.accuracy}%
                                             </div>
-                                            <div className="text-xs text-gray-500">{member.perfectPicks} perfect</div>
+                                            <div className="text-xs text-gray-500">{member.correctPicks} perfect</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Secondary Stats - 3 columns on mobile */}
+                                    <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50 rounded-lg">
+                                        <div className="text-center">
+                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points Accuracy</div>
+                                            <div className={`text-xl font-bold mb-2 sm:mb-1 ${getAccuracyColor(member.newAccuracy || 0)}`}>
+                                                {member.newAccuracy || 0}%
+                                            </div>
+                                            <div className="text-xs text-gray-500">points-based</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Avg Distance</div>
-                                            <div className={`text-xl font-bold mb-2 sm:mb-1 ${getDistanceColor(member.averageDistanceFromCorrect)}`}>
-                                                {member.averageDistanceFromCorrect || 0} positions
+                                            <div className={`text-xl font-bold mb-2 sm:mb-1 ${getDistanceColor(member.avgDistance)}`}>
+                                                {member.avgDistance || 0} positions
                                             </div>
                                             <div className="text-xs text-gray-500">from target</div>
                                         </div>
