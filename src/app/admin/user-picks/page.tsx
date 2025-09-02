@@ -26,8 +26,8 @@ interface Driver {
 
 interface Race {
     weekNumber: number;
-    name: string;
-    date: string;
+    raceName: string;
+    raceDate: string;
 }
 
 interface UserPick {
@@ -210,7 +210,7 @@ export default function AdminUserPicksPage() {
 
             if (response.status === 200) {
                 setMessage({ type: 'success', text: 'Pick created successfully' });
-                setPickForm({ position: 1, driverId: 0, weekNumber: selectedWeek });
+                setPickForm({ position: 1, driverId: 0, weekNumber: pickForm.weekNumber });
                 loadUserPicks();
             } else {
                 setMessage({ type: 'error', text: response.data.message || 'Failed to create pick' });
@@ -268,9 +268,7 @@ export default function AdminUserPicksPage() {
         }
     };
 
-    const getDriverById = (driverId: number) => {
-        return drivers.find(d => d.id === driverId);
-    };
+
 
     if (loading) {
         return (
@@ -383,7 +381,7 @@ export default function AdminUserPicksPage() {
                                     >
                                         {races.map(race => (
                                             <option key={race.weekNumber} value={race.weekNumber}>
-                                                Week {race.weekNumber} - {race.name}
+                                                Week {race.weekNumber} - {race.raceName}
                                             </option>
                                         ))}
                                     </select>
