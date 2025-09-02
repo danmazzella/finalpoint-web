@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+
 import { leaguesAPI } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import BackToLeagueButton from '@/components/BackToLeagueButton';
@@ -24,6 +24,17 @@ interface DetailedStanding {
     averagePointsPerRace: number;
     avatar: string;
     newAccuracy?: number; // New position-based accuracy
+    correctPicksByPosition?: {
+        userId: number;
+        userName: string;
+        positions: {
+            [position: number]: {
+                position: number;
+                totalPicks: number;
+                correctPicks: number;
+            };
+        };
+    } | null;
 }
 
 interface League {
@@ -37,7 +48,6 @@ interface League {
 
 export default function StandingsPage() {
     const params = useParams();
-    const router = useRouter();
     const { showToast } = useToast();
     const leagueId = params.id as string;
 
@@ -47,11 +57,7 @@ export default function StandingsPage() {
     const [sortBy, setSortBy] = useState<'points' | 'accuracy' | 'newAccuracy' | 'distance' | 'races' | 'name'>('points');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    useEffect(() => {
-        loadData();
-    }, [leagueId]);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         try {
             setLoading(true);
             const [leagueResponse, standingsResponse] = await Promise.all([
@@ -64,7 +70,7 @@ export default function StandingsPage() {
             }
 
             if (standingsResponse.data.success) {
-                // newAccuracy is now calculated directly in the SQL query
+                // newAccuracy and correctPicksByPosition are now included in the response
                 setStandings(standingsResponse.data.data);
             }
         } catch (error) {
@@ -73,7 +79,11 @@ export default function StandingsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [leagueId, showToast]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleSort = (newSortBy: typeof sortBy) => {
         if (sortBy === newSortBy) {
@@ -149,6 +159,42 @@ export default function StandingsPage() {
         if (distance <= 2) return 'text-green-600';
         if (distance <= 5) return 'text-yellow-600';
         return 'text-red-600';
+    };
+
+    const renderCorrectPicksByPosition = (member: DetailedStanding) => {
+        const userPicks = member.correctPicksByPosition;
+        if (!userPicks || !userPicks.positions) return null;
+
+        const positions = Object.keys(userPicks.positions)
+            .map(Number)
+            .sort((a, b) => a - b);
+
+        if (positions.length === 0) return null;
+
+        return (
+            <div className="mt-3">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Correct Picks by Position</div>
+                <div className="flex flex-wrap gap-2">
+                    {positions.map(position => {
+                        const positionData = userPicks.positions[position];
+                        const accuracy = positionData.totalPicks > 0
+                            ? Math.round((positionData.correctPicks / positionData.totalPicks) * 100)
+                            : 0;
+
+                        return (
+                            <div
+                                key={position}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                            >
+                                <span className="font-semibold">P{position}:</span>
+                                <span className="ml-1">{positionData.correctPicks}/{positionData.totalPicks}</span>
+                                <span className="ml-1 text-gray-500">({accuracy}%)</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
     };
 
     const cleanName = (name: string | null | undefined): string => {
@@ -400,8 +446,8 @@ export default function StandingsPage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {member.racesParticipated}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <div className="flex space-x-2">
+                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                            <div className="flex space-x-2 mb-2">
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                     {member.totalPicks} picks
                                                 </span>
@@ -409,6 +455,7 @@ export default function StandingsPage() {
                                                     {member.correctPicks} correct
                                                 </span>
                                             </div>
+                                            {renderCorrectPicksByPosition(member)}
                                         </td>
                                     </tr>
                                 ))}
@@ -471,7 +518,7 @@ export default function StandingsPage() {
                                     </div>
 
                                     {/* Secondary Stats - 3 columns on mobile */}
-                                    <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50 rounded-lg">
+                                    <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50 rounded-lg mb-3">
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points Accuracy</div>
                                             <div className={`text-xl font-bold mb-2 sm:mb-1 ${getAccuracyColor(member.newAccuracy || 0)}`}>
@@ -491,6 +538,9 @@ export default function StandingsPage() {
                                             <div className="text-xl font-bold text-gray-900">{member.racesParticipated}</div>
                                         </div>
                                     </div>
+
+                                    {/* Correct Picks by Position */}
+                                    {renderCorrectPicksByPosition(member)}
                                 </div>
                             ))}
                         </div>
