@@ -423,7 +423,7 @@ export default function StandingsPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-medium text-gray-900">{member.totalPoints}</div>
-                                            <div className="text-sm text-gray-500">{member.averagePointsPerRace} avg/race</div>
+                                            <div className="text-sm text-gray-500">points</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className={`text-sm font-medium ${getAccuracyColor(member.accuracy)}`}>
@@ -506,7 +506,7 @@ export default function StandingsPage() {
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points</div>
                                             <div className="text-xl font-bold text-gray-900 mb-2 sm:mb-1">{member.totalPoints}</div>
-                                            <div className="text-xs text-gray-500">{member.averagePointsPerRace} avg/race</div>
+                                            <div className="text-xs text-gray-500">points</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Perfect Picks</div>
