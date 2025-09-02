@@ -129,8 +129,6 @@ export default function Navigation() {
                                 </Link>
                             ))}
 
-
-
                             {/* Desktop Login/Signup Section - Only show for unauthenticated users */}
                             {!user && (
                                 <div className="flex items-center space-x-4">
@@ -197,6 +195,7 @@ export default function Navigation() {
                                         <span>{item.name}</span>
                                     </Link>
                                 ))}
+
                                 <div className="pt-2 border-t border-border">
                                     {!user && (
                                         <div className="space-y-2">

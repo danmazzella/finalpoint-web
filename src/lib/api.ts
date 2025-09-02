@@ -347,6 +347,17 @@ export const notificationsAPI = {
   testPush: () => apiService.post('/notifications/test', { type: 'push' }),
 };
 
+export const chatAPI = {
+  validateAccess: (leagueId: number) => apiService.get(`/chat/validate/${leagueId}`),
+  markMessagesAsRead: (leagueId: number) => apiService.post(`/chat/mark-read/${leagueId}`),
+  getUnreadCount: (leagueId: number) => apiService.get(`/chat/unread-count/${leagueId}`),
+  getAllUnreadCounts: () => apiService.get('/chat/unread-counts'),
+  getNotificationPreferences: (leagueId: number) => apiService.get(`/chat/notification-preferences/${leagueId}`),
+  updateNotificationPreferences: (leagueId: number, notificationsEnabled: boolean) =>
+    apiService.put(`/chat/notification-preferences/${leagueId}`, { notificationsEnabled }),
+  getAllNotificationPreferences: () => apiService.get('/chat/notification-preferences'),
+};
+
 // Types
 export interface User {
   id: number;
@@ -557,6 +568,7 @@ export interface NotificationPreferences {
   pushReminder1Hour: boolean;
   emailOther: boolean;
   pushOther: boolean;
+  pushChatMessages: boolean;
 }
 
 // Activity interface for league activities

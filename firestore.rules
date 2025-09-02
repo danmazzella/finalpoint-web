@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Since your app uses custom JWT auth (not Firebase Auth), 
+    // we can't use Firestore security rules for access control.
+    // Security will be handled server-side through your API.
+    
+    // For now, allow all access but we'll implement proper security
+    // through your existing API endpoints
+    
+    // Test collection (for development testing)
+    match /test_collection/{document} {
+      allow read, write: if true;
+    }
+    
+    // Development environment collections
+    match /dev_chat_messages/{messageId} {
+      allow read, write: if true;
+    }
+    
+    match /dev_chat_channels/{channelId} {
+      allow read, write: if true;
+    }
+    
+    match /dev_chat_users/{userId} {
+      allow read, write: if true;
+    }
+    
+    match /dev_league_members/{memberId} {
+      allow read, write: if true;
+    }
+    
+    // Production environment collections
+    match /prod_chat_messages/{messageId} {
+      allow read, write: if true;
+    }
+    
+    match /prod_chat_channels/{channelId} {
+      allow read, write: if true;
+    }
+    
+    match /prod_chat_users/{userId} {
+      allow read, write: if true;
+    }
+    
+    match /prod_league_members/{memberId} {
+      allow read, write: if true;
+    }
+    
+    // Legacy collections (for backward compatibility)
+    match /chat_messages/{messageId} {
+      allow read, write: if true;
+    }
+    
+    match /chat_channels/{channelId} {
+      allow read, write: if true;
+    }
+    
+    match /chat_users/{userId} {
+      allow read, write: if true;
+    }
+    
+    match /league_members/{memberId} {
+      allow read, write: if true;
+    }
+  }
+}

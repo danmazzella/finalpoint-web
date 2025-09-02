@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { leaguesAPI, League } from '@/lib/api';
+import { leaguesAPI, League, chatAPI } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
 import { useSearchParams } from 'next/navigation';
@@ -13,6 +13,7 @@ export default function LeaguesPage() {
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const [myLeagues, setMyLeagues] = useState<League[]>([]);
   const [publicLeagues, setPublicLeagues] = useState<League[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<{ [leagueId: number]: number }>({});
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newLeagueName, setNewLeagueName] = useState('');
@@ -33,9 +34,10 @@ export default function LeaguesPage() {
 
       if (user) {
         // Authenticated user - get their leagues and public leagues they can join
-        const [myLeaguesResponse, publicLeaguesResponse] = await Promise.all([
+        const [myLeaguesResponse, publicLeaguesResponse, unreadCountsResponse] = await Promise.all([
           leaguesAPI.getLeagues(),
-          leaguesAPI.getPublicLeagues()
+          leaguesAPI.getPublicLeagues(),
+          chatAPI.getAllUnreadCounts()
         ]);
 
         if (myLeaguesResponse.data.success) {
@@ -44,6 +46,14 @@ export default function LeaguesPage() {
 
         if (publicLeaguesResponse.data.success) {
           setPublicLeagues(publicLeaguesResponse.data.data);
+        }
+
+        if (unreadCountsResponse.data.success) {
+          const counts: { [leagueId: number]: number } = {};
+          unreadCountsResponse.data.unreadCounts.forEach((item: { leagueId: number; unreadCount: number }) => {
+            counts[item.leagueId] = item.unreadCount;
+          });
+          setUnreadCounts(counts);
         }
       } else {
         // Unauthenticated user - get only public leagues
@@ -217,7 +227,19 @@ export default function LeaguesPage() {
                 >
                   <div className="px-4 py-5 sm:p-6">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
+                        {user && unreadCounts[league.id] > 0 && (
+                          <div className="relative">
+                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                            </svg>
+                            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-4 text-xs font-bold text-white bg-blue-500 rounded-full">
+                              {unreadCounts[league.id]}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${league.isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                         }`}>
                         {league.isPublic ? 'Public' : 'Private'}
@@ -283,7 +305,19 @@ export default function LeaguesPage() {
                 >
                   <div className="px-4 py-5 sm:p-6">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
+                        {unreadCounts[league.id] > 0 && (
+                          <div className="relative">
+                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                            </svg>
+                            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-4 text-xs font-bold text-white bg-blue-500 rounded-full">
+                              {unreadCounts[league.id]}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         Public
                       </span>

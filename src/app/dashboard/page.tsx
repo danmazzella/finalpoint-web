@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { leaguesAPI, authAPI, League } from '@/lib/api';
+import { leaguesAPI, authAPI, League, chatAPI } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
 import { logPageView } from '@/lib/analytics';
@@ -57,6 +57,7 @@ export default function DashboardPage() {
     weekAccuracy: 0,
     weekAvgDistance: 0
   });
+  const [unreadCounts, setUnreadCounts] = useState<{ [leagueId: number]: number }>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,10 +73,11 @@ export default function DashboardPage() {
 
       if (user) {
         // Authenticated user - load user-specific data and global stats
-        const [leaguesResponse, statsResponse, globalStatsResponse] = await Promise.all([
+        const [leaguesResponse, statsResponse, globalStatsResponse, unreadCountsResponse] = await Promise.all([
           leaguesAPI.getLeagues(),
           authAPI.getUserStats(),
-          authAPI.getGlobalStats() // Now works for both authenticated and unauthenticated users
+          authAPI.getGlobalStats(), // Now works for both authenticated and unauthenticated users
+          chatAPI.getAllUnreadCounts()
         ]);
 
         if (leaguesResponse.data.success) {
@@ -88,6 +90,14 @@ export default function DashboardPage() {
 
         if (globalStatsResponse.data.success) {
           setGlobalStats(globalStatsResponse.data.data);
+        }
+
+        if (unreadCountsResponse.data.success) {
+          const counts: { [leagueId: number]: number } = {};
+          unreadCountsResponse.data.unreadCounts.forEach((item: { leagueId: number; unreadCount: number }) => {
+            counts[item.leagueId] = item.unreadCount;
+          });
+          setUnreadCounts(counts);
         }
       } else {
         // Unauthenticated user - load public data
@@ -241,8 +251,20 @@ export default function DashboardPage() {
               {leagues.map((league) => (
                 <div key={league.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">{league.name}</h4>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-medium text-gray-900">{league.name}</h4>
+                        {unreadCounts[league.id] > 0 && (
+                          <div className="relative">
+                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                            </svg>
+                            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-4 text-xs font-bold text-white bg-blue-500 rounded-full">
+                              {unreadCounts[league.id]}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500">Join Code: {league.joinCode}</p>
                     </div>
                     <Link

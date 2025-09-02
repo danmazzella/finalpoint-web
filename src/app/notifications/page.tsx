@@ -24,7 +24,8 @@ export default function NotificationsPage() {
         pushReminder1Day: true,
         pushReminder1Hour: true,
         emailOther: true,
-        pushOther: true
+        pushOther: true,
+        pushChatMessages: true
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -59,7 +60,8 @@ export default function NotificationsPage() {
                     pushReminder1Day: Boolean(rawData.pushReminder1Day ?? true),
                     pushReminder1Hour: Boolean(rawData.pushReminder1Hour ?? true),
                     emailOther: Boolean(rawData.emailOther ?? true),
-                    pushOther: Boolean(rawData.pushOther ?? true)
+                    pushOther: Boolean(rawData.pushOther ?? true),
+                    pushChatMessages: Boolean(rawData.pushChatMessages ?? true)
                 });
             }
         } catch (error) {
@@ -590,6 +592,27 @@ export default function NotificationsPage() {
                                     >
                                         <span
                                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushScoreUpdates && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'
+                                                }`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {/* Chat Messages */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-medium text-gray-900">Chat Messages</p>
+                                        <p className="text-sm text-gray-500">
+                                            Get notified when someone sends a message in league chats
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handlePreferenceChange('pushChatMessages')}
+                                        disabled={!pushSupported || pushPermission !== 'granted'}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${preferences.pushChatMessages && pushPermission === 'granted' ? 'bg-blue-600' : 'bg-gray-200'
+                                            } ${(!pushSupported || pushPermission !== 'granted') ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${preferences.pushChatMessages && pushPermission === 'granted' ? 'translate-x-5' : 'translate-x-1'
                                                 }`}
                                         />
                                     </button>

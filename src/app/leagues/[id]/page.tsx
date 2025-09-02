@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import { leaguesAPI, activityAPI, League, f1racesAPI } from '@/lib/api';
+import { leaguesAPI, activityAPI, League, f1racesAPI, chatAPI } from '@/lib/api';
 import { copyToClipboardWithFeedback } from '@/utils/clipboardUtils';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -65,6 +65,7 @@ export default function LeagueDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     // Load league data for both authenticated and unauthenticated users
@@ -75,6 +76,7 @@ export default function LeagueDetailPage() {
     // Only load user-specific data if authenticated
     if (user) {
       loadRecentActivity(parseInt(leagueId));
+      loadUnreadCount(parseInt(leagueId));
     }
   }, [user, leagueId]);
 
@@ -111,6 +113,17 @@ export default function LeagueDetailPage() {
       console.error('Error loading recent activity:', error);
     } finally {
       setActivityLoading(false);
+    }
+  };
+
+  const loadUnreadCount = async (leagueId: number) => {
+    try {
+      const response = await chatAPI.getUnreadCount(leagueId);
+      if (response.data.success) {
+        setUnreadCount(response.data.unreadCount);
+      }
+    } catch (error: any) {
+      console.error('Error loading unread count:', error);
     }
   };
 
@@ -290,7 +303,18 @@ export default function LeagueDetailPage() {
         <PageTitle
           title={league.name}
           subtitle={`Season ${league.seasonYear}`}
-        />
+        >
+          {unreadCount > 0 && (
+            <div className="relative">
+              <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+              </svg>
+              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-4 text-xs font-bold text-white bg-blue-500 rounded-full">
+                {unreadCount}
+              </span>
+            </div>
+          )}
+        </PageTitle>
 
         {/* Notification Prompt */}
         <ComprehensiveNotificationPrompt
@@ -313,6 +337,14 @@ export default function LeagueDetailPage() {
                     >
                       Make Picks
                     </Link>
+                    {isMember && (
+                      <Link
+                        href={`/chat/${league.id}`}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                      >
+                        💬 League Chat
+                      </Link>
+                    )}
                     {!isMember && (
                       <button
                         onClick={joinLeague}

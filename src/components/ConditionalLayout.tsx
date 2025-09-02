@@ -36,7 +36,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     const hasCustomHeaderFooter = isInfoPage || isMarketingPage;
 
     // Only hide navigation on authentication pages or pages with custom headers
-    const shouldHideNavigation = isAuthPage || hasCustomHeaderFooter;
+    const shouldHideNavigation = isAuthPage || hasCustomHeaderFooter || pathname.includes('/chat/');
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
