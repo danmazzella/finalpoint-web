@@ -182,6 +182,8 @@ export const adminAPI = {
   getAvailableRaces: () => apiService.get('/admin/available-races'),
   getAvailableRacesForResults: () => apiService.get('/admin/available-races-for-results'),
   getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
+  getRacesWithResultStatus: () => apiService.get('/admin/races-with-result-status'),
+  getExistingRaceResults: (weekNumber: number) => apiService.get(`/admin/existing-race-results/${weekNumber}`),
   getLeaguePicksOverview: (weekNumber: number) => apiService.get(`/admin/league-picks-overview?weekNumber=${weekNumber}`),
   getPicksByPositionOverview: (weekNumber: number) => apiService.get(`/admin/picks-by-position-overview?weekNumber=${weekNumber}`),
   getPicksByPositionDetailed: (weekNumber: number) => apiService.get(`/admin/picks-by-position-detailed?weekNumber=${weekNumber}`),
@@ -191,6 +193,8 @@ export const adminAPI = {
   updatePickLockingStatus: (data: { enabled: boolean; lockTime: string; unlockTime: string }) => apiService.put('/admin/pick-locking-status', data),
   enterRaceResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>) =>
     apiService.post('/admin/enter-race-results', { weekNumber, results }),
+  rescoreRaceResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>, leagueId?: number, logActivity: boolean = true) =>
+    apiService.post('/admin/rescore-race-results', { weekNumber, results, leagueId, logActivity }),
   rescheduleAllPicks: () => apiService.post('/admin/reschedule-all-picks'),
 
   // New admin methods for managing picks and league memberships
@@ -291,6 +295,27 @@ export const picksAPI = {
 
 export const driversAPI = {
   getDrivers: () => apiService.get('/drivers/get'),
+  // Admin endpoints
+  getAllDriversAdmin: () => apiService.get('/drivers/admin/all'),
+  getDriversByStatusAdmin: (status: 'active' | 'inactive') => apiService.get(`/drivers/admin/status/${status}`),
+  getDriverAdmin: (driverId: number) => apiService.get(`/drivers/admin/${driverId}`),
+  createDriverAdmin: (driverData: {
+    name: string;
+    team: string;
+    driverNumber: number;
+    country: string;
+    isActive: boolean;
+    seasonYear: number;
+  }) => apiService.post('/drivers/admin', driverData),
+  updateDriverStatusAdmin: (driverId: number, isActive: boolean) =>
+    apiService.put(`/drivers/admin/${driverId}/status`, { isActive }),
+  updateDriverAdmin: (driverId: number, driverData: {
+    name: string;
+    team: string;
+    driverNumber: number;
+    country: string;
+    isActive: boolean;
+  }) => apiService.put(`/drivers/admin/${driverId}`, driverData),
 };
 
 export const f1racesAPI = {
@@ -380,6 +405,7 @@ export interface Driver {
   team: string;
   driverNumber: number;
   country: string;
+  isActive?: boolean;
 }
 
 export interface Pick {

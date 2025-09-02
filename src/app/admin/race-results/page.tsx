@@ -17,6 +17,7 @@ interface Race {
     raceDate: string;
     circuitName: string;
     country: string;
+    hasResults?: boolean;
 }
 
 interface RaceResult {
@@ -27,7 +28,7 @@ interface RaceResult {
 export default function RaceResultsEntryPage() {
     const router = useRouter();
     const [drivers, setDrivers] = useState<Driver[]>([]);
-    const [races, setRaces] = useState<Race[]>([]);
+    const [allRaces, setAllRaces] = useState<Race[]>([]);
     const [selectedWeek, setSelectedWeek] = useState<number>(1);
     const [selectedRace, setSelectedRace] = useState<Race | null>(null);
     const [results, setResults] = useState<RaceResult[]>([]);
@@ -36,17 +37,23 @@ export default function RaceResultsEntryPage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<{ [key: number]: string }>({});
+    const [isRescoring, setIsRescoring] = useState(false);
+    const [leagues, setLeagues] = useState<Array<{ id: number; name: string; isActive: number }>>([]);
+    const [selectedLeagueId, setSelectedLeagueId] = useState<number | null>(null);
+    const [rescoringMode, setRescoringMode] = useState<'all' | 'specific'>('all');
+    const [originalResults, setOriginalResults] = useState<RaceResult[]>([]);
+    const [logActivity, setLogActivity] = useState<boolean>(true);
 
     useEffect(() => {
         loadInitialData();
     }, []);
 
     useEffect(() => {
-        if (selectedWeek && races.length > 0) {
-            const race = races.find(r => r.weekNumber === selectedWeek);
+        if (selectedWeek && allRaces.length > 0) {
+            const race = allRaces.find(r => r.weekNumber === selectedWeek);
             setSelectedRace(race || null);
         }
-    }, [selectedWeek, races]);
+    }, [selectedWeek, allRaces]);
 
     useEffect(() => {
         // Initialize results array with 20 positions
@@ -62,30 +69,84 @@ export default function RaceResultsEntryPage() {
             setLoading(true);
             setError(null);
 
-            const [driversResponse, racesResponse] = await Promise.all([
-                driversAPI.getDrivers(),
-                adminAPI.getAvailableRacesForResults()
+            const [driversResponse, allRacesResponse, leaguesResponse] = await Promise.all([
+                driversAPI.getAllDriversAdmin(),
+                adminAPI.getRacesWithResultStatus(),
+                adminAPI.getAllLeagues()
             ]);
 
             if (driversResponse.status === 200) {
                 setDrivers(driversResponse.data.data || []);
             }
 
-            if (racesResponse.status === 200) {
-                const racesData = racesResponse.data.data || [];
-                setRaces(racesData);
+            if (allRacesResponse.status === 200) {
+                setAllRaces(allRacesResponse.data.data || []);
 
                 // Set the selected week to the first available race (lowest week number)
-                if (racesData.length > 0) {
-                    const firstRace = racesData.sort((a: Race, b: Race) => a.weekNumber - b.weekNumber)[0];
+                if (allRacesResponse.data.data?.length > 0) {
+                    const firstRace = allRacesResponse.data.data.sort((a: Race, b: Race) => a.weekNumber - b.weekNumber)[0];
                     setSelectedWeek(firstRace.weekNumber);
                 }
+            }
+
+            if (leaguesResponse.status === 200) {
+                setLeagues(leaguesResponse.data.data || []);
             }
         } catch (error) {
             console.error('Error loading initial data:', error);
             setError('Failed to load drivers and races data');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadExistingResults = async (weekNumber: number) => {
+        try {
+            setLoading(true);
+            const response = await adminAPI.getExistingRaceResults(weekNumber);
+
+            if (response.status === 200 && response.data.data) {
+                const existingResults = response.data.data;
+                const newResults = Array.from({ length: 20 }, (_, i) => {
+                    const existing = existingResults.find((r: RaceResult) => r.finishingPosition === i + 1);
+                    return {
+                        driverId: existing?.driverId || 0,
+                        finishingPosition: i + 1
+                    };
+                });
+                setResults(newResults);
+                setOriginalResults([...newResults]); // Store the original results
+            }
+        } catch (error) {
+            console.error('Error loading existing results:', error);
+            setError('Failed to load existing race results');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleWeekChange = async (weekNumber: number) => {
+        setSelectedWeek(weekNumber);
+        const race = allRaces.find(r => r.weekNumber === weekNumber);
+        setIsRescoring(race?.hasResults || false);
+
+        if (race?.hasResults) {
+            await loadExistingResults(weekNumber);
+        } else {
+            // Reset to empty form for new results
+            setResults(Array.from({ length: 20 }, (_, i) => ({
+                driverId: 0,
+                finishingPosition: i + 1
+            })));
+        }
+    };
+
+    const handleRescoringModeChange = (mode: 'all' | 'specific') => {
+        setRescoringMode(mode);
+
+        // If switching to specific league mode and we have original results, reset to original
+        if (mode === 'specific' && originalResults.length > 0) {
+            setResults([...originalResults]);
         }
     };
 
@@ -171,10 +232,24 @@ export default function RaceResultsEntryPage() {
             setError(null);
             setSuccess(null);
 
-            const response = await adminAPI.enterRaceResults(selectedWeek, results);
+            let response;
+            if (isRescoring) {
+                // For specific league rescoring, we don't need to send results since we're not changing them
+                const resultsToSend = rescoringMode === 'specific' ? [] : results;
+                response = await adminAPI.rescoreRaceResults(
+                    selectedWeek,
+                    resultsToSend,
+                    rescoringMode === 'specific' && selectedLeagueId ? selectedLeagueId : undefined,
+                    logActivity
+                );
+            } else {
+                response = await adminAPI.enterRaceResults(selectedWeek, results);
+            }
 
             if (response.status === 200) {
-                setSuccess(`Successfully entered race results for ${selectedRace?.raceName} (Week ${selectedWeek}) and scored ${response.data.data.leaguesScored} leagues!`);
+                const action = isRescoring ? 'rescored' : 'entered';
+                const leaguesAffected = isRescoring ? response.data.data.leaguesRescored : response.data.data.leaguesScored;
+                setSuccess(`Successfully ${action} race results for ${selectedRace?.raceName} (Week ${selectedWeek}) and ${isRescoring ? 'rescored' : 'scored'} ${leaguesAffected} leagues!`);
 
                 // Reset form after successful submission
                 setTimeout(() => {
@@ -185,9 +260,10 @@ export default function RaceResultsEntryPage() {
                     setSuccess(null);
                 }, 5000);
             }
-        } catch (error: any) {
-            console.error('Error entering race results:', error);
-            setError(error.response?.data?.message || 'Failed to enter race results');
+        } catch (error: unknown) {
+            console.error(`Error ${isRescoring ? 'rescoring' : 'entering'} race results:`, error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            setError(errorMessage);
         } finally {
             setSubmitting(false);
         }
@@ -228,7 +304,7 @@ export default function RaceResultsEntryPage() {
             <div className="bg-white shadow-lg rounded-lg p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Select Race</h2>
 
-                {races.length === 0 ? (
+                {allRaces.length === 0 ? (
                     <div className="bg-green-50 border border-green-200 rounded-md p-4">
                         <div className="flex">
                             <div className="flex-shrink-0">
@@ -253,10 +329,10 @@ export default function RaceResultsEntryPage() {
                             <select
                                 id="week-select"
                                 value={selectedWeek}
-                                onChange={(e) => setSelectedWeek(Number(e.target.value))}
+                                onChange={(e) => handleWeekChange(Number(e.target.value))}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                             >
-                                {races
+                                {allRaces
                                     .sort((a, b) => a.weekNumber - b.weekNumber)
                                     .map((race) => (
                                         <option key={race.weekNumber} value={race.weekNumber}>
@@ -271,6 +347,81 @@ export default function RaceResultsEntryPage() {
                                 <p className="text-sm text-gray-600">
                                     {new Date(selectedRace.raceDate).toLocaleDateString()} • {selectedRace.circuitName}, {selectedRace.country}
                                 </p>
+                                {isRescoring && (
+                                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                        <p className="text-sm text-blue-800 font-medium">
+                                            ⚠️ This race already has results entered. You are rescoring the race and updating league scores.
+                                        </p>
+
+                                        {/* Rescoring Mode Selection */}
+                                        <div className="mt-3">
+                                            <label className="block text-sm font-medium text-blue-900 mb-2">
+                                                Rescoring Mode:
+                                            </label>
+                                            <div className="space-y-2">
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="rescoringMode"
+                                                        value="all"
+                                                        checked={rescoringMode === 'all'}
+                                                        onChange={(e) => handleRescoringModeChange(e.target.value as 'all' | 'specific')}
+                                                        className="mr-2"
+                                                    />
+                                                    <span className="text-sm text-blue-800">Rescore all active leagues</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="rescoringMode"
+                                                        value="specific"
+                                                        checked={rescoringMode === 'specific'}
+                                                        onChange={(e) => handleRescoringModeChange(e.target.value as 'all' | 'specific')}
+                                                        className="mr-2"
+                                                    />
+                                                    <span className="text-sm text-blue-800">Rescore specific league only</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        {/* League Selection */}
+                                        {rescoringMode === 'specific' && (
+                                            <div className="mt-3">
+                                                <label htmlFor="league-select" className="block text-sm font-medium text-blue-900 mb-2">
+                                                    Select League:
+                                                </label>
+                                                <select
+                                                    id="league-select"
+                                                    value={selectedLeagueId || ''}
+                                                    onChange={(e) => setSelectedLeagueId(e.target.value ? Number(e.target.value) : null)}
+                                                    className="w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                >
+                                                    <option value="">Select a league...</option>
+                                                    {leagues
+                                                        .filter(league => league.isActive !== 0)
+                                                        .map((league) => (
+                                                            <option key={league.id} value={league.id}>
+                                                                {league.name}
+                                                            </option>
+                                                        ))}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        {/* Activity Logging Toggle */}
+                                        <div className="mt-3">
+                                            <label className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={logActivity}
+                                                    onChange={(e) => setLogActivity(e.target.checked)}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm text-blue-800">Log activity events (uncheck for bulk updates)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -278,11 +429,16 @@ export default function RaceResultsEntryPage() {
             </div>
 
             {/* Race Results Entry - Only show if there are races available */}
-            {races.length > 0 && (
+            {allRaces.length > 0 && (
                 <div className="bg-white shadow-lg rounded-lg p-6">
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Enter Finishing Positions</h2>
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">
+                        {isRescoring && rescoringMode === 'specific' ? 'Current Race Results (Read-only)' : 'Enter Finishing Positions'}
+                    </h2>
                     <p className="text-sm text-gray-600 mb-6">
-                        Select the driver who finished in each position. All 20 positions must be filled.
+                        {isRescoring && rescoringMode === 'specific'
+                            ? 'Current race results are displayed below. Only the selected league will be rescored.'
+                            : 'Select the driver who finished in each position. All 20 positions must be filled.'
+                        }
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -294,7 +450,9 @@ export default function RaceResultsEntryPage() {
                                 <select
                                     value={result.driverId}
                                     onChange={(e) => handleDriverChange(result.finishingPosition, Number(e.target.value))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                                    disabled={isRescoring && rescoringMode === 'specific'}
+                                    className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 ${isRescoring && rescoringMode === 'specific' ? 'bg-gray-100 cursor-not-allowed' : ''
+                                        }`}
                                 >
                                     <option value={0}>Select Driver</option>
                                     {drivers
@@ -378,21 +536,30 @@ export default function RaceResultsEntryPage() {
             )}
 
             {/* Submit Button - Only show if there are races available */}
-            {races.length > 0 && (
+            {allRaces.length > 0 && (
                 <div className="bg-white shadow-lg rounded-lg p-6">
                     <div className="flex items-center justify-between">
                         <div>
                             <h3 className="text-lg font-medium text-gray-900">Submit Results</h3>
                             <p className="text-sm text-gray-600">
-                                This will enter the race results and automatically score all active leagues for Week {selectedWeek}
+                                {isRescoring
+                                    ? rescoringMode === 'specific' && selectedLeagueId
+                                        ? `This will rescore the race results and update the selected league for Week ${selectedWeek}`
+                                        : `This will rescore the race results and update all active leagues for Week ${selectedWeek}`
+                                    : `This will enter the race results and automatically score all active leagues for Week ${selectedWeek}`
+                                }
                             </p>
                         </div>
                         <button
                             onClick={handleSubmit}
-                            disabled={submitting || !isFormValid()}
+                            disabled={submitting || !isFormValid() || (isRescoring && rescoringMode === 'specific' && !selectedLeagueId)}
                             className="px-6 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {submitting ? 'Processing...' : 'Enter Results & Score Leagues'}
+                            {submitting ? 'Processing...' :
+                                isRescoring ?
+                                    (rescoringMode === 'specific' ? 'Rescore Specific League' : 'Rescore Results & Update Leagues')
+                                    : 'Enter Results & Score Leagues'
+                            }
                         </button>
                     </div>
                 </div>
