@@ -21,6 +21,7 @@ interface Driver {
     id: number;
     name: string;
     team: string;
+    isActive?: boolean;
 }
 
 interface Race {
@@ -71,7 +72,7 @@ export default function AdminUserPicksPage() {
             const [usersResponse, leaguesResponse, driversResponse, racesResponse] = await Promise.all([
                 adminAPI.getAllUsers(),
                 adminAPI.getAllLeagues(),
-                driversAPI.getDrivers(),
+                driversAPI.getAllDriversAdmin(),
                 f1racesAPI.getAllRaces()
             ]);
 
