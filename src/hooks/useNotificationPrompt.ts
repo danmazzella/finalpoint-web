@@ -90,8 +90,14 @@ export const useNotificationPrompt = (
                         });
                     }
 
-                    // Send subscription to server (you'll need to implement this)
-                    // await notificationsAPI.registerPushToken(JSON.stringify(subscription), 'web');
+                    // Send subscription to server
+                    try {
+                        const { notificationsAPI } = await import('@/lib/api');
+                        await notificationsAPI.registerPushToken(JSON.stringify(subscription), 'web');
+                        console.log('✅ Push token registered with server');
+                    } catch (apiError) {
+                        console.error('❌ Failed to register push token with server:', apiError);
+                    }
                 } catch (error) {
                     if (process.env.NODE_ENV === 'development') {
                         console.error('Error setting up push subscription:', error);
