@@ -55,7 +55,17 @@ export class SecureWebSocketService {
             const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6075';
             // Remove /api suffix if it exists to avoid double /api/api
             const baseUrl = apiBaseUrl.endsWith('/api') ? apiBaseUrl.slice(0, -4) : apiBaseUrl;
-            const wsUrl = baseUrl.replace('http', 'ws') + '/api/chat/ws?token=' + encodeURIComponent(this.token);
+            // Convert to WebSocket URL and ensure proper path construction
+            const wsBaseUrl = baseUrl.replace('http', 'ws');
+            const wsUrl = `${wsBaseUrl}/api/chat/ws?token=${encodeURIComponent(this.token)}`;
+
+            console.log('🔌 WebSocket connection details:');
+            console.log('  API Base URL:', apiBaseUrl);
+            console.log('  Base URL (after /api removal):', baseUrl);
+            console.log('  WebSocket Base URL:', wsBaseUrl);
+            console.log('  Full WebSocket URL:', wsUrl);
+            console.log('  Token available:', !!this.token);
+
             this.ws = new WebSocket(wsUrl);
 
             this.ws.onopen = () => {
@@ -87,6 +97,12 @@ export class SecureWebSocketService {
 
             this.ws.onclose = (event) => {
                 this.isConnecting = false;
+                console.log('🔌 WebSocket connection closed:', event.code, event.reason);
+                console.log('🔍 Close event details:', {
+                    code: event.code,
+                    reason: event.reason,
+                    wasClean: event.wasClean
+                });
                 this.callbacks.onDisconnected?.();
 
                 // Attempt to reconnect if not a manual close
@@ -96,7 +112,12 @@ export class SecureWebSocketService {
             };
 
             this.ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
+                console.error('❌ WebSocket error:', error);
+                console.log('🔍 Error event details:', {
+                    type: error.type,
+                    target: error.target,
+                    currentTarget: error.currentTarget
+                });
                 this.isConnecting = false;
                 this.callbacks.onError?.('WebSocket connection error');
             };
@@ -224,7 +245,15 @@ export class SecureWebSocketService {
     private handleMessage(data: WebSocketMessage): void {
         switch (data.type) {
             case 'authenticated':
+                console.log('✅ WebSocket authenticated successfully');
 
+                // Handle token migration if new token is provided
+                if (data.newToken && data.tokenMigration && typeof data.newToken === 'string') {
+                    console.log('🔄 Token migration received via WebSocket, updating stored token');
+                    localStorage.setItem('token', data.newToken);
+                    this.token = data.newToken;
+                    console.log('✅ Token updated successfully');
+                }
                 break;
 
             case 'league_joined':
