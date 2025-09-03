@@ -154,7 +154,6 @@ export default function StandingsPage() {
     };
 
     const getDistanceColor = (distance: number | null | undefined) => {
-        console.log('getDistanceColor called with:', distance, 'type:', typeof distance);
         if (distance === null || distance === undefined || isNaN(distance)) return 'text-gray-600';
         if (distance <= 2) return 'text-green-600';
         if (distance <= 5) return 'text-yellow-600';
