@@ -104,6 +104,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error('Could not initialize WebSocket for existing user:', wsError);
           // Don't fail auth initialization if WebSocket initialization fails
         }
+
+        // Initialize push notification refresh for existing authenticated users
+        try {
+          const { notificationRefreshService } = await import('../services/notificationRefreshService');
+          await notificationRefreshService.initialize();
+        } catch (notificationError) {
+          console.error('Could not initialize push notification refresh:', notificationError);
+          // Don't fail auth initialization if notification initialization fails
+        }
       } else {
         console.log('🔍 AuthContext: No stored user or token found');
       }
@@ -136,6 +145,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (wsError) {
           console.error('Could not initialize WebSocket after login:', wsError);
           // Don't fail login if WebSocket initialization fails
+        }
+
+        // Initialize push notification refresh after login
+        try {
+          const { notificationRefreshService } = await import('../services/notificationRefreshService');
+          await notificationRefreshService.initialize();
+        } catch (notificationError) {
+          console.error('Could not initialize push notification refresh after login:', notificationError);
+          // Don't fail login if notification initialization fails
         }
 
         setLoginError(null); // Clear any error on success

@@ -79,21 +79,10 @@ export const useNotificationPrompt = (
 
                     await navigator.serviceWorker.ready;
 
-                    // Check if already subscribed
-                    let subscription = await registration.pushManager.getSubscription();
-
-                    if (!subscription) {
-                        // Subscribe to push notifications
-                        subscription = await registration.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-                        });
-                    }
-
-                    // Send subscription to server
+                    // Use the notification refresh service to handle subscription
                     try {
-                        const { notificationsAPI } = await import('@/lib/api');
-                        await notificationsAPI.registerPushToken(JSON.stringify(subscription), 'web');
+                        const { notificationRefreshService } = await import('@/services/notificationRefreshService');
+                        await notificationRefreshService.initialize();
                         console.log('✅ Push token registered with server');
                     } catch (apiError) {
                         console.error('❌ Failed to register push token with server:', apiError);

@@ -155,22 +155,9 @@ export default function NotificationsPage() {
                     // Wait for service worker to be ready
                     await navigator.serviceWorker.ready;
 
-                    // Check if already subscribed
-                    let subscription = await registration.pushManager.getSubscription();
-
-                    if (!subscription) {
-                        // Subscribe to push notifications
-                        subscription = await registration.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-                        });
-                    }
-
-                    // Send subscription to server
-                    await notificationsAPI.registerPushToken(
-                        JSON.stringify(subscription),
-                        'web'
-                    );
+                    // Use the notification refresh service to handle subscription
+                    const { notificationRefreshService } = await import('@/services/notificationRefreshService');
+                    await notificationRefreshService.initialize();
 
                     setSuccess('Push notifications enabled successfully!');
                 } catch (subscriptionError) {
