@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChatService } from '../services/chatService';
+import { SecureChatService } from '../services/secureChatService';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useChat = () => {
@@ -16,7 +16,7 @@ export const useChat = () => {
 
         const loadUserLeagues = async () => {
             try {
-                const leagues = await ChatService.getUserLeagues(user.id.toString());
+                const leagues = await SecureChatService.getUserLeagues(user.id.toString());
                 setUserLeagues(leagues);
             } catch (error) {
                 console.error('Error loading user leagues:', error);
@@ -32,7 +32,8 @@ export const useChat = () => {
         if (!user) return false;
 
         try {
-            await ChatService.addUserToLeague(user.id.toString(), leagueId);
+            // Note: League joining should be handled through the leagues API, not chat service
+            // This is just for updating the local state after successful league join
             setUserLeagues(prev => [...prev, leagueId]);
             return true;
         } catch (error) {
@@ -45,7 +46,8 @@ export const useChat = () => {
         if (!user) return false;
 
         try {
-            await ChatService.removeUserFromLeague(user.id.toString(), leagueId);
+            // Note: League leaving should be handled through the leagues API, not chat service
+            // This is just for updating the local state after successful league leave
             setUserLeagues(prev => prev.filter(id => id !== leagueId));
             return true;
         } catch (error) {

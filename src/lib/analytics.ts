@@ -1,58 +1,50 @@
 'use client';
 
-import { analytics, getAnalyticsInstance } from '@/lib/firebase';
-import { logEvent as firebaseLogEvent } from 'firebase/analytics';
+// Firebase Analytics integration (restored)
 
-declare global {
-    interface Window {
-        gtag: (command: string, eventName: string, eventParams?: Record<string, string | number | boolean>) => void;
-        dataLayer: Record<string, unknown>[];
-    }
-}
+import { logEvent as firebaseLogEvent, setUserProperties as firebaseSetUserProperties, setUserId as firebaseSetUserId } from 'firebase/analytics';
+import { analytics } from './firebase';
 
 export const logEvent = (eventName: string, eventParams?: Record<string, string | number | boolean>) => {
-    const currentAnalytics = analytics || getAnalyticsInstance();
-
-    if (currentAnalytics) {
+    if (typeof window !== 'undefined' && analytics) {
         try {
-            firebaseLogEvent(currentAnalytics, eventName, eventParams);
-
-            if (typeof window !== 'undefined' && window.gtag) {
-                try {
-                    window.gtag('event', eventName, eventParams);
-                } catch (gtagError) {
-                    // Silent fallback
-                }
-            }
-
+            firebaseLogEvent(analytics, eventName, eventParams);
             return true;
-
-        } catch (error) {
-            console.error('Firebase Analytics failed:', error);
-
-            if (typeof window !== 'undefined' && window.gtag) {
-                try {
-                    window.gtag('event', eventName, eventParams);
-                    return true;
-                } catch (gtagError) {
-                    console.error('Gtag fallback also failed:', gtagError);
-                }
-            }
-
+        } catch (firebaseError) {
+            console.error('Firebase Analytics failed:', firebaseError);
             return false;
         }
-    } else {
-        if (typeof window !== 'undefined' && window.gtag) {
-            try {
-                window.gtag('event', eventName, eventParams);
-                return true;
-            } catch (gtagError) {
-                console.error('Gtag fallback failed:', gtagError);
-            }
-        }
-
-        return false;
     }
+
+    return false;
+};
+
+export const setUserProperties = (properties: Record<string, any>) => {
+    if (typeof window !== 'undefined' && analytics) {
+        try {
+            firebaseSetUserProperties(analytics, properties);
+            return true;
+        } catch (firebaseError) {
+            console.error('Firebase Analytics failed:', firebaseError);
+            return false;
+        }
+    }
+
+    return false;
+};
+
+export const setUserId = (userId: string) => {
+    if (typeof window !== 'undefined' && analytics) {
+        try {
+            firebaseSetUserId(analytics, userId);
+            return true;
+        } catch (firebaseError) {
+            console.error('Firebase Analytics failed:', firebaseError);
+            return false;
+        }
+    }
+
+    return false;
 };
 
 export const logPageView = (pageTitle: string, pageLocation: string) => {

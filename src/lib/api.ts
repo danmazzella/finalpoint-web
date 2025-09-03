@@ -21,7 +21,7 @@ const getApiBaseUrl = () => {
   }
 
   // Fallback to development URL
-  return 'http://192.168.0.15:6075/api';
+  return 'http://localhost:6075/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -51,7 +51,7 @@ publicApiService.interceptors.request.use(
 );
 
 // Helper function to get full avatar URL
-export const getAvatarUrl = (avatarPath: string, baseUrl?: string) => {
+export const getAvatarUrl = (avatarPath: string, _baseUrl?: string) => {
   // Handle null, undefined, empty string, or the string "null"
   if (!avatarPath || avatarPath === 'null' || avatarPath.trim() === '') {
     return null;
@@ -349,6 +349,10 @@ export const notificationsAPI = {
 
 export const chatAPI = {
   validateAccess: (leagueId: number) => apiService.get(`/chat/validate/${leagueId}`),
+  sendMessage: (leagueId: number, text: string, channelId?: string) =>
+    apiService.post('/chat/send', { leagueId, text, channelId }),
+  getMessages: (leagueId: number, channelId?: string, limit?: number) =>
+    apiService.get('/chat/messages', { params: { leagueId, channelId, limit } }),
   markMessagesAsRead: (leagueId: number) => apiService.post(`/chat/mark-read/${leagueId}`),
   getUnreadCount: (leagueId: number) => apiService.get(`/chat/unread-count/${leagueId}`),
   getAllUnreadCounts: () => apiService.get('/chat/unread-counts'),
@@ -356,6 +360,8 @@ export const chatAPI = {
   updateNotificationPreferences: (leagueId: number, notificationsEnabled: boolean) =>
     apiService.put(`/chat/notification-preferences/${leagueId}`, { notificationsEnabled }),
   getAllNotificationPreferences: () => apiService.get('/chat/notification-preferences'),
+  getOnlineUsers: (leagueId: number) => apiService.get(`/chat/online-users/${leagueId}`),
+  updateStatus: (isOnline: boolean) => apiService.post('/chat/update-status', { isOnline }),
 };
 
 // Types
@@ -558,6 +564,7 @@ export interface NotificationPreferences {
   emailScoreUpdates: boolean;
   pushReminders: boolean;
   pushScoreUpdates: boolean;
+  pushChatMessages: boolean;
   emailReminder5Days: boolean;
   emailReminder3Days: boolean;
   emailReminder1Day: boolean;
@@ -568,7 +575,6 @@ export interface NotificationPreferences {
   pushReminder1Hour: boolean;
   emailOther: boolean;
   pushOther: boolean;
-  pushChatMessages: boolean;
 }
 
 // Activity interface for league activities

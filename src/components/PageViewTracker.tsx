@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { logPageView } from '@/lib/analytics';
-import { analytics, getAnalyticsInstance } from '@/lib/firebase';
+import { analytics } from '@/lib/firebase';
 
 export default function PageViewTracker() {
     const pathname = usePathname();
@@ -12,8 +12,7 @@ export default function PageViewTracker() {
 
     useEffect(() => {
         const checkAnalytics = () => {
-            const currentAnalytics = analytics || getAnalyticsInstance();
-            if (currentAnalytics) {
+            if (analytics) {
                 setAnalyticsReady(true);
             } else {
                 setTimeout(checkAnalytics, 100);

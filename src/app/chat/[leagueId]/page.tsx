@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { LeagueChat } from '../../../components/LeagueChat';
-import { ChatService } from '../../../services/chatService';
+import { SecureChatService } from '../../../services/secureChatService';
 import { useAuth } from '@/contexts/AuthContext';
 import { chatAPI, leaguesAPI } from '@/lib/api';
 
@@ -44,9 +44,8 @@ export default function LeagueChatPage() {
 
         const checkAccess = async () => {
             try {
-                // Check if user has access to this league
-                const userLeagues = await ChatService.getUserLeagues(user.id.toString());
-                const hasLeagueAccess = userLeagues.includes(leagueId);
+                // Use secure backend validation instead of client-side checks
+                const hasLeagueAccess = await SecureChatService.validateLeagueAccess(leagueId);
 
                 if (hasLeagueAccess) {
                     setHasAccess(true);
@@ -68,7 +67,7 @@ export default function LeagueChatPage() {
                     await loadNotificationPreferences();
                 } else {
                     setHasAccess(false);
-                    const errorMsg = `You are not a member of league ${leagueId}. Your leagues: ${userLeagues.join(', ') || 'none'}`;
+                    const errorMsg = `You are not a member of league ${leagueId}. Access denied by server.`;
 
                     alert(errorMsg);
                     router.back();
@@ -142,9 +141,9 @@ export default function LeagueChatPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="h-screen bg-gray-50 flex flex-col">
             {/* Enhanced Header */}
-            <div className="bg-white border-b border-gray-200 shadow-sm">
+            <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
                 <div className="max-w-4xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
@@ -181,8 +180,8 @@ export default function LeagueChatPage() {
             </div>
 
             {/* Chat Component */}
-            <div className="flex-1 p-4">
-                <div className="h-full max-w-4xl mx-auto bg-white rounded-lg shadow-sm border">
+            <div className="flex-1 p-4 min-h-0">
+                <div className="h-full max-w-4xl mx-auto bg-white rounded-lg shadow-sm border flex flex-col">
                     <LeagueChat
                         leagueId={leagueId}
                         leagueName={leagueName}

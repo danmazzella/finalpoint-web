@@ -12,6 +12,8 @@ export interface ChatMessage {
     channelId?: string; // Optional - for different chat channels within a league (general, race-discussion, etc.)
     image?: string; // For image messages
     system?: boolean; // For system messages (like "User joined the league")
+    status?: 'sending' | 'sent' | 'failed' | 'queued'; // Message delivery status
+    tempId?: string; // Temporary ID for messages being sent (before server assigns real ID)
 }
 
 export interface ChatChannel {

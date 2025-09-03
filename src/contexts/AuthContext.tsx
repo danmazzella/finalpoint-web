@@ -78,11 +78,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadStoredUser();
   }, []);
 
-  const loadStoredUser = () => {
+  const loadStoredUser = async () => {
     try {
       const storedUser = localStorage.getItem('user');
-      if (storedUser) {
+      const storedToken = localStorage.getItem('token');
+
+      if (storedUser && storedToken) {
         setUser(JSON.parse(storedUser));
+
+        // Initialize WebSocket connection for existing authenticated users
+        try {
+          const { SecureChatService } = await import('../services/secureChatService');
+          SecureChatService.updateWebSocketToken(storedToken);
+          await SecureChatService.initializeWebSocket();
+        } catch (wsError) {
+          console.error('Could not initialize WebSocket for existing user:', wsError);
+          // Don't fail auth initialization if WebSocket initialization fails
+        }
       }
     } catch (error) {
       console.error('Error loading stored user:', error);
@@ -104,6 +116,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('token', response.data.token);
+
+        // Initialize WebSocket connection for chat
+        try {
+          const { SecureChatService } = await import('../services/secureChatService');
+          SecureChatService.updateWebSocketToken(response.data.token);
+          await SecureChatService.initializeWebSocket();
+        } catch (wsError) {
+          console.error('Could not initialize WebSocket after login:', wsError);
+          // Don't fail login if WebSocket initialization fails
+        }
 
         setLoginError(null); // Clear any error on success
         setLoginFormData({ email: '', password: '' }); // Clear form data on success
@@ -228,6 +250,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('token', response.data.token);
+
+        // Initialize WebSocket connection for chat
+        try {
+          const { SecureChatService } = await import('../services/secureChatService');
+          SecureChatService.updateWebSocketToken(response.data.token);
+          await SecureChatService.initializeWebSocket();
+        } catch (wsError) {
+          console.error('Could not initialize WebSocket after Google login:', wsError);
+          // Don't fail login if WebSocket initialization fails
+        }
+
         return { success: true };
       }
       return { success: false, error: 'Failed to sign in with Google. Please try again.' };
@@ -245,7 +278,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Disconnect WebSocket connection
+    try {
+      const { SecureChatService } = await import('../services/secureChatService');
+      SecureChatService.disconnectWebSocket();
+    } catch (wsError) {
+      console.error('Could not disconnect WebSocket on logout:', wsError);
+    }
+
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChatService } from '../services/chatService';
+import { SecureChatService } from '../services/secureChatService';
 import { ChatMessage } from '../types/chat';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -29,15 +29,69 @@ export const LeagueChat: React.FC<LeagueChatProps> = ({
         if (!user || !leagueId) return;
 
         let unsubscribe: (() => void) | undefined;
+        let isInitialLoad = true;
 
         const setupSubscription = async () => {
             try {
-                unsubscribe = await ChatService.subscribeToLeagueMessages(
+                unsubscribe = await SecureChatService.subscribeToLeagueMessages(
                     leagueId,
-                    channelId,
+                    channelId || undefined,
                     (chatMessages: ChatMessage[]) => {
-                        setMessages(chatMessages);
-                        setLoading(false);
+                        if (isInitialLoad) {
+                            // Initial load - replace all messages
+                            // Ensure dates are properly converted for initial messages
+                            const processedMessages = chatMessages.map(msg => ({
+                                ...msg,
+                                createdAt: typeof msg.createdAt === 'string' ? new Date(msg.createdAt) : msg.createdAt
+                            }));
+                            setMessages(processedMessages);
+                            setLoading(false);
+                            isInitialLoad = false;
+                        } else {
+                            // New message received - append to existing messages
+                            setMessages(prevMessages => {
+                                // Check if this message already exists to avoid duplicates
+                                const newMessage = chatMessages[0];
+                                if (!newMessage) return prevMessages;
+
+                                // Check for duplicate by ID
+                                const messageExistsById = prevMessages.some(msg => msg.id === newMessage.id);
+                                if (messageExistsById) {
+                                    return prevMessages;
+                                }
+
+                                // Check for duplicate by content and user (for messages we just sent)
+                                // This handles the case where server message doesn't have tempId
+                                const messageExistsByContent = prevMessages.some(msg =>
+                                    msg.text === newMessage.text &&
+                                    msg.user._id === newMessage.user._id &&
+                                    Math.abs(new Date(msg.createdAt).getTime() - new Date(newMessage.createdAt).getTime()) < 5000 // Within 5 seconds
+                                );
+
+                                if (messageExistsByContent) {
+                                    // Replace the temporary message with the real one from server
+                                    const processedMessage: ChatMessage = {
+                                        ...newMessage,
+                                        status: 'sent' as const, // Mark as sent when received from server
+                                        createdAt: typeof newMessage.createdAt === 'string' ? new Date(newMessage.createdAt) : newMessage.createdAt
+                                    };
+                                    return prevMessages.map(msg =>
+                                        msg.text === newMessage.text &&
+                                            msg.user._id === newMessage.user._id &&
+                                            Math.abs(new Date(msg.createdAt).getTime() - new Date(newMessage.createdAt).getTime()) < 5000
+                                            ? processedMessage : msg
+                                    );
+                                }
+
+                                // Ensure dates are properly converted for new messages
+                                const processedMessages = chatMessages.map(msg => ({
+                                    ...msg,
+                                    createdAt: typeof msg.createdAt === 'string' ? new Date(msg.createdAt) : msg.createdAt
+                                }));
+
+                                return [...prevMessages, ...processedMessages];
+                            });
+                        }
                     }
                 );
             } catch (error) {
@@ -61,23 +115,72 @@ export const LeagueChat: React.FC<LeagueChatProps> = ({
         if (!user || !leagueId) return;
 
         // Set user online when component mounts
-        ChatService.updateUserStatus(user.id.toString(), true, {
+        SecureChatService.updateUserStatus(user.id.toString(), true, {
             name: user.name || user.email,
             email: user.email
         });
 
+        // Add current user to online list immediately (temporary solution)
+        setOnlineUsers([{
+            id: user.id.toString(),
+            name: user.name || user.email || 'You',
+            isOnline: true
+        }]);
+
         // Subscribe to online users
-        const unsubscribeOnlineUsers = ChatService.subscribeToOnlineUsers(
-            leagueId,
-            (users) => {
-                setOnlineUsers(users);
+        const setupOnlineUsers = async () => {
+            try {
+                const unsubscribeOnlineUsers = await SecureChatService.subscribeToOnlineUsers(
+                    leagueId,
+                    (users) => {
+                        setOnlineUsers(prevUsers => {
+                            // Handle different types of updates
+                            if (Array.isArray(users)) {
+                                // If we get an array, it's a full list update
+                                // Merge with current user if not already included
+                                const currentUser = {
+                                    id: user.id.toString(),
+                                    name: user.name || user.email || 'You',
+                                    isOnline: true
+                                };
+                                const hasCurrentUser = users.some(u => u.id === currentUser.id);
+                                return hasCurrentUser ? users : [currentUser, ...users];
+                            } else {
+                                // If we get a single user, it's either a join or leave event
+                                const newUser = users;
+                                if (newUser.isOnline) {
+                                    // User joined - add if not exists
+                                    const exists = prevUsers.some(u => u.id === newUser.id);
+                                    if (!exists) {
+                                        return [...prevUsers, newUser];
+                                    }
+                                } else {
+                                    // User left - remove from list (but keep current user)
+                                    return prevUsers.filter(u => u.id !== newUser.id);
+                                }
+                                return prevUsers;
+                            }
+                        });
+                    }
+                );
+                return unsubscribeOnlineUsers;
+            } catch (error) {
+                console.error('Error setting up online users subscription:', error);
+                return () => { };
             }
-        );
+        };
+
+        let unsubscribeOnlineUsers: (() => void) | undefined;
+        setupOnlineUsers().then(unsubscribe => {
+            unsubscribeOnlineUsers = unsubscribe;
+        });
 
         // Set user offline when component unmounts
         return () => {
-            ChatService.updateUserStatus(user.id.toString(), false);
-            unsubscribeOnlineUsers();
+            SecureChatService.updateUserStatus(user.id.toString(), false);
+            if (unsubscribeOnlineUsers) {
+                unsubscribeOnlineUsers();
+            }
         };
     }, [user, leagueId]);
 
@@ -86,14 +189,40 @@ export const LeagueChat: React.FC<LeagueChatProps> = ({
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, [messages]);
 
+    // Function to refresh online users list
+    const refreshOnlineUsers = async () => {
+        try {
+            // Use the proper getOnlineUsers endpoint
+            const onlineUsers = await SecureChatService.getOnlineUsers(leagueId);
+
+            // Ensure current user is included in the online users list
+            const currentUser = {
+                id: user?.id.toString() || '',
+                name: user?.name || user?.email || 'You',
+                isOnline: true
+            };
+
+            const hasCurrentUser = onlineUsers.some((u: { id: string }) => u.id === currentUser.id);
+            const updatedUsers = hasCurrentUser ? onlineUsers : [currentUser, ...onlineUsers];
+
+            setOnlineUsers(updatedUsers);
+        } catch (error) {
+            console.error('Error refreshing online users:', error);
+            // Don't show error to user as this is a background operation
+        }
+    };
+
     // Send a new message
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user || !newMessage.trim()) return;
 
+        const messageText = newMessage.trim();
+        setNewMessage(''); // Clear input immediately
+
         try {
-            await ChatService.sendMessage(leagueId, {
-                text: newMessage.trim(),
+            const sentMessage = await SecureChatService.sendMessage(leagueId, {
+                text: messageText,
                 user: {
                     _id: user.id.toString(),
                     name: user.name || user.email,
@@ -102,18 +231,44 @@ export const LeagueChat: React.FC<LeagueChatProps> = ({
                 leagueId,
                 channelId: channelId || undefined,
             });
-            setNewMessage('');
+
+            // Only add to local state if using REST API (not WebSocket)
+            // WebSocket messages will come back through the subscription
+            if (sentMessage.status === 'sent') {
+                setMessages(prevMessages => {
+                    const newMessages = [...prevMessages, sentMessage];
+                    return newMessages;
+                });
+            } else if (sentMessage.status === 'sending') {
+                // For WebSocket, add the temporary message
+                setMessages(prevMessages => {
+                    const newMessages = [...prevMessages, sentMessage];
+                    return newMessages;
+                });
+            }
+
+            // Refresh online users list after sending message to ensure up-to-date status
+            await refreshOnlineUsers();
         } catch (error) {
             console.error('Error sending message:', error);
             alert('Failed to send message. Please try again.');
+            setNewMessage(messageText); // Restore text on error
         }
     };
 
-    const formatTime = (date: Date) => {
+    const formatTime = (date: Date | string) => {
+        // Convert to Date object if it's a string
+        const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+        // Check if the date is valid
+        if (isNaN(dateObj.getTime())) {
+            return 'Invalid date';
+        }
+
         return new Intl.DateTimeFormat('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-        }).format(date);
+        }).format(dateObj);
     };
 
     if (loading) {
@@ -127,9 +282,9 @@ export const LeagueChat: React.FC<LeagueChatProps> = ({
     return (
         <div className="flex h-full bg-gray-50 relative">
             {/* Main Chat Area */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0">
                 {/* Mobile Sidebar Toggle */}
-                <div className="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 flex justify-between items-center">
+                <div className="lg:hidden bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-2 flex justify-between items-center flex-shrink-0">
                     <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">League Chat</h3>
                     <button
                         onClick={() => setShowSidebar(!showSidebar)}
@@ -141,7 +296,7 @@ export const LeagueChat: React.FC<LeagueChatProps> = ({
                     </button>
                 </div>
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-4">
+                <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-4 min-h-0">
                     {messages.length === 0 ? (
                         <div className="text-center text-gray-500 py-8">
                             No messages yet. Start the conversation!
@@ -165,12 +320,39 @@ export const LeagueChat: React.FC<LeagueChatProps> = ({
                                     )}
                                     <div className="text-sm break-words">{message.text}</div>
                                     <div
-                                        className={`text-xs mt-1 ${message.user._id === user?.id?.toString()
+                                        className={`text-xs mt-1 flex items-center ${message.user._id === user?.id?.toString()
                                             ? 'text-blue-100'
                                             : 'text-gray-500'
                                             }`}
                                     >
-                                        {formatTime(message.createdAt)}
+                                        <span>{formatTime(message.createdAt)}</span>
+
+                                        {/* Status indicator for own messages */}
+                                        {message.user._id === user?.id?.toString() && message.status && (
+                                            <span className="ml-2">
+                                                {message.status === 'sending' && (
+                                                    <span className="text-yellow-400" title="Sending...">⏳</span>
+                                                )}
+                                                {message.status === 'sent' && (
+                                                    <span className="text-green-400" title="Sent">✓</span>
+                                                )}
+                                                {message.status === 'failed' && (
+                                                    <button
+                                                        className="text-red-400 hover:text-red-300"
+                                                        title="Failed to send - Click to retry"
+                                                        onClick={() => {
+                                                            // TODO: Implement retry functionality
+                                                            console.log('Retry message:', message.id);
+                                                        }}
+                                                    >
+                                                        ⚠️
+                                                    </button>
+                                                )}
+                                                {message.status === 'queued' && (
+                                                    <span className="text-blue-400" title="Queued for sending">☁️</span>
+                                                )}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -180,18 +362,25 @@ export const LeagueChat: React.FC<LeagueChatProps> = ({
                 </div>
 
                 {/* Message Input */}
-                <div className="border-t bg-white p-2 sm:p-4">
+                <div className="border-t bg-white p-2 sm:p-4 flex-shrink-0">
                     <form onSubmit={handleSendMessage} className="flex space-x-2">
-                        <textarea
+                        <input
+                            type="text"
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             placeholder={`Message ${leagueName}...`}
-                            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[44px] max-h-[120px]"
-                            rows={1}
-                            onInput={(e) => {
-                                const target = e.target as HTMLTextAreaElement;
-                                target.style.height = 'auto';
-                                target.style.height = Math.min(target.scrollHeight, 120) + 'px';
+                            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            autoComplete="off"
+                            autoCorrect="on"
+                            autoCapitalize="sentences"
+                            spellCheck="true"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (newMessage.trim()) {
+                                        handleSendMessage(e);
+                                    }
+                                }
                             }}
                         />
                         <button
