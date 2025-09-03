@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { FeatureFlagProvider } from '@/contexts/FeatureFlagContext';
 import ConditionalLayout from '@/components/ConditionalLayout';
 import ServiceWorkerManager from '@/components/ServiceWorkerManager';
 import PageViewTracker from '@/components/PageViewTracker';
@@ -30,11 +31,13 @@ export default function RootLayout({
         <ServiceWorkerManager />
         <ThemeProvider>
           <AuthProvider>
-            <ToastProvider>
-              <ConditionalLayout>
-                {children}
-              </ConditionalLayout>
-            </ToastProvider>
+            <FeatureFlagProvider>
+              <ToastProvider>
+                <ConditionalLayout>
+                  {children}
+                </ConditionalLayout>
+              </ToastProvider>
+            </FeatureFlagProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

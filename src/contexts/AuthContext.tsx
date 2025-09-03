@@ -20,6 +20,7 @@ interface User {
   name: string;
   avatar?: string;
   role?: 'user' | 'admin';
+  chatFeatureEnabled?: boolean;
 }
 
 interface AuthResponse {
@@ -84,7 +85,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const storedToken = localStorage.getItem('token');
 
       if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+
+        // Try to refresh user data from API to get latest feature flags
+        try {
+          await refreshUserData();
+        } catch (refreshError) {
+          console.log('⚠️ AuthContext: Error refreshing user data, using cached data:', refreshError);
+        }
 
         // Initialize WebSocket connection for existing authenticated users
         try {
@@ -95,6 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error('Could not initialize WebSocket for existing user:', wsError);
           // Don't fail auth initialization if WebSocket initialization fails
         }
+      } else {
+        console.log('🔍 AuthContext: No stored user or token found');
       }
     } catch (error) {
       console.error('Error loading stored user:', error);
@@ -393,6 +404,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authAPI.getProfile();
       if (response.data.success && response.data.data) {
         const userData = response.data.data;
+
         // Don't strip the avatar path - the backend returns the correct format
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));

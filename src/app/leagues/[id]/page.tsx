@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { useChatFeature } from '@/contexts/FeatureFlagContext';
 import { leaguesAPI, activityAPI, League, f1racesAPI, chatAPI } from '@/lib/api';
 import { copyToClipboardWithFeedback } from '@/utils/clipboardUtils';
 import Link from 'next/link';
@@ -43,6 +44,7 @@ interface UserPick {
 export default function LeagueDetailPage() {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { isChatFeatureEnabled } = useChatFeature();
   const params = useParams();
   const router = useRouter();
   const leagueId = params.id as string;
@@ -76,9 +78,15 @@ export default function LeagueDetailPage() {
     // Only load user-specific data if authenticated
     if (user) {
       loadRecentActivity(parseInt(leagueId));
-      loadUnreadCount(parseInt(leagueId));
+
+      // Only load chat data if chat feature is enabled
+      if (isChatFeatureEnabled) {
+        loadUnreadCount(parseInt(leagueId));
+      } else {
+        setUnreadCount(0); // Clear unread count if chat is disabled
+      }
     }
-  }, [user, leagueId]);
+  }, [user, leagueId, isChatFeatureEnabled]);
 
   const loadLeague = async () => {
     try {
@@ -304,7 +312,7 @@ export default function LeagueDetailPage() {
           title={league.name}
           subtitle={`Season ${league.seasonYear}`}
         >
-          {unreadCount > 0 && (
+          {isChatFeatureEnabled && unreadCount > 0 && (
             <div className="relative">
               <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
@@ -337,7 +345,7 @@ export default function LeagueDetailPage() {
                     >
                       Make Picks
                     </Link>
-                    {isMember && (
+                    {isMember && isChatFeatureEnabled && (
                       <Link
                         href={`/chat/${league.id}`}
                         className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
@@ -542,16 +550,6 @@ export default function LeagueDetailPage() {
                   <div className="space-y-3">
                     {recentActivity.map((activity) => {
                       // Debug logging to see what we're receiving
-                      console.log('Activity data:', {
-                        id: activity.id,
-                        type: activity.activityType,
-                        primaryMessage: activity.primaryMessage,
-                        secondaryMessage: activity.secondaryMessage,
-                        userName: activity.userName,
-                        driverName: activity.driverName,
-                        driverTeam: activity.driverTeam
-                      });
-
                       return (
                         <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                           <div className="flex-shrink-0">

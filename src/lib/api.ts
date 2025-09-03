@@ -210,6 +210,12 @@ export const adminAPI = {
     apiService.delete(`/admin/users/${userId}/picks`, { data: { leagueId, weekNumber, position } }),
   getUserPicks: (userId: number, leagueId: number) =>
     apiService.get(`/admin/users/${userId}/picks/${leagueId}`),
+
+  // Chat feature flag management
+  updateUserChatFeature: (userId: number, chatFeatureEnabled: boolean) =>
+    apiService.put(`/admin/users/${userId}/chat-feature`, { chatFeatureEnabled }),
+  getUserChatFeature: (userId: number) =>
+    apiService.get(`/admin/users/${userId}/chat-feature`),
 };
 
 export const authAPI = {

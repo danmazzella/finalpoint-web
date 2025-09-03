@@ -5,12 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { LeagueChat } from '../../../components/LeagueChat';
 import { SecureChatService } from '../../../services/secureChatService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useChatFeature } from '@/contexts/FeatureFlagContext';
 import { chatAPI, leaguesAPI } from '@/lib/api';
 
 export default function LeagueChatPage() {
     const params = useParams();
     const router = useRouter();
     const { user } = useAuth();
+    const { isChatFeatureEnabled, isLoading: featureFlagLoading } = useChatFeature();
     const leagueId = params.leagueId as string;
     const [leagueName, setLeagueName] = useState('League Chat');
     const [hasAccess, setHasAccess] = useState(false);
@@ -34,6 +36,13 @@ export default function LeagueChatPage() {
     }, [leagueId]);
 
     useEffect(() => {
+        // Check if chat feature is enabled
+        if (!featureFlagLoading && !isChatFeatureEnabled) {
+            alert('Chat functionality is currently not available. Please try again later.');
+            router.back();
+            return;
+        }
+
         if (!user || !leagueId) {
             if (!user) {
                 router.push('/login');
@@ -83,7 +92,7 @@ export default function LeagueChatPage() {
         };
 
         checkAccess();
-    }, [user, leagueId, router, loadNotificationPreferences]);
+    }, [user, leagueId, router, loadNotificationPreferences, isChatFeatureEnabled, featureFlagLoading]);
 
     const toggleNotifications = async () => {
         try {
@@ -115,10 +124,12 @@ export default function LeagueChatPage() {
         );
     }
 
-    if (loading) {
+    if (loading || featureFlagLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="text-gray-500">Loading chat...</div>
+                <div className="text-gray-500">
+                    {featureFlagLoading ? 'Loading...' : 'Loading chat...'}
+                </div>
             </div>
         );
     }

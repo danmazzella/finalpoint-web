@@ -12,10 +12,16 @@ export default function PageViewTracker() {
 
     useEffect(() => {
         const checkAnalytics = () => {
-            if (analytics) {
-                setAnalyticsReady(true);
-            } else {
-                setTimeout(checkAnalytics, 100);
+            try {
+                if (analytics) {
+                    setAnalyticsReady(true);
+                } else {
+                    // If analytics is not available after 5 seconds, give up
+                    setTimeout(checkAnalytics, 100);
+                }
+            } catch (error) {
+                console.warn('Analytics check failed:', error);
+                setAnalyticsReady(false);
             }
         };
         checkAnalytics();

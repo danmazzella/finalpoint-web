@@ -9,6 +9,7 @@ interface AdminUser {
     name: string;
     avatar: string | null;
     role: 'user' | 'admin';
+    chat_feature_enabled: boolean;
     createdAt: string;
     updatedAt: string;
     leagueCount: number;
@@ -101,6 +102,25 @@ export default function AdminUsersPage() {
         }
     };
 
+    const updateUserChatFeature = async (userId: number, chatFeatureEnabled: boolean) => {
+        try {
+            const response = await adminAPI.updateUserChatFeature(userId, chatFeatureEnabled);
+
+            if (response.status === 200) {
+                // Update the user in the local state
+                setUsers(prevUsers =>
+                    prevUsers.map(user =>
+                        user.id === userId ? { ...user, chat_feature_enabled: chatFeatureEnabled } : user
+                    )
+                );
+            } else {
+                console.error('Failed to update user chat feature:', response.data);
+            }
+        } catch (error) {
+            console.error('Error updating user chat feature:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -124,6 +144,9 @@ export default function AdminUsersPage() {
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Role
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Chat Feature
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Leagues
@@ -169,6 +192,20 @@ export default function AdminUsersPage() {
                                         }`}>
                                         {user.role}
                                     </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <button
+                                        onClick={() => updateUserChatFeature(user.id, !user.chat_feature_enabled)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                                            user.chat_feature_enabled ? 'bg-indigo-600' : 'bg-gray-200'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                                user.chat_feature_enabled ? 'translate-x-6' : 'translate-x-1'
+                                            }`}
+                                        />
+                                    </button>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <button

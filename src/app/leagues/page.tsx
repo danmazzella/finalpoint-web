@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useChatFeature } from '@/contexts/FeatureFlagContext';
 import { leaguesAPI, League, chatAPI } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
@@ -9,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 
 export default function LeaguesPage() {
   const { user, isLoading: authLoading } = useAuth();
+  const { isChatFeatureEnabled } = useChatFeature();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const [myLeagues, setMyLeagues] = useState<League[]>([]);
@@ -26,7 +28,7 @@ export default function LeaguesPage() {
     if (!authLoading) {
       loadLeagues();
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, isChatFeatureEnabled]);
 
   const loadLeagues = async () => {
     try {
@@ -34,11 +36,18 @@ export default function LeaguesPage() {
 
       if (user) {
         // Authenticated user - get their leagues and public leagues they can join
-        const [myLeaguesResponse, publicLeaguesResponse, unreadCountsResponse] = await Promise.all([
+        const promises = [
           leaguesAPI.getLeagues(),
-          leaguesAPI.getPublicLeagues(),
-          chatAPI.getAllUnreadCounts()
-        ]);
+          leaguesAPI.getPublicLeagues()
+        ];
+
+        // Only load chat data if chat feature is enabled
+        if (isChatFeatureEnabled) {
+          promises.push(chatAPI.getAllUnreadCounts());
+        }
+
+        const responses = await Promise.all(promises);
+        const [myLeaguesResponse, publicLeaguesResponse, unreadCountsResponse] = responses;
 
         if (myLeaguesResponse.data.success) {
           setMyLeagues(myLeaguesResponse.data.data);
@@ -48,12 +57,16 @@ export default function LeaguesPage() {
           setPublicLeagues(publicLeaguesResponse.data.data);
         }
 
-        if (unreadCountsResponse.data.success) {
+        // Only process chat data if chat feature is enabled and response exists
+        if (isChatFeatureEnabled && unreadCountsResponse?.data?.success) {
           const counts: { [leagueId: number]: number } = {};
           unreadCountsResponse.data.unreadCounts.forEach((item: { leagueId: number; unreadCount: number }) => {
             counts[item.leagueId] = item.unreadCount;
           });
           setUnreadCounts(counts);
+        } else if (!isChatFeatureEnabled) {
+          // Clear unread counts if chat feature is disabled
+          setUnreadCounts({});
         }
       } else {
         // Unauthenticated user - get only public leagues
@@ -229,7 +242,7 @@ export default function LeaguesPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
-                        {user && unreadCounts[league.id] > 0 && (
+                        {user && isChatFeatureEnabled && unreadCounts[league.id] > 0 && (
                           <div className="relative">
                             <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
@@ -307,7 +320,7 @@ export default function LeaguesPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
-                        {unreadCounts[league.id] > 0 && (
+                        {isChatFeatureEnabled && unreadCounts[league.id] > 0 && (
                           <div className="relative">
                             <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
