@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { adminAPI } from '@/lib/api';
 
 interface UserWithoutPicks {
@@ -17,10 +18,23 @@ interface UserWithoutPicks {
 }
 
 export default function UsersWithoutPicksPage() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const [weekNumber, setWeekNumber] = useState<number>(1);
     const [usersWithoutPicks, setUsersWithoutPicks] = useState<UserWithoutPicks[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Initialize week number from query params
+    useEffect(() => {
+        const weekParam = searchParams.get('week');
+        if (weekParam) {
+            const week = parseInt(weekParam, 10);
+            if (week >= 1 && week <= 24) {
+                setWeekNumber(week);
+            }
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         loadUsersWithoutPicks();
@@ -58,6 +72,14 @@ export default function UsersWithoutPicksPage() {
         return usersWithoutPicks.length;
     };
 
+    const handleWeekChange = (newWeek: number) => {
+        setWeekNumber(newWeek);
+        // Update URL with new week parameter
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('week', newWeek.toString());
+        router.push(`?${params.toString()}`);
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -86,7 +108,7 @@ export default function UsersWithoutPicksPage() {
                         <select
                             id="week-select"
                             value={weekNumber}
-                            onChange={(e) => setWeekNumber(parseInt(e.target.value))}
+                            onChange={(e) => handleWeekChange(parseInt(e.target.value))}
                             className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
                             {Array.from({ length: 24 }, (_, i) => i + 1).map((week) => (

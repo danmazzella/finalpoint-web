@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import PageTitle from '@/components/PageTitle';
 import { statsAPI } from '@/lib/api';
 
@@ -21,9 +21,21 @@ interface DriverPositionResponse {
 
 export default function StatsPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [selectedPosition, setSelectedPosition] = useState<number>(1);
     const [driverStats, setDriverStats] = useState<DriverPositionStats[]>([]);
     const [loading, setLoading] = useState(false);
+
+    // Initialize position from query params
+    useEffect(() => {
+        const positionParam = searchParams.get('position');
+        if (positionParam) {
+            const position = parseInt(positionParam, 10);
+            if (position >= 1 && position <= 20) {
+                setSelectedPosition(position);
+            }
+        }
+    }, [searchParams]);
 
     const handleBack = () => {
         router.back();
@@ -52,6 +64,10 @@ export default function StatsPage() {
 
     const handlePositionChange = (position: number) => {
         setSelectedPosition(position);
+        // Update URL with new position parameter
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('position', position.toString());
+        router.push(`?${params.toString()}`);
     };
 
     return (

@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { adminAPI, LeaguePicksOverview } from '@/lib/api';
 import Link from 'next/link';
 import logger from '@/utils/logger';
 
 export default function LeaguePicksOverviewPage() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const [overview, setOverview] = useState<LeaguePicksOverview[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -16,19 +19,35 @@ export default function LeaguePicksOverviewPage() {
         loadAvailableWeeks();
     }, []);
 
+    // Initialize week number from query params after available weeks are loaded
+    useEffect(() => {
+        if (availableWeeks.length > 0) {
+            const weekParam = searchParams.get('week');
+            if (weekParam) {
+                const week = parseInt(weekParam, 10);
+                if (week >= 1 && week <= 24) {
+                    setSelectedWeek(week);
+                } else {
+                    setSelectedWeek(availableWeeks[0]);
+                }
+            } else {
+                setSelectedWeek(availableWeeks[0]);
+            }
+        }
+    }, [searchParams, availableWeeks]);
+
     const loadAvailableWeeks = async () => {
         try {
             // For now, we'll generate weeks 1-24 (typical F1 season)
             // In the future, this could come from an API endpoint
             const weeks = Array.from({ length: 24 }, (_, i) => i + 1);
             setAvailableWeeks(weeks);
-            setSelectedWeek(weeks[0]);
         } catch (error) {
             logger.forceError('Error loading available weeks:', error);
         }
     };
 
-    const loadOverview = async () => {
+    const loadOverview = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -46,13 +65,13 @@ export default function LeaguePicksOverviewPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedWeek]);
 
     useEffect(() => {
         if (selectedWeek) {
             loadOverview();
         }
-    }, [selectedWeek]);
+    }, [selectedWeek, loadOverview]);
 
     const getPositionLabel = (position: number) => {
         return `P${position}`;
@@ -82,6 +101,14 @@ export default function LeaguePicksOverviewPage() {
             'bg-slate-500',  // P20 - Slate
         ];
         return colors[position - 1] || 'bg-gray-500';
+    };
+
+    const handleWeekChange = (newWeek: number) => {
+        setSelectedWeek(newWeek);
+        // Update URL with new week parameter
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('week', newWeek.toString());
+        router.push(`?${params.toString()}`);
     };
 
     if (loading) {
@@ -132,7 +159,7 @@ export default function LeaguePicksOverviewPage() {
                     <select
                         id="week-select"
                         value={selectedWeek}
-                        onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                        onChange={(e) => handleWeekChange(parseInt(e.target.value))}
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         {availableWeeks.map((week) => (
