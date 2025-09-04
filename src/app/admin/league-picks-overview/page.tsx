@@ -16,12 +16,6 @@ export default function LeaguePicksOverviewPage() {
         loadAvailableWeeks();
     }, []);
 
-    useEffect(() => {
-        if (selectedWeek) {
-            loadOverview();
-        }
-    }, [selectedWeek]);
-
     const loadAvailableWeeks = async () => {
         try {
             // For now, we'll generate weeks 1-24 (typical F1 season)
@@ -53,6 +47,12 @@ export default function LeaguePicksOverviewPage() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (selectedWeek) {
+            loadOverview();
+        }
+    }, [selectedWeek]);
 
     const getPositionLabel = (position: number) => {
         return `P${position}`;

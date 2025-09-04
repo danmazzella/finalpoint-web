@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { adminAPI, getAvatarUrl } from '@/lib/api';
 import logger from '@/utils/logger';
 
@@ -260,10 +261,12 @@ export default function AdminLeaguesPage() {
                                                         <div className="flex items-center">
                                                             <div className="flex-shrink-0 h-8 w-8">
                                                                 {member.avatar && getAvatarUrl(member.avatar) ? (
-                                                                    <img
+                                                                    <Image
                                                                         className="h-8 w-8 rounded-full"
                                                                         src={getAvatarUrl(member.avatar)!}
                                                                         alt={member.name}
+                                                                        width={32}
+                                                                        height={32}
                                                                     />
                                                                 ) : (
                                                                     <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
