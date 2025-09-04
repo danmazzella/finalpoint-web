@@ -26,10 +26,11 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     const isMarketingPage = pathname === '/marketing';
     const isPrivacyPage = pathname === '/privacy';
     const isTermsPage = pathname === '/terms';
+    const isStatsPage = pathname === '/stats';
     const isRootPage = pathname === '/';
 
     // Define all public pages that don't require authentication
-    const isPublicPage = isScoringPage || isInfoPage || isJoinLeaguePage || isLeagueDetailPage || isLeagueStandingsPage || isLeagueResultsPage || isMarketingPage || isPrivacyPage || isTermsPage || isRootPage;
+    const isPublicPage = isScoringPage || isInfoPage || isJoinLeaguePage || isLeagueDetailPage || isLeagueStandingsPage || isLeagueResultsPage || isMarketingPage || isPrivacyPage || isTermsPage || isStatsPage || isRootPage;
     const isAuthPage = isLoginPage || isSignupPage || isResetPasswordPage;
 
     // Pages with custom headers/footers (should not show shared Navigation/Footer)

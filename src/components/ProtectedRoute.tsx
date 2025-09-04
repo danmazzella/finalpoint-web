@@ -20,7 +20,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
         }
 
         // List of public routes that don't require authentication
-        const publicRoutes = ['/login', '/signup', '/privacy', '/terms', '/reset-password'];
+        const publicRoutes = ['/login', '/signup', '/privacy', '/terms', '/reset-password', '/stats'];
 
         // Special handling for joinleague routes - they should be public
         const isJoinLeagueRoute = pathname.startsWith('/joinleague');
@@ -58,7 +58,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
 
     // Check routes for rendering logic
-    const publicRoutes = ['/login', '/signup', '/privacy', '/terms', '/reset-password'];
+    const publicRoutes = ['/login', '/signup', '/privacy', '/terms', '/reset-password', '/stats'];
     const isJoinLeagueRoute = pathname.startsWith('/joinleague');
     const limitedAccessRoutes = ['/dashboard', '/leagues', '/picks', '/profile'];
 
