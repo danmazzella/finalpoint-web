@@ -172,8 +172,8 @@ export default function StandingsPage() {
 
         return (
             <div className="mt-3">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 text-center">Correct Picks by Position</div>
-                <div className="flex flex-wrap gap-2 justify-center">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 text-center md:text-left">Correct Picks by Position</div>
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                     {positions.map(position => {
                         const positionData = userPicks.positions[position];
                         const accuracy = positionData.totalPicks > 0

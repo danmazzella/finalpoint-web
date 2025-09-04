@@ -172,6 +172,11 @@ apiService.interceptors.response.use(
 );
 
 // API methods
+// Public stats API
+export const statsAPI = {
+  getDriverPositionStats: (position: number) => apiService.get(`/stats/driver-positions?position=${position}`),
+};
+
 export const adminAPI = {
   getAllUsers: () => apiService.get('/admin/users'),
   getAllLeagues: () => apiService.get('/admin/leagues'),
