@@ -188,6 +188,7 @@ export const adminAPI = {
   getLeaguePicksOverview: (weekNumber: number) => apiService.get(`/admin/league-picks-overview?weekNumber=${weekNumber}`),
   getPicksByPositionOverview: (weekNumber: number) => apiService.get(`/admin/picks-by-position-overview?weekNumber=${weekNumber}`),
   getPicksByPositionDetailed: (weekNumber: number) => apiService.get(`/admin/picks-by-position-detailed?weekNumber=${weekNumber}`),
+  getUsersWithoutPicks: (weekNumber: number) => apiService.get(`/admin/users-without-picks?weekNumber=${weekNumber}`),
   testNotifications: (data: { userId: number; notificationType: 'email' | 'push' | 'both'; customMessage?: string; templateId?: string; templateFields?: Record<string, string> }) => apiService.post('/admin/test-notifications', data),
   getUserNotificationHistory: (userId: number) => apiService.get(`/admin/users/${userId}/notification-history`),
   getPickLockingStatus: () => apiService.get('/admin/pick-locking-status'),

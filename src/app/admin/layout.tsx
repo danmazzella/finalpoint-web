@@ -38,6 +38,7 @@ export default function AdminLayout({
         { name: 'Users', href: '/admin/users', current: pathname === '/admin/users' },
         { name: 'Leagues', href: '/admin/leagues', current: pathname === '/admin/leagues' },
         { name: 'User Picks', href: '/admin/user-picks', current: pathname === '/admin/user-picks' },
+        { name: 'Missing Picks', href: '/admin/users-without-picks', current: pathname === '/admin/users-without-picks' },
     ];
 
     return (
