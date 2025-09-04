@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { adminAPI, PicksByPositionDetailed } from '@/lib/api';
 import Link from 'next/link';
 
-export default function PicksByPositionPage() {
+function PicksByPositionPageContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [overview, setOverview] = useState<PicksByPositionDetailed[]>([]);
@@ -36,12 +36,6 @@ export default function PicksByPositionPage() {
         }
     }, [searchParams, availableWeeks]);
 
-    useEffect(() => {
-        if (selectedWeek) {
-            loadOverview();
-        }
-    }, [selectedWeek]);
-
     const loadAvailableWeeks = async () => {
         try {
             // For now, we'll generate weeks 1-24 (typical F1 season)
@@ -53,7 +47,7 @@ export default function PicksByPositionPage() {
         }
     };
 
-    const loadOverview = async () => {
+    const loadOverview = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -71,7 +65,13 @@ export default function PicksByPositionPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedWeek]);
+
+    useEffect(() => {
+        if (selectedWeek) {
+            loadOverview();
+        }
+    }, [selectedWeek, loadOverview]);
 
     const getPositionLabel = (position: number) => {
         return `P${position}`;
@@ -280,5 +280,17 @@ export default function PicksByPositionPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function PicksByPositionPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+            </div>
+        }>
+            <PicksByPositionPageContent />
+        </Suspense>
     );
 }

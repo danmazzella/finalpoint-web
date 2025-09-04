@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { adminAPI, LeaguePicksOverview } from '@/lib/api';
 import Link from 'next/link';
 import logger from '@/utils/logger';
 
-export default function LeaguePicksOverviewPage() {
+function LeaguePicksOverviewPageContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [overview, setOverview] = useState<LeaguePicksOverview[]>([]);
@@ -235,5 +235,17 @@ export default function LeaguePicksOverviewPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function LeaguePicksOverviewPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+            </div>
+        }>
+            <LeaguePicksOverviewPageContent />
+        </Suspense>
     );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { adminAPI } from '@/lib/api';
 
@@ -17,7 +17,7 @@ interface UserWithoutPicks {
     }>;
 }
 
-export default function UsersWithoutPicksPage() {
+function UsersWithoutPicksPageContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [weekNumber, setWeekNumber] = useState<number>(1);
@@ -36,11 +36,7 @@ export default function UsersWithoutPicksPage() {
         }
     }, [searchParams]);
 
-    useEffect(() => {
-        loadUsersWithoutPicks();
-    }, [weekNumber]);
-
-    const loadUsersWithoutPicks = async () => {
+    const loadUsersWithoutPicks = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -58,7 +54,11 @@ export default function UsersWithoutPicksPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [weekNumber]);
+
+    useEffect(() => {
+        loadUsersWithoutPicks();
+    }, [loadUsersWithoutPicks]);
 
     const formatRequiredPositions = (positions: string[]) => {
         return positions.map(pos => `P${pos}`).join(', ');
@@ -96,7 +96,7 @@ export default function UsersWithoutPicksPage() {
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Users Without Picks</h1>
                         <p className="mt-1 text-sm text-gray-600">
-                            Users who haven't made their picks for the selected week
+                            Users who haven&apos;t made their picks for the selected week
                         </p>
                     </div>
 
@@ -258,5 +258,17 @@ export default function UsersWithoutPicksPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function UsersWithoutPicksPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+            </div>
+        }>
+            <UsersWithoutPicksPageContent />
+        </Suspense>
     );
 }
