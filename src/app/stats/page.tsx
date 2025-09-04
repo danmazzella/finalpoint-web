@@ -60,10 +60,10 @@ function StatsPageContent() {
 
     const handlePositionChange = (position: number) => {
         setSelectedPosition(position);
-        // Update URL with new position parameter
+        // Update URL with new position parameter (replace instead of push to avoid history buildup)
         const params = new URLSearchParams(searchParams.toString());
         params.set('position', position.toString());
-        router.push(`?${params.toString()}`);
+        router.replace(`?${params.toString()}`);
     };
 
     return (

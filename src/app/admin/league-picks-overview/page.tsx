@@ -105,10 +105,10 @@ function LeaguePicksOverviewPageContent() {
 
     const handleWeekChange = (newWeek: number) => {
         setSelectedWeek(newWeek);
-        // Update URL with new week parameter
+        // Update URL with new week parameter (replace instead of push to avoid history buildup)
         const params = new URLSearchParams(searchParams.toString());
         params.set('week', newWeek.toString());
-        router.push(`?${params.toString()}`);
+        router.replace(`?${params.toString()}`);
     };
 
     if (loading) {
