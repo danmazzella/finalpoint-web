@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '@/lib/api';
+import logger from '@/utils/logger';
 
 // Type for axios error responses
 interface AxiosError {
@@ -101,7 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           SecureChatService.updateWebSocketToken(storedToken);
           await SecureChatService.initializeWebSocket();
         } catch (wsError) {
-          console.error('Could not initialize WebSocket for existing user:', wsError);
+          logger.error('Could not initialize WebSocket for existing user:', wsError);
           // Don't fail auth initialization if WebSocket initialization fails
         }
 
@@ -110,14 +111,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const { notificationRefreshService } = await import('../services/notificationRefreshService');
           await notificationRefreshService.initialize();
         } catch (notificationError) {
-          console.error('Could not initialize push notification refresh:', notificationError);
+          logger.error('Could not initialize push notification refresh:', notificationError);
           // Don't fail auth initialization if notification initialization fails
         }
       } else {
-        console.log('🔍 AuthContext: No stored user or token found');
+        logger.info('AuthContext: No stored user or token found');
       }
     } catch (error) {
-      console.error('Error loading stored user:', error);
+      logger.error('Error loading stored user:', error);
     } finally {
       setIsLoading(false);
     }
@@ -132,6 +133,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.data.success) {
         const userData = response.data.user;
+        logger.info('User login successful:', { email: userData.email, id: userData.id });
+        // Example of force logging - this will always show even in production
+        logger.forceInfo('🔐 User authentication completed - This message will always show');
         // Don't strip the avatar path - the backend returns the correct format
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
@@ -143,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           SecureChatService.updateWebSocketToken(response.data.token);
           await SecureChatService.initializeWebSocket();
         } catch (wsError) {
-          console.error('Could not initialize WebSocket after login:', wsError);
+          logger.error('Could not initialize WebSocket after login:', wsError);
           // Don't fail login if WebSocket initialization fails
         }
 

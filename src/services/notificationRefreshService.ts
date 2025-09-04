@@ -1,5 +1,6 @@
 // Service to automatically refresh push notification subscriptions on page load
 import { notificationsAPI } from '@/lib/api';
+import logger from '@/utils/logger';
 
 export class NotificationRefreshService {
   private static instance: NotificationRefreshService;
@@ -42,7 +43,7 @@ export class NotificationRefreshService {
 
       this.isInitialized = true;
     } catch (error) {
-      console.error('❌ NotificationRefreshService: Initialization failed:', error);
+      logger.error('❌ NotificationRefreshService: Initialization failed:', error);
     }
   }
 
@@ -78,7 +79,7 @@ export class NotificationRefreshService {
           applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
         });
       } else {
-        console.log('🔄 NotificationRefreshService: Found existing subscription');
+        logger.info('🔄 NotificationRefreshService: Found existing subscription');
       }
 
       // Register with server
@@ -87,7 +88,7 @@ export class NotificationRefreshService {
         'web'
       );
     } catch (error) {
-      console.error('❌ NotificationRefreshService: Failed to refresh subscription:', error);
+      logger.error('❌ NotificationRefreshService: Failed to refresh subscription:', error);
       throw error;
     }
   }
@@ -109,7 +110,7 @@ export class NotificationRefreshService {
       const subscription = await registration.pushManager.getSubscription();
       return !!subscription;
     } catch (error) {
-      console.error('❌ NotificationRefreshService: Error checking subscription:', error);
+      logger.error('❌ NotificationRefreshService: Error checking subscription:', error);
       return false;
     }
   }
@@ -130,7 +131,7 @@ export class NotificationRefreshService {
 
       return await registration.pushManager.getSubscription();
     } catch (error) {
-      console.error('❌ NotificationRefreshService: Error getting subscription:', error);
+      logger.error('❌ NotificationRefreshService: Error getting subscription:', error);
       return null;
     }
   }

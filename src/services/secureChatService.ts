@@ -1,5 +1,6 @@
 import { ChatMessage, ChatChannel, ChatUser } from '../types/chat';
 import { chatAPI, leaguesAPI } from '../lib/api';
+import logger from '@/utils/logger';
 import { secureWebSocketService } from './secureWebSocketService';
 
 /**
@@ -52,7 +53,7 @@ export class SecureChatService {
                 };
             }
         } catch (error) {
-            console.error('Error sending message:', error);
+            logger.forceError('Error sending message:', error);
             // Return message with failed status
             return {
                 ...message,
@@ -91,7 +92,7 @@ export class SecureChatService {
                 };
             });
         } catch (error) {
-            console.error('Error getting messages via secure API:', error);
+            logger.forceError('Error getting messages via secure API:', error);
             throw error;
         }
     }
@@ -124,7 +125,7 @@ export class SecureChatService {
                     createdAt: new Date(msg.createdAt)
                 }));
         } catch (error) {
-            console.error('Error getting messages since timestamp:', error);
+            logger.forceError('Error getting messages since timestamp:', error);
             throw error;
         }
     }
@@ -138,7 +139,7 @@ export class SecureChatService {
             const hasAccess = response.data.success && response.data.hasAccess;
             return hasAccess;
         } catch (error) {
-            console.error('Error validating league access:', error);
+            logger.forceError('Error validating league access:', error);
             return false;
         }
     }
@@ -157,7 +158,7 @@ export class SecureChatService {
 
             return userLeagues;
         } catch (error) {
-            console.error('Error getting user leagues from API:', error);
+            logger.forceError('Error getting user leagues from API:', error);
             throw error;
         }
     }
@@ -172,7 +173,7 @@ export class SecureChatService {
                 throw new Error(response.data.message || 'Failed to mark messages as read');
             }
         } catch (error) {
-            console.error('Error marking messages as read:', error);
+            logger.forceError('Error marking messages as read:', error);
             throw error;
         }
     }
@@ -188,7 +189,7 @@ export class SecureChatService {
             }
             return response.data.unreadCount || 0;
         } catch (error) {
-            console.error('Error getting unread count:', error);
+            logger.forceError('Error getting unread count:', error);
             return 0;
         }
     }
@@ -204,7 +205,7 @@ export class SecureChatService {
             }
             return response.data.unreadCounts || [];
         } catch (error) {
-            console.error('Error getting all unread counts:', error);
+            logger.forceError('Error getting all unread counts:', error);
             return [];
         }
     }
@@ -220,7 +221,7 @@ export class SecureChatService {
             }
             return response.data.notificationsEnabled || false;
         } catch (error) {
-            console.error('Error getting notification preferences:', error);
+            logger.forceError('Error getting notification preferences:', error);
             return false;
         }
     }
@@ -235,7 +236,7 @@ export class SecureChatService {
                 throw new Error(response.data.message || 'Failed to update notification preferences');
             }
         } catch (error) {
-            console.error('Error updating notification preferences:', error);
+            logger.forceError('Error updating notification preferences:', error);
             throw error;
         }
     }
@@ -251,7 +252,7 @@ export class SecureChatService {
             }
             return response.data.preferences || [];
         } catch (error) {
-            console.error('Error getting all notification preferences:', error);
+            logger.forceError('Error getting all notification preferences:', error);
             return [];
         }
     }
@@ -266,7 +267,7 @@ export class SecureChatService {
             // For now, return empty array until backend endpoint is created
             return [];
         } catch (error) {
-            console.error('Error getting league channels:', error);
+            logger.forceError('Error getting league channels:', error);
             throw error;
         }
     }
@@ -281,7 +282,7 @@ export class SecureChatService {
             // For now, throw error until backend endpoint is created
             throw new Error('createDefaultChannel not yet implemented in backend API');
         } catch (error) {
-            console.error('Error creating default channel:', error);
+            logger.forceError('Error creating default channel:', error);
             throw error;
         }
     }
@@ -304,7 +305,7 @@ export class SecureChatService {
                 await chatAPI.updateStatus(isOnline);
             }
         } catch (error) {
-            console.error('Error updating user status:', error);
+            logger.forceError('Error updating user status:', error);
             // Don't throw error to prevent breaking the chat functionality
         }
     }
@@ -324,7 +325,7 @@ export class SecureChatService {
             // TODO: Implement backend endpoint for creating chat users
             // For now, do nothing until backend endpoint is created
         } catch (error) {
-            console.error('Error creating chat user:', error);
+            logger.forceError('Error creating chat user:', error);
             throw error;
         }
     }
@@ -343,7 +344,7 @@ export class SecureChatService {
             try {
                 existingMessages = await SecureChatService.getMessages(leagueId, channelId);
             } catch (error) {
-                console.error('Error loading existing messages:', error);
+                logger.forceError('Error loading existing messages:', error);
                 throw error;
             }
 
@@ -366,7 +367,7 @@ export class SecureChatService {
                     }
                 },
                 onError: (error: string) => {
-                    console.error('WebSocket error in message subscription:', error);
+                    logger.forceError('WebSocket error in message subscription:', error);
                 }
             });
 
@@ -378,7 +379,7 @@ export class SecureChatService {
                 secureWebSocketService.leaveLeague(leagueId);
             };
         } catch (error) {
-            console.error('Error setting up message subscription:', error);
+            logger.forceError('Error setting up message subscription:', error);
             return () => { };
         }
     }
@@ -404,7 +405,7 @@ export class SecureChatService {
 
             return [];
         } catch (error) {
-            console.error('Error getting online users:', error);
+            logger.forceError('Error getting online users:', error);
             return [];
         }
     }
@@ -434,7 +435,7 @@ export class SecureChatService {
                     callback({ id: userId, name: '', email: '', isOnline: false, lastSeen: new Date(), leagues: [] } as ChatUser);
                 },
                 onError: (error: string) => {
-                    console.error('WebSocket error in user subscription:', error);
+                    logger.forceError('WebSocket error in user subscription:', error);
                 }
             });
 
@@ -446,7 +447,7 @@ export class SecureChatService {
                 secureWebSocketService.leaveLeague(leagueId);
             };
         } catch (error) {
-            console.error('Error setting up online users subscription:', error);
+            logger.forceError('Error setting up online users subscription:', error);
             return () => { };
         }
     }
@@ -458,7 +459,7 @@ export class SecureChatService {
         try {
             await secureWebSocketService.connect();
         } catch (error) {
-            console.error('Error initializing WebSocket:', error);
+            logger.forceError('Error initializing WebSocket:', error);
             throw error;
         }
     }

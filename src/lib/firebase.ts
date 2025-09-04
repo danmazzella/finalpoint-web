@@ -1,6 +1,7 @@
 // Firebase configuration for web app
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
+import logger from '@/utils/logger';
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -34,10 +35,10 @@ if (isFirebaseConfigComplete()) {
             analytics = getAnalytics(app);
         }
     } catch (error) {
-        console.error('Firebase initialization failed:', error);
+        logger.error('Firebase initialization failed:', error);
     }
 } else {
-    console.warn('Firebase configuration incomplete. Please set NEXT_PUBLIC_FIREBASE_* environment variables.');
+    logger.warn('Firebase configuration incomplete. Please set NEXT_PUBLIC_FIREBASE_* environment variables.');
 }
 
 export { app, analytics };

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import logger from '@/utils/logger';
 
 // API URL configuration
 const getApiBaseUrl = () => {
@@ -144,7 +145,7 @@ apiService.interceptors.response.use(
 
       // Don't redirect if we're on a limited access route for logged-out users
       if (isLimitedAccessRoute) {
-        console.log('401 error on limited access route, not redirecting');
+        logger.info('401 error on limited access route, not redirecting');
         return Promise.reject(error);
       }
 

@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { leaguesAPI, authAPI, League, chatAPI } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
-import { logPageView } from '@/lib/analytics';
 import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
 
 interface UserStats {
@@ -61,81 +60,81 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+
+        if (user) {
+          // Authenticated user - load user-specific data and global stats
+          const [leaguesResponse, statsResponse, globalStatsResponse, unreadCountsResponse] = await Promise.all([
+            leaguesAPI.getLeagues(),
+            authAPI.getUserStats(),
+            authAPI.getGlobalStats(), // Now works for both authenticated and unauthenticated users
+            chatAPI.getAllUnreadCounts()
+          ]);
+
+          if (leaguesResponse.data.success) {
+            setLeagues(leaguesResponse.data.data);
+          }
+
+          if (statsResponse.data.success) {
+            setUserStats(statsResponse.data.data);
+          }
+
+          if (globalStatsResponse.data.success) {
+            setGlobalStats(globalStatsResponse.data.data);
+          }
+
+          if (unreadCountsResponse.data.success) {
+            const counts: { [leagueId: number]: number } = {};
+            unreadCountsResponse.data.unreadCounts.forEach((item: { leagueId: number; unreadCount: number }) => {
+              counts[item.leagueId] = item.unreadCount;
+            });
+            setUnreadCounts(counts);
+          }
+        } else {
+          // Unauthenticated user - load public data
+          const [leaguesResponse, globalStatsResponse] = await Promise.all([
+            leaguesAPI.getLeagues(), // Now returns public leagues for unauthenticated users
+            authAPI.getGlobalStats() // Now returns basic stats for unauthenticated users
+          ]);
+
+          if (leaguesResponse.data.success) {
+            setLeagues(leaguesResponse.data.data);
+          }
+
+          if (globalStatsResponse.data.success) {
+            setGlobalStats(globalStatsResponse.data.data);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        // For logged-out users, ensure we have default values even if there's an error
+        if (!user) {
+          setGlobalStats({
+            totalUsers: 0,
+            totalLeagues: 0,
+            totalPicks: 0,
+            correctPicks: 0,
+            accuracy: 0,
+            averagePoints: 0,
+            averageDistanceFromTarget: 0,
+            lifetimeAccuracy: 0,
+            lifetimeAvgDistance: 0,
+            weekAccuracy: 0,
+            weekAvgDistance: 0
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
     // Only load data if auth is not loading
     if (!authLoading) {
       loadData();
     }
   }, [authLoading, user]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-
-      if (user) {
-        // Authenticated user - load user-specific data and global stats
-        const [leaguesResponse, statsResponse, globalStatsResponse, unreadCountsResponse] = await Promise.all([
-          leaguesAPI.getLeagues(),
-          authAPI.getUserStats(),
-          authAPI.getGlobalStats(), // Now works for both authenticated and unauthenticated users
-          chatAPI.getAllUnreadCounts()
-        ]);
-
-        if (leaguesResponse.data.success) {
-          setLeagues(leaguesResponse.data.data);
-        }
-
-        if (statsResponse.data.success) {
-          setUserStats(statsResponse.data.data);
-        }
-
-        if (globalStatsResponse.data.success) {
-          setGlobalStats(globalStatsResponse.data.data);
-        }
-
-        if (unreadCountsResponse.data.success) {
-          const counts: { [leagueId: number]: number } = {};
-          unreadCountsResponse.data.unreadCounts.forEach((item: { leagueId: number; unreadCount: number }) => {
-            counts[item.leagueId] = item.unreadCount;
-          });
-          setUnreadCounts(counts);
-        }
-      } else {
-        // Unauthenticated user - load public data
-        const [leaguesResponse, globalStatsResponse] = await Promise.all([
-          leaguesAPI.getLeagues(), // Now returns public leagues for unauthenticated users
-          authAPI.getGlobalStats() // Now returns basic stats for unauthenticated users
-        ]);
-
-        if (leaguesResponse.data.success) {
-          setLeagues(leaguesResponse.data.data);
-        }
-
-        if (globalStatsResponse.data.success) {
-          setGlobalStats(globalStatsResponse.data.data);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-      // For logged-out users, ensure we have default values even if there's an error
-      if (!user) {
-        setGlobalStats({
-          totalUsers: 0,
-          totalLeagues: 0,
-          totalPicks: 0,
-          correctPicks: 0,
-          accuracy: 0,
-          averagePoints: 0,
-          averageDistanceFromTarget: 0,
-          lifetimeAccuracy: 0,
-          lifetimeAvgDistance: 0,
-          weekAccuracy: 0,
-          weekAvgDistance: 0
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Show loading spinner only while auth is loading or while loading user data
   if (authLoading || (loading && user)) {

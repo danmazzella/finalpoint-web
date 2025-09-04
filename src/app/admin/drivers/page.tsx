@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { driversAPI } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import logger from '@/utils/logger';
 
 interface Driver {
     id: number;
@@ -43,7 +44,7 @@ export default function AdminDriversPage() {
                 setError('Failed to load drivers');
             }
         } catch (error) {
-            console.error('Error loading drivers:', error);
+            logger.forceError('Error loading drivers:', error);
             setError('Failed to load drivers');
         } finally {
             setLoading(false);
@@ -63,7 +64,7 @@ export default function AdminDriversPage() {
                 setError('Failed to update driver status');
             }
         } catch (error) {
-            console.error('Error updating driver status:', error);
+            logger.forceError('Error updating driver status:', error);
             setError('Failed to update driver status');
         }
     };
@@ -94,7 +95,7 @@ export default function AdminDriversPage() {
                 setError('Failed to update driver');
             }
         } catch (error) {
-            console.error('Error updating driver:', error);
+            logger.forceError('Error updating driver:', error);
             setError('Failed to update driver');
         }
     };
@@ -113,7 +114,7 @@ export default function AdminDriversPage() {
                 setError('Failed to create driver');
             }
         } catch (error) {
-            console.error('Error creating driver:', error);
+            logger.forceError('Error creating driver:', error);
             setError('Failed to create driver');
         }
     };

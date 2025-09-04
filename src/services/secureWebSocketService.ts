@@ -1,4 +1,5 @@
 import { ChatMessage, ChatUser } from '../types/chat';
+import logger from '@/utils/logger';
 
 interface WebSocketMessage {
     type: string;
@@ -86,7 +87,7 @@ export class SecureWebSocketService {
                     const data: WebSocketMessage = JSON.parse(event.data);
                     this.handleMessage(data);
                 } catch (error) {
-                    console.error('Error parsing WebSocket message:', error);
+                    logger.error('Error parsing WebSocket message:', error);
                 }
             };
 
@@ -101,13 +102,13 @@ export class SecureWebSocketService {
             };
 
             this.ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
+                logger.error('WebSocket error:', error);
                 this.isConnecting = false;
                 this.callbacks.onError?.('WebSocket connection error');
             };
 
         } catch (error) {
-            console.error('Error connecting to WebSocket:', error);
+            logger.error('Error connecting to WebSocket:', error);
             this.isConnecting = false;
             this.callbacks.onError?.(error instanceof Error ? error.message : 'Connection failed');
         }
@@ -129,7 +130,7 @@ export class SecureWebSocketService {
      */
     joinLeague(leagueId: string): void {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            console.warn('WebSocket not connected, cannot join league');
+            logger.warn('WebSocket not connected, cannot join league');
             this.connect();
             return;
         }
@@ -170,7 +171,7 @@ export class SecureWebSocketService {
      */
     sendMessage(leagueId: string, text: string, channelId?: string): void {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            console.warn('WebSocket not connected, queuing message for later');
+            logger.warn('WebSocket not connected, queuing message for later');
             // Queue the message for later sending
             this.queueOfflineMessage(leagueId, { text, channelId });
             return;
@@ -277,7 +278,7 @@ export class SecureWebSocketService {
                 break;
 
             case 'error':
-                console.error('WebSocket error:', data.message);
+                logger.error('WebSocket error:', data.message);
                 this.callbacks.onError?.(typeof data.message === 'string' ? data.message : 'Unknown error');
                 break;
 
@@ -286,7 +287,7 @@ export class SecureWebSocketService {
                 break;
 
             default:
-                console.warn('Unknown WebSocket message type:', data.type);
+                logger.warn('Unknown WebSocket message type:', data.type);
         }
     }
 
@@ -320,7 +321,7 @@ export class SecureWebSocketService {
                     });
                 }
             } catch (error) {
-                console.error(`Error synchronizing messages for league ${leagueId}:`, error);
+                logger.error(`Error synchronizing messages for league ${leagueId}:`, error);
             }
         }
     }
@@ -336,7 +337,7 @@ export class SecureWebSocketService {
             try {
                 await this.sendMessage(leagueId, message.text, message.channelId);
             } catch (error) {
-                console.error('Error retrying offline message:', error);
+                logger.error('Error retrying offline message:', error);
                 // Re-queue the message if it fails
                 this.offlineMessageQueue.push({ leagueId, message });
             }

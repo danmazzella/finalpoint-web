@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { adminAPI, getAvatarUrl } from '@/lib/api';
+import logger from '@/utils/logger';
 
 interface League {
     id: number;
@@ -53,10 +54,10 @@ export default function AdminLeaguesPage() {
                 const leaguesData = leaguesResponse.data;
                 setLeagues(leaguesData.data);
             } else {
-                console.error('Leagues response error:', leaguesResponse.data);
+                logger.forceError('Leagues response error:', leaguesResponse.data);
             }
         } catch (error) {
-            console.error('Error loading leagues:', error);
+            logger.forceError('Error loading leagues:', error);
         } finally {
             setLoading(false);
         }
@@ -70,10 +71,10 @@ export default function AdminLeaguesPage() {
             if (response.status === 200) {
                 setLeagueMembers(response.data.data);
             } else {
-                console.error('Failed to load league members:', response.data);
+                logger.forceError('Failed to load league members:', response.data);
             }
         } catch (error) {
-            console.error('Error loading league members:', error);
+            logger.forceError('Error loading league members:', error);
         } finally {
             setMembersLoading(false);
         }

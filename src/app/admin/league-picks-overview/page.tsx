@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { adminAPI, LeaguePicksOverview } from '@/lib/api';
 import Link from 'next/link';
+import logger from '@/utils/logger';
 
 export default function LeaguePicksOverviewPage() {
     const [overview, setOverview] = useState<LeaguePicksOverview[]>([]);
@@ -29,7 +30,7 @@ export default function LeaguePicksOverviewPage() {
             setAvailableWeeks(weeks);
             setSelectedWeek(weeks[0]);
         } catch (error) {
-            console.error('Error loading available weeks:', error);
+            logger.forceError('Error loading available weeks:', error);
         }
     };
 
@@ -46,7 +47,7 @@ export default function LeaguePicksOverviewPage() {
                 setError('Failed to load picks overview');
             }
         } catch (error) {
-            console.error('Error loading picks overview:', error);
+            logger.forceError('Error loading picks overview:', error);
             setError('Failed to load picks overview');
         } finally {
             setLoading(false);

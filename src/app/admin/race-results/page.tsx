@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { adminAPI, driversAPI, f1racesAPI } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import logger from '@/utils/logger';
 
 interface Driver {
     id: number;
@@ -93,7 +94,7 @@ export default function RaceResultsEntryPage() {
                 setLeagues(leaguesResponse.data.data || []);
             }
         } catch (error) {
-            console.error('Error loading initial data:', error);
+            logger.forceError('Error loading initial data:', error);
             setError('Failed to load drivers and races data');
         } finally {
             setLoading(false);
@@ -118,7 +119,7 @@ export default function RaceResultsEntryPage() {
                 setOriginalResults([...newResults]); // Store the original results
             }
         } catch (error) {
-            console.error('Error loading existing results:', error);
+            logger.forceError('Error loading existing results:', error);
             setError('Failed to load existing race results');
         } finally {
             setLoading(false);
@@ -261,7 +262,7 @@ export default function RaceResultsEntryPage() {
                 }, 5000);
             }
         } catch (error: unknown) {
-            console.error(`Error ${isRescoring ? 'rescoring' : 'entering'} race results:`, error);
+            logger.forceError(`Error ${isRescoring ? 'rescoring' : 'entering'} race results:`, error);
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             setError(errorMessage);
         } finally {
