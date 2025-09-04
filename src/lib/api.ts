@@ -189,6 +189,7 @@ export const adminAPI = {
     apiService.get(`/admin/position-breakdown${weekNumber ? `?weekNumber=${weekNumber}` : ''}`),
   getAvailableRaces: () => apiService.get('/admin/available-races'),
   getAvailableRacesForResults: () => apiService.get('/admin/available-races-for-results'),
+  getRaceInfoByWeek: (weekNumber: number) => apiService.get(`/admin/race-info/${weekNumber}`),
   getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
   getRacesWithResultStatus: () => apiService.get('/admin/races-with-result-status'),
   getExistingRaceResults: (weekNumber: number) => apiService.get(`/admin/existing-race-results/${weekNumber}`),
@@ -205,6 +206,7 @@ export const adminAPI = {
   rescoreRaceResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>, leagueId?: number, logActivity: boolean = true) =>
     apiService.post('/admin/rescore-race-results', { weekNumber, results, leagueId, logActivity }),
   rescheduleAllPicks: () => apiService.post('/admin/reschedule-all-picks'),
+  rescheduleAllReminders: () => apiService.post('/admin/reschedule-all-reminders'),
 
   // New admin methods for managing picks and league memberships
   addUserToLeague: (leagueId: number, userId: number) =>

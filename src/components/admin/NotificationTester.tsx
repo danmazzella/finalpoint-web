@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '@/lib/api';
 import { notificationTemplates, getTemplateById, NotificationTemplate } from './notificationTemplates';
 
@@ -70,13 +70,15 @@ const extractTemplateVariables = (template: NotificationTemplate): Record<string
 };
 
 // Helper function to get variable descriptions
-const getVariableDescription = (variableName: string): string => {
+const getVariableDescription = (variableName: string, templateId?: string): string => {
     const descriptions: Record<string, string> = {
         userName: "User's name (auto-filled)",
-        raceName: "Race name (enter race name, date/week auto-filled)",
+        raceName: templateId === 'pick_reminder_generic'
+            ? "Race name (auto-populated from week number)"
+            : "Race name (enter race name, date/week auto-filled)",
         timing: "Time until race (auto-calculated: days or hours)",
         raceDate: "Race date (auto-filled from database)",
-        weekNumber: "Week number (auto-filled from database)",
+        weekNumber: "Week number (enter week number to auto-populate race info)",
         leagueName: "League name (enter league name, join code auto-filled)",
         joinCode: "League join code (auto-filled from database)",
         customTitle: "Custom notification title",
@@ -88,9 +90,15 @@ const getVariableDescription = (variableName: string): string => {
 };
 
 // Helper function to determine if a variable is user-input or auto-filled
-const isUserInputVariable = (variableName: string): boolean => {
+const isUserInputVariable = (variableName: string, templateId?: string): boolean => {
     // These variables are auto-filled from database or calculated
-    const autoFilledVariables = ['userName', 'raceDate', 'weekNumber', 'joinCode', 'timing'];
+    const autoFilledVariables = ['userName', 'raceDate', 'joinCode', 'timing'];
+
+    // Special case: weekNumber is user input for generic race reminder, auto-filled for others
+    if (variableName === 'weekNumber') {
+        return templateId === 'pick_reminder_generic';
+    }
+
     return !autoFilledVariables.includes(variableName);
 };
 
@@ -100,6 +108,11 @@ const getTemplateAutoFillFeatures = (templateId: string): string[] => {
         'pick_reminder_dynamic': [
             'Dynamic Pick Reminder: Automatically calculates days/hours until race',
             'Race templates: Enter race name, date & week number are auto-filled from database',
+            'User name: Always auto-filled for personalization'
+        ],
+        'pick_reminder_generic': [
+            'Generic Race Reminder: Enter week number to auto-populate race info',
+            'Auto-population: raceName, raceDate, and timing are calculated automatically by the backend',
             'User name: Always auto-filled for personalization'
         ],
         'pick_reminder_5_days': [
@@ -233,26 +246,59 @@ const NotificationTester: React.FC = () => {
         fetchData();
     }, []);
 
+
+    const loadNotificationHistory = useCallback(async () => {
+        if (!selectedUser) return;
+
+        setHistoryLoading(true);
+        try {
+            const response = await adminAPI.getUserNotificationHistory(selectedUser);
+            if (response.status === 200) {
+                setNotificationHistory(response.data.data.history);
+            }
+        } catch (error: unknown) {
+            console.error('Error loading notification history:', error);
+        } finally {
+            setHistoryLoading(false);
+        }
+    }, [selectedUser]);
+
     // Load notification history when user is selected
     useEffect(() => {
         if (selectedUser && showHistory) {
             loadNotificationHistory();
         }
-    }, [selectedUser, showHistory]);
+    }, [selectedUser, showHistory, loadNotificationHistory]);
 
     // Reset template fields when template changes
     useEffect(() => {
         if (selectedTemplate) {
             const template = getTemplateById(selectedTemplate);
             if (template) {
-                // Extract variables from the template content
-                const templateVariables = extractTemplateVariables(template);
+                // For generic race reminder, use predefined variables instead of extracting from content
+                let templateVariables: Record<string, string> = {};
+
+                if (selectedTemplate === 'pick_reminder_generic') {
+                    // Use predefined variables for generic race reminder
+                    // Only weekNumber is user input, others are auto-populated
+                    templateVariables = {
+                        weekNumber: 'WEEKNUMBER'
+                    };
+                } else {
+                    // Extract variables from the template content for other templates
+                    templateVariables = extractTemplateVariables(template);
+                }
 
                 // Build the fields object with only user-input variables
                 const newFields = Object.fromEntries(
                     Object.keys(templateVariables)
-                        .filter(variableName => isUserInputVariable(variableName))
+                        .filter(variableName => isUserInputVariable(variableName, selectedTemplate))
                         .map(variableName => {
+                            // Special handling for generic race reminder template
+                            if (selectedTemplate === 'pick_reminder_generic' && variableName === 'weekNumber') {
+                                return [variableName, '16']; // Default to week 3 as example
+                            }
+
                             if (variableName === 'raceName' && races.length > 0) {
                                 return [variableName, races[0].name];
                             } else if (variableName === 'leagueName' && leagues.length > 0) {
@@ -275,21 +321,6 @@ const NotificationTester: React.FC = () => {
         }
     }, [selectedTemplate, races, leagues]);
 
-    const loadNotificationHistory = async () => {
-        if (!selectedUser) return;
-
-        setHistoryLoading(true);
-        try {
-            const response = await adminAPI.getUserNotificationHistory(selectedUser);
-            if (response.status === 200) {
-                setNotificationHistory(response.data.data.history);
-            }
-        } catch (error: unknown) {
-            console.error('Error loading notification history:', error);
-        } finally {
-            setHistoryLoading(false);
-        }
-    };
 
     const getTemplatePreview = () => {
         const template = getTemplateById(selectedTemplate);
@@ -324,11 +355,19 @@ const NotificationTester: React.FC = () => {
 
         // Validate required fields for the selected template
         const requiredFields = [];
-        if (template.title.includes('{raceName}') && !templateFields.raceName) requiredFields.push('Race Name');
-        if (template.title.includes('{raceDate}') && !templateFields.raceDate) requiredFields.push('Race Date');
-        if (template.title.includes('{weekNumber}') && !templateFields.weekNumber) requiredFields.push('Week Number');
-        if (template.title.includes('{leagueName}') && !templateFields.leagueName) requiredFields.push('League Name');
-        if (template.title.includes('{joinCode}') && !templateFields.joinCode) requiredFields.push('Join Code');
+
+        // Special handling for generic race reminder template
+        if (template.id === 'pick_reminder_generic') {
+            // Only weekNumber is required as user input, others are auto-populated
+            if (!templateFields.weekNumber) requiredFields.push('Week Number');
+        } else {
+            // Standard validation for other templates
+            if (template.title.includes('{raceName}') && !templateFields.raceName) requiredFields.push('Race Name');
+            if (template.title.includes('{raceDate}') && !templateFields.raceDate) requiredFields.push('Race Date');
+            if (template.title.includes('{weekNumber}') && !templateFields.weekNumber) requiredFields.push('Week Number');
+            if (template.title.includes('{leagueName}') && !templateFields.leagueName) requiredFields.push('League Name');
+            if (template.title.includes('{joinCode}') && !templateFields.joinCode) requiredFields.push('Join Code');
+        }
         if (template.id === 'custom_message') {
             if (!templateFields.customTitle) requiredFields.push('Custom Title');
             if (!templateFields.customSubject) requiredFields.push('Custom Subject');
@@ -545,7 +584,7 @@ const NotificationTester: React.FC = () => {
                                         try {
                                             const newFields = JSON.parse(e.target.value);
                                             setTemplateFields(newFields);
-                                        } catch (error) {
+                                        } catch {
                                             // Allow invalid JSON while typing
                                         }
                                     }}
@@ -558,9 +597,14 @@ const NotificationTester: React.FC = () => {
                             {/* Template Variable Help */}
                             <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
                                 <h5 className="text-xs font-medium text-blue-900 mb-2">Available Variables:</h5>
+                                {selectedTemplate === 'pick_reminder_generic' && (
+                                    <div className="mb-3 p-2 bg-green-100 border border-green-300 rounded text-xs text-green-800">
+                                        <strong>💡 Tip:</strong> For the Generic Race Reminder, enter a week number in the weekNumber field and the backend will automatically populate raceName, raceDate, and timing!
+                                    </div>
+                                )}
                                 <div className="text-xs text-blue-800 space-y-1">
                                     {Object.keys(templateFields).map(variableName => {
-                                        const description = getVariableDescription(variableName);
+                                        const description = getVariableDescription(variableName, selectedTemplate);
                                         return (
                                             <div key={variableName}>
                                                 <code className="bg-blue-100 px-1 rounded">{`{${variableName}}`}</code> - {description}

@@ -47,6 +47,15 @@ export const notificationTemplates: NotificationTemplate[] = [
         category: 'reminder',
         description: 'Last-minute urgent reminder 1 hour before a race'
     },
+    {
+        id: 'pick_reminder_generic',
+        name: 'Generic Race Reminder',
+        title: 'Race Reminder: {raceName} in {timing}',
+        body: '{timing} until {raceName} - Make your picks!',
+        emailSubject: 'FinalPoint: {raceName} in {timing} - Make your picks!',
+        category: 'reminder',
+        description: 'Smart reminder that automatically shows days or hours until race based on current time'
+    },
 
     // Promotional Templates
     {

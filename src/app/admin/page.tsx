@@ -42,6 +42,7 @@ export default function AdminOverviewPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [reschedulingPicks, setReschedulingPicks] = useState(false);
+  const [reschedulingReminders, setReschedulingReminders] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
   const [positionBreakdown, setPositionBreakdown] = useState<Array<{
     position: number;
@@ -113,6 +114,28 @@ export default function AdminOverviewPage() {
       alert('Error rescheduling picks. Please check the console for details.');
     } finally {
       setReschedulingPicks(false);
+    }
+  };
+
+  const handleRescheduleAllReminders = async () => {
+    if (!confirm('Are you sure you want to reschedule all reminders? This will clear all existing scheduled reminder jobs and create new ones based on current race times.')) {
+      return;
+    }
+
+    try {
+      setReschedulingReminders(true);
+      const response = await adminAPI.rescheduleAllReminders();
+
+      if (response.status === 200) {
+        alert('All reminders have been rescheduled successfully!');
+      } else {
+        alert('Error rescheduling reminders. Please check the console for details.');
+      }
+    } catch (error) {
+      console.error('Error rescheduling reminders:', error);
+      alert('Error rescheduling reminders. Please check the console for details.');
+    } finally {
+      setReschedulingReminders(false);
     }
   };
 
@@ -266,6 +289,35 @@ export default function AdminOverviewPage() {
                 {reschedulingPicks
                   ? 'Please wait while picks are being rescheduled...'
                   : 'Clear and reschedule all pick locking jobs based on current race times'
+                }
+              </p>
+            </div>
+          </button>
+
+          <button
+            onClick={handleRescheduleAllReminders}
+            disabled={reschedulingReminders}
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                {reschedulingReminders ? (
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                ) : (
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 1 0-15 0v5h5l-5 5-5-5h5v-5a7.5 7.5 0 1 1 15 0v5z" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <div className="ml-4 text-left">
+              <h3 className="text-sm font-medium text-gray-900">
+                {reschedulingReminders ? 'Rescheduling Reminders...' : 'Reschedule All Reminders'}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {reschedulingReminders
+                  ? 'Please wait while reminders are being rescheduled...'
+                  : 'Clear and reschedule all reminder jobs based on current race times'
                 }
               </p>
             </div>
