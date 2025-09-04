@@ -25,12 +25,31 @@ interface AdminStats {
     correctPicks: number;
     accuracy: number;
   };
+  positionBreakdown: Array<{
+    position: number;
+    totalPicks: number;
+    scoredPicks: number;
+    correctPicks: number;
+    accuracy: number;
+  }>;
+  availableWeeks: Array<{
+    weekNumber: number;
+    raceName: string;
+  }>;
 }
 
 export default function AdminOverviewPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [reschedulingPicks, setReschedulingPicks] = useState(false);
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
+  const [positionBreakdown, setPositionBreakdown] = useState<Array<{
+    position: number;
+    totalPicks: number;
+    scoredPicks: number;
+    correctPicks: number;
+    accuracy: number;
+  }> | null>(null);
 
   useEffect(() => {
     loadAdminData();
@@ -45,6 +64,7 @@ export default function AdminOverviewPage() {
       if (statsResponse.status === 200) {
         const statsData = statsResponse.data;
         setStats(statsData.data);
+        setPositionBreakdown(statsData.data.positionBreakdown);
       } else {
         console.error('Stats response error:', statsResponse.data);
       }
@@ -53,6 +73,25 @@ export default function AdminOverviewPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadPositionBreakdownByWeek = async (weekNumber: number | null) => {
+    try {
+      const response = await adminAPI.getPositionBreakdownByWeek(weekNumber);
+
+      if (response.status === 200) {
+        setPositionBreakdown(response.data.data);
+      } else {
+        console.error('Position breakdown response error:', response.data);
+      }
+    } catch (error) {
+      console.error('Error loading position breakdown:', error);
+    }
+  };
+
+  const handleWeekChange = (weekNumber: number | null) => {
+    setSelectedWeek(weekNumber);
+    loadPositionBreakdownByWeek(weekNumber);
   };
 
   const handleRescheduleAllPicks = async () => {
@@ -299,6 +338,80 @@ export default function AdminOverviewPage() {
             <div className="text-2xl font-bold text-orange-600">{stats.picks.accuracy || 0}%</div>
             <div className="text-sm text-gray-500">Accuracy</div>
           </div>
+        </div>
+      </div>
+
+      {/* Position Breakdown */}
+      <div className="bg-white shadow-lg rounded-lg p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-medium text-gray-900">Position Breakdown</h2>
+          <div className="flex items-center space-x-3">
+            <label htmlFor="week-selector" className="text-sm font-medium text-gray-700">
+              Filter by week:
+            </label>
+            <select
+              id="week-selector"
+              value={selectedWeek || ''}
+              onChange={(e) => handleWeekChange(e.target.value ? parseInt(e.target.value) : null)}
+              className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            >
+              <option value="">All weeks (overall)</option>
+              {stats?.availableWeeks?.map((week) => (
+                <option key={week.weekNumber} value={week.weekNumber}>
+                  Week {week.weekNumber}: {week.raceName}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Position
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Total Picks
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Scored Picks
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Correct Picks
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Accuracy
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {positionBreakdown?.map((position) => (
+                <tr key={position.position}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    P{position.position}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {position.totalPicks}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {position.scoredPicks}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {position.correctPicks}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${position.accuracy >= 30 ? 'bg-green-100 text-green-800' :
+                      position.accuracy >= 15 ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                      {position.accuracy}%
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

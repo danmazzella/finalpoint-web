@@ -180,6 +180,8 @@ export const adminAPI = {
   updateUserRole: (userId: number, role: string) =>
     apiService.put(`/admin/users/${userId}/role`, { role }),
   getAdminDashboardStats: () => apiService.get('/admin/dashboard-stats'),
+  getPositionBreakdownByWeek: (weekNumber: number | null) =>
+    apiService.get(`/admin/position-breakdown${weekNumber ? `?weekNumber=${weekNumber}` : ''}`),
   getAvailableRaces: () => apiService.get('/admin/available-races'),
   getAvailableRacesForResults: () => apiService.get('/admin/available-races-for-results'),
   getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
