@@ -323,6 +323,57 @@ export default function AdminOverviewPage() {
             </div>
           </button>
 
+          <Link
+            href="/admin/user-picks"
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-teal-300 hover:bg-teal-50 transition-colors"
+          >
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 00-2 2v2h2V7z" />
+                </svg>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-900">User Picks</h3>
+              <p className="text-sm text-gray-500">View and manage individual user picks</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/users-without-picks"
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors"
+          >
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-900">Missing Picks</h3>
+              <p className="text-sm text-gray-500">Users who haven't made picks for specific weeks</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/app-versions"
+            className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+          >
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-900">App Versions</h3>
+              <p className="text-sm text-gray-500">Manage mobile app versions and updates</p>
+            </div>
+          </Link>
+
           {/* Add more admin tools here in the future */}
           <div className="flex items-center p-4 border border-gray-200 rounded-lg bg-gray-50">
             <div className="flex-shrink-0">

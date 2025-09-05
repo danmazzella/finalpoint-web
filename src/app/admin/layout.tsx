@@ -33,13 +33,10 @@ export default function AdminLayout({
         return null;
     }
 
-    const tabs = [
+    const mainTabs = [
         { name: 'Overview', href: '/admin', current: pathname === '/admin' },
         { name: 'Users', href: '/admin/users', current: pathname === '/admin/users' },
         { name: 'Leagues', href: '/admin/leagues', current: pathname === '/admin/leagues' },
-        { name: 'User Picks', href: '/admin/user-picks', current: pathname === '/admin/user-picks' },
-        { name: 'Missing Picks', href: '/admin/users-without-picks', current: pathname === '/admin/users-without-picks' },
-        { name: 'App Versions', href: '/admin/app-versions', current: pathname === '/admin/app-versions' },
     ];
 
     return (
@@ -50,10 +47,10 @@ export default function AdminLayout({
                     <p className="mt-2 text-gray-600">Manage users, leagues, and platform statistics</p>
                 </div>
 
-                {/* Navigation Tabs */}
-                <div className="border-b border-gray-200 mb-8">
+                {/* Main Navigation Tabs */}
+                <div className="border-b border-gray-200 mb-6">
                     <nav className="-mb-px flex space-x-8">
-                        {tabs.map((tab) => (
+                        {mainTabs.map((tab) => (
                             <Link
                                 key={tab.name}
                                 href={tab.href}
