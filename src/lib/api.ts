@@ -222,11 +222,11 @@ export const adminAPI = {
   getUserPicks: (userId: number, leagueId: number) =>
     apiService.get(`/admin/users/${userId}/picks/${leagueId}`),
 
-  // Chat feature flag management
-  updateUserChatFeature: (userId: number, chatFeatureEnabled: boolean) =>
-    apiService.put(`/admin/users/${userId}/chat-feature`, { chatFeatureEnabled }),
-  getUserChatFeature: (userId: number) =>
-    apiService.get(`/admin/users/${userId}/chat-feature`),
+  // Feature flags management (unified)
+  getUserFeatureFlags: (userId: number) =>
+    apiService.get(`/admin/users/${userId}/feature-flags`),
+  updateUserFeatureFlags: (userId: number, featureFlags: Record<string, any>) =>
+    apiService.put(`/admin/users/${userId}/feature-flags`, { featureFlags }),
 
   // App versions management
   getAppVersions: () => apiService.get('/app/versions'),
@@ -320,6 +320,11 @@ export const picksAPI = {
   getLeaguePositions: (leagueId: number) => apiService.get(`/picks/league/${leagueId}/positions`),
   updateLeaguePositions: (leagueId: number, positions: number[]) =>
     apiService.put(`/picks/league/${leagueId}/positions`, { positions }),
+
+  // League position history
+  getLeaguePositionHistory: (leagueId: number) => apiService.get(`/picks/league/${leagueId}/positions/history`),
+  getLeaguePositionsForWeek: (leagueId: number, weekNumber: number) =>
+    apiService.get(`/picks/league/${leagueId}/positions/week/${weekNumber}`),
 };
 
 export const driversAPI = {
@@ -400,6 +405,8 @@ export interface User {
   name: string;
   avatar?: string;
   role?: 'user' | 'admin';
+  chatFeatureEnabled?: boolean;
+  positionChangesEnabled?: boolean;
 }
 
 export interface SignupData {

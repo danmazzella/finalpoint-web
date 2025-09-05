@@ -87,6 +87,15 @@ export const notificationTemplates: NotificationTemplate[] = [
         category: 'system',
         description: 'Welcome message for new users'
     },
+    {
+        id: 'position_change',
+        name: 'Position Requirements Changed',
+        title: 'Position Requirements Changed in {leagueName}',
+        body: 'League position requirements changed from P{previousPositions} to P{newPositions}',
+        emailSubject: 'FinalPoint: League position requirements changed in {leagueName}',
+        category: 'system',
+        description: 'Notify users when league position requirements are changed mid-season'
+    },
 
     // Custom Template
     {

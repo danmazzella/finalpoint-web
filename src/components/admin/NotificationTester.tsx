@@ -134,6 +134,11 @@ const getTemplateAutoFillFeatures = (templateId: string): string[] => {
         'welcome_message': [
             'User name: Always auto-filled for personalization'
         ],
+        'position_change': [
+            'Position Change templates: Enter league name, previous and new positions',
+            'League templates: Enter league name, other fields are auto-filled from database',
+            'User name: Always auto-filled for personalization'
+        ],
         'custom_message': [
             'Custom templates: All fields are user-editable',
             'User name: Always auto-filled for personalization'

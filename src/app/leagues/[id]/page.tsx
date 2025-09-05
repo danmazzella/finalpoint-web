@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import { useChatFeature } from '@/contexts/FeatureFlagContext';
-import { leaguesAPI, activityAPI, League, f1racesAPI, chatAPI } from '@/lib/api';
+import { useChatFeature, usePositionChanges } from '@/contexts/FeatureFlagContext';
+import { leaguesAPI, activityAPI, League, f1racesAPI, chatAPI, picksAPI } from '@/lib/api';
 import { copyToClipboardWithFeedback } from '@/utils/clipboardUtils';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -45,6 +45,7 @@ export default function LeagueDetailPage() {
   const { user } = useAuth();
   const { showToast } = useToast();
   const { isChatFeatureEnabled } = useChatFeature();
+  const { isPositionChangesEnabled } = usePositionChanges();
   const params = useParams();
   const router = useRouter();
   const leagueId = params.id as string;
@@ -68,6 +69,12 @@ export default function LeagueDetailPage() {
   const [leaving, setLeaving] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Position changes state
+  const [editingPositions, setEditingPositions] = useState<number[]>([]);
+  const [updatingPositions, setUpdatingPositions] = useState(false);
+  const [showPositionChangeConfirm, setShowPositionChangeConfirm] = useState(false);
+  const [positionChangeConflict, setPositionChangeConflict] = useState<any>(null);
 
   useEffect(() => {
     // Load league data for both authenticated and unauthenticated users
@@ -273,9 +280,53 @@ export default function LeagueDetailPage() {
     if (league) {
       if (league.userRole === 'Owner') {
         setEditingName(league.name);
+        setEditingPositions(league.requiredPositions || []);
       }
       setShowSettings(true);
     }
+  };
+
+  const updateLeaguePositions = async (forceChange = false) => {
+    if (!league || !editingPositions.length) return;
+
+    try {
+      setUpdatingPositions(true);
+      const response = await picksAPI.updateLeaguePositions(league.id, editingPositions);
+
+      if (response.data.success) {
+        showToast('League positions updated successfully!', 'success');
+        setLeague({ ...league, requiredPositions: editingPositions });
+        setShowSettings(false);
+        setEditingPositions([]);
+        setShowPositionChangeConfirm(false);
+        setPositionChangeConflict(null);
+        // Refresh recent activity to show the position change
+        loadRecentActivity(parseInt(leagueId));
+      }
+    } catch (error: any) {
+      console.error('Error updating league positions:', error);
+
+      // Check if it's a conflict error
+      if (error.response?.data?.conflict) {
+        setPositionChangeConflict(error.response.data);
+        setShowPositionChangeConfirm(true);
+      } else {
+        showToast(error.response?.data?.message || 'Failed to update league positions. Please try again.', 'error');
+      }
+    } finally {
+      setUpdatingPositions(false);
+    }
+  };
+
+  const handlePositionToggle = (position: number) => {
+    setEditingPositions(prev => {
+      if (prev.includes(position)) {
+        return prev.filter(p => p !== position);
+      } else if (prev.length < 2) {
+        return [...prev, position].sort((a, b) => a - b);
+      }
+      return prev;
+    });
   };
 
   if (loading) {
@@ -503,11 +554,13 @@ export default function LeagueDetailPage() {
                   <dt className="text-sm font-medium text-gray-500">Your Status</dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {user ? (
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isMember
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${league?.userRole === 'Owner'
+                        ? 'bg-purple-100 text-purple-800'
+                        : league?.userRole === 'Member'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
                         }`}>
-                        {isMember ? 'Member' : 'Not a Member'}
+                        {league?.userRole || 'Not a Member'}
                       </span>
                     ) : (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -771,6 +824,53 @@ export default function LeagueDetailPage() {
                     </p>
                   </div>
 
+                  {/* League Position Requirements - Owner Only */}
+                  {isPositionChangesEnabled && (
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Position Requirements
+                      </label>
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-500 mb-3">
+                          Select 1-2 positions that league members must predict for each race.
+                        </p>
+                        <div className="grid grid-cols-5 gap-2">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((position) => (
+                            <label
+                              key={position}
+                              className={`flex items-center justify-center p-2 border rounded-md transition-colors ${editingPositions.includes(position)
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : editingPositions.length >= 2
+                                  ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer'
+                                }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={editingPositions.includes(position)}
+                                onChange={() => handlePositionToggle(position)}
+                                disabled={editingPositions.length >= 2 && !editingPositions.includes(position)}
+                                className="sr-only"
+                              />
+                              <span className="text-sm font-medium">P{position}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Current: P{league?.requiredPositions?.join(', P') || 'None selected'}
+                        </p>
+                        <button
+                          onClick={() => updateLeaguePositions()}
+                          disabled={updatingPositions || editingPositions.length === 0 ||
+                            JSON.stringify(editingPositions.sort()) === JSON.stringify((league?.requiredPositions || []).sort())}
+                          className="mt-2 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {updatingPositions ? 'Updating...' : 'Update Positions'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Delete League - Owner Only */}
                   <div className="border-t pt-4">
                     <h4 className="text-sm font-medium text-gray-900 mb-2">Danger Zone</h4>
@@ -878,6 +978,55 @@ export default function LeagueDetailPage() {
                 </button>
                 <button
                   onClick={() => setShowLeaveConfirm(false)}
+                  className="flex-1 flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Position Change Conflict Confirmation Modal */}
+      {showPositionChangeConfirm && positionChangeConflict && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mt-4 mb-2">Position Change Conflict</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Changing positions will affect existing picks. {positionChangeConflict.affectedUsers?.length || 0} users have picks that will be affected by this change.
+              </p>
+              {positionChangeConflict.affectedUsers && positionChangeConflict.affectedUsers.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Affected users:</p>
+                  <div className="max-h-32 overflow-y-auto">
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      {positionChangeConflict.affectedUsers.map((user: any, index: number) => (
+                        <li key={index}>• {user.name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => updateLeaguePositions()}
+                  disabled={updatingPositions}
+                  className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {updatingPositions ? 'Updating...' : 'Force Change'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPositionChangeConfirm(false);
+                    setPositionChangeConflict(null);
+                  }}
                   className="flex-1 flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Cancel

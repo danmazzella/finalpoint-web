@@ -10,6 +10,7 @@ interface AdminUser {
     avatar: string | null;
     role: 'user' | 'admin';
     chat_feature_enabled: boolean;
+    position_changes_enabled: boolean;
     createdAt: string;
     updatedAt: string;
     leagueCount: number;
@@ -102,22 +103,54 @@ export default function AdminUsersPage() {
         }
     };
 
-    const updateUserChatFeature = async (userId: number, chatFeatureEnabled: boolean) => {
+
+    const [showFeatureFlagsModal, setShowFeatureFlagsModal] = useState(false);
+    const [selectedUserForFlags, setSelectedUserForFlags] = useState<AdminUser | null>(null);
+    const [userFeatureFlags, setUserFeatureFlags] = useState<Record<string, any>>({});
+    const [loadingFeatureFlags, setLoadingFeatureFlags] = useState(false);
+
+    const openFeatureFlagsModal = async (user: AdminUser) => {
         try {
-            const response = await adminAPI.updateUserChatFeature(userId, chatFeatureEnabled);
+            setLoadingFeatureFlags(true);
+            setSelectedUserForFlags(user);
+
+            const response = await adminAPI.getUserFeatureFlags(user.id);
+
+            if (response.status === 200) {
+                setUserFeatureFlags(response.data.data.featureFlags);
+                setShowFeatureFlagsModal(true);
+            } else {
+                console.error('Failed to load user feature flags:', response.data);
+            }
+        } catch (error) {
+            console.error('Error loading user feature flags:', error);
+        } finally {
+            setLoadingFeatureFlags(false);
+        }
+    };
+
+    const updateUserFeatureFlags = async (userId: number, featureFlags: Record<string, any>) => {
+        try {
+            const response = await adminAPI.updateUserFeatureFlags(userId, featureFlags);
 
             if (response.status === 200) {
                 // Update the user in the local state
                 setUsers(prevUsers =>
                     prevUsers.map(user =>
-                        user.id === userId ? { ...user, chat_feature_enabled: chatFeatureEnabled } : user
+                        user.id === userId ? {
+                            ...user,
+                            chat_feature_enabled: featureFlags.chat_feature || false,
+                            position_changes_enabled: featureFlags.league_position_changes || false
+                        } : user
                     )
                 );
+                setShowFeatureFlagsModal(false);
+                setSelectedUserForFlags(null);
             } else {
-                console.error('Failed to update user chat feature:', response.data);
+                console.error('Failed to update user feature flags:', response.data);
             }
         } catch (error) {
-            console.error('Error updating user chat feature:', error);
+            console.error('Error updating user feature flags:', error);
         }
     };
 
@@ -146,7 +179,7 @@ export default function AdminUsersPage() {
                                 Role
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Chat Feature
+                                Feature Flags
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Leagues
@@ -195,16 +228,14 @@ export default function AdminUsersPage() {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <button
-                                        onClick={() => updateUserChatFeature(user.id, !user.chat_feature_enabled)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-                                            user.chat_feature_enabled ? 'bg-indigo-600' : 'bg-gray-200'
-                                        }`}
+                                        onClick={() => openFeatureFlagsModal(user)}
+                                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                     >
-                                        <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                                user.chat_feature_enabled ? 'translate-x-6' : 'translate-x-1'
-                                            }`}
-                                        />
+                                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        Feature Flags
                                     </button>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -329,6 +360,101 @@ export default function AdminUsersPage() {
                                             </tbody>
                                         </table>
                                     )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Feature Flags Modal */}
+            {showFeatureFlagsModal && selectedUserForFlags && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                        <div className="mt-3">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium text-gray-900">
+                                    Feature Flags - {selectedUserForFlags.name}
+                                </h3>
+                                <button
+                                    onClick={() => {
+                                        setShowFeatureFlagsModal(false);
+                                        setSelectedUserForFlags(null);
+                                        setUserFeatureFlags({});
+                                    }}
+                                    className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            {loadingFeatureFlags ? (
+                                <div className="flex justify-center items-center py-8">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {/* Chat Feature */}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700">Chat Feature</label>
+                                            <p className="text-xs text-gray-500">Enable league chat functionality</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setUserFeatureFlags(prev => ({
+                                                ...prev,
+                                                chat_feature: !prev.chat_feature
+                                            }))}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${userFeatureFlags.chat_feature ? 'bg-indigo-600' : 'bg-gray-200'
+                                                }`}
+                                        >
+                                            <span
+                                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${userFeatureFlags.chat_feature ? 'translate-x-6' : 'translate-x-1'
+                                                    }`}
+                                            />
+                                        </button>
+                                    </div>
+
+                                    {/* Position Changes Feature */}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700">Position Changes</label>
+                                            <p className="text-xs text-gray-500">Allow changing league position requirements</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setUserFeatureFlags(prev => ({
+                                                ...prev,
+                                                league_position_changes: !prev.league_position_changes
+                                            }))}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${userFeatureFlags.league_position_changes ? 'bg-indigo-600' : 'bg-gray-200'
+                                                }`}
+                                        >
+                                            <span
+                                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${userFeatureFlags.league_position_changes ? 'translate-x-6' : 'translate-x-1'
+                                                    }`}
+                                            />
+                                        </button>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex space-x-3 pt-4">
+                                        <button
+                                            onClick={() => updateUserFeatureFlags(selectedUserForFlags.id, userFeatureFlags)}
+                                            className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                        >
+                                            Save Changes
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowFeatureFlagsModal(false);
+                                                setSelectedUserForFlags(null);
+                                                setUserFeatureFlags({});
+                                            }}
+                                            className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>

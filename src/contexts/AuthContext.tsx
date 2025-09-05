@@ -22,6 +22,7 @@ interface User {
   avatar?: string;
   role?: 'user' | 'admin';
   chatFeatureEnabled?: boolean;
+  positionChangesEnabled?: boolean;
 }
 
 interface AuthResponse {
