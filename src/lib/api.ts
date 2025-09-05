@@ -227,6 +227,18 @@ export const adminAPI = {
     apiService.put(`/admin/users/${userId}/chat-feature`, { chatFeatureEnabled }),
   getUserChatFeature: (userId: number) =>
     apiService.get(`/admin/users/${userId}/chat-feature`),
+
+  // App versions management
+  getAppVersions: () => apiService.get('/app/versions'),
+  createAppVersion: (data: {
+    version: string;
+    platform: 'android' | 'ios';
+    android_version_code?: number;
+    ios_build_number?: string;
+    is_required: boolean;
+    release_notes: string;
+    update_url?: string;
+  }) => apiService.post('/app/versions', data),
 };
 
 export const authAPI = {
