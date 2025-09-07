@@ -81,10 +81,10 @@ export default function PositionResultsPage() {
 
     const loadAvailablePositions = async () => {
         try {
-            const response = await picksAPI.getLeaguePositions(parseInt(leagueId));
+            const response = await picksAPI.getLeaguePositionsForWeek(parseInt(leagueId), parseInt(weekNumber));
             if (response.data.success) {
                 // Sort positions in ascending order (P1, P2, P3, etc.)
-                const sortedPositions = response.data.data.sort((a: number, b: number) => a - b);
+                const sortedPositions = (response.data.data.positions || []).sort((a: number, b: number) => a - b);
                 setAvailablePositions(sortedPositions);
             }
         } catch (error) {

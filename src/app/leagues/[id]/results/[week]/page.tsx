@@ -105,9 +105,9 @@ export default function RaceResultsPage() {
 
     const loadRequiredPositions = async () => {
         try {
-            const response = await picksAPI.getLeaguePositions(parseInt(leagueId));
+            const response = await picksAPI.getLeaguePositionsForWeek(parseInt(leagueId), selectedWeek);
             if (response.data.success) {
-                setRequiredPositions(response.data.data);
+                setRequiredPositions(response.data.data.positions || []);
             }
         } catch (error) {
             console.error('Error loading required positions:', error);
@@ -117,7 +117,7 @@ export default function RaceResultsPage() {
     useEffect(() => {
         // Load required positions for both authenticated and unauthenticated users
         loadRequiredPositions();
-    }, [leagueId]);
+    }, [leagueId, selectedWeek]);
 
     const handleWeekChange = (week: number) => {
         setSelectedWeek(week);
