@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { picksAPI, PositionResultV2 } from '@/lib/api';
+import { picksAPI, PositionResultV2, f1racesAPI } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import PageTitle from '@/components/PageTitle';
 import BackToLeagueButton from '@/components/BackToLeagueButton';
@@ -12,21 +12,47 @@ import BackToLeagueButton from '@/components/BackToLeagueButton';
 export default function UnscoredPositionPicksPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
 
   const [results, setResults] = useState<PositionResultV2 | null>(null);
   const [availablePositions, setAvailablePositions] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
+  const [currentRace, setCurrentRace] = useState<any>(null);
 
   const leagueId = params.id as string;
   const weekNumber = params.week as string;
   const position = params.position as string;
 
+  // Handle eventType URL parameter
+  useEffect(() => {
+    const eventTypeParam = searchParams.get('eventType');
+    if (eventTypeParam === 'sprint' || eventTypeParam === 'race') {
+      setSelectedEventType(eventTypeParam);
+    }
+  }, [searchParams]);
+
+  // Update URL when selectedEventType changes
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('eventType', selectedEventType);
+    window.history.replaceState({}, '', url.toString());
+  }, [selectedEventType]);
+
+  // Set default event type based on whether the race has a sprint
+  useEffect(() => {
+    if (currentRace?.hasSprint && !searchParams.get('eventType')) {
+      setSelectedEventType('sprint');
+    }
+  }, [currentRace, searchParams]);
+
   useEffect(() => {
     loadResults();
     loadAvailablePositions();
-  }, [leagueId, weekNumber, position]);
+    loadCurrentRace();
+  }, [leagueId, weekNumber, position, selectedEventType]);
 
   const loadResults = async () => {
     try {
@@ -36,7 +62,8 @@ export default function UnscoredPositionPicksPage() {
       const response = await picksAPI.getResultsByPositionV2(
         parseInt(leagueId),
         parseInt(weekNumber),
-        parseInt(position)
+        parseInt(position),
+        selectedEventType
       );
 
       if (response.data.success) {
@@ -65,9 +92,25 @@ export default function UnscoredPositionPicksPage() {
     }
   };
 
+  const loadCurrentRace = async () => {
+    try {
+      const response = await f1racesAPI.getAllRaces();
+      if (response.data.success) {
+        const currentRaceData = response.data.data.find((race: any) => race.weekNumber === parseInt(weekNumber));
+        setCurrentRace(currentRaceData);
+      }
+    } catch (error) {
+      console.error('Error loading current race:', error);
+    }
+  };
+
   const navigateToPosition = (newPosition: number) => {
     // Use replace instead of push to avoid building up navigation stack
-    router.replace(`/leagues/${leagueId}/results/${weekNumber}/unscored-position/${newPosition}`);
+    const url = `/leagues/${leagueId}/results/${weekNumber}/unscored-position/${newPosition}`;
+    const params = new URLSearchParams();
+    params.set('eventType', selectedEventType);
+    const finalUrl = `${url}?${params.toString()}`;
+    router.replace(finalUrl);
   };
 
   const getCurrentPositionIndex = () => {
@@ -293,6 +336,34 @@ export default function UnscoredPositionPicksPage() {
             </div>
           </div>
         </div>
+
+        {/* Event Type Selector */}
+        {currentRace?.hasSprint && (
+          <div className="bg-white shadow rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-center">
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setSelectedEventType('sprint')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'sprint'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                >
+                  Sprint Results
+                </button>
+                <button
+                  onClick={() => setSelectedEventType('race')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'race'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                >
+                  Race Results
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Picks Table */}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">

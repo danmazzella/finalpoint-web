@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import {
@@ -32,6 +32,7 @@ interface CurrentRace {
     qualifyingDate?: string;
     showCountdown?: boolean;
     lockTime?: string; // Added for new countdown logic
+    hasSprint?: boolean; // Added for sprint race support
 }
 
 function PicksV2Form() {
@@ -49,24 +50,13 @@ function PicksV2Form() {
     const [currentRace, setCurrentRace] = useState<CurrentRace | null>(null);
     const [requiredPositions, setRequiredPositions] = useState<number[]>([10]);
     const [userPicks, setUserPicks] = useState<Map<number, number>>(new Map()); // position -> driverId
-    const [existingPicks, setExistingPicks] = useState<UserPickV2[]>([]);
-    const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
-    const [isMobile, setIsMobile] = useState(false);
+    const [sprintPicks, setSprintPicks] = useState<Map<number, number>>(new Map()); // position -> driverId
     const [showDriverModal, setShowDriverModal] = useState(false);
     const [modalPosition, setModalPosition] = useState<number>(0);
+    const [modalEventType, setModalEventType] = useState<'race' | 'sprint'>('race');
 
     useEffect(() => {
         loadData();
-
-        // Check if device is mobile
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-
-        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     const loadData = async () => {
@@ -112,15 +102,14 @@ function PicksV2Form() {
         }
     };
 
-    const loadExistingPicks = async () => {
+    const loadExistingPicks = useCallback(async () => {
         if (!selectedLeague || !currentRace) {
             setUserPicks(new Map());
-            setExistingPicks([]);
             return;
         }
 
         try {
-            const response = await picksAPI.getUserPicksV2(parseInt(selectedLeague));
+            const response = await picksAPI.getUserPicksForEvent(parseInt(selectedLeague), 'race');
             if (response.data.success) {
                 const picks = response.data.data;
                 const currentWeekPicks = picks.filter((pick: UserPickV2) => pick.weekNumber === currentRace.weekNumber);
@@ -131,17 +120,46 @@ function PicksV2Form() {
                 });
 
                 setUserPicks(picksMap);
-                setExistingPicks(currentWeekPicks);
             } else {
                 setUserPicks(new Map());
-                setExistingPicks([]);
             }
         } catch (error) {
             console.error('Error loading existing picks:', error);
             setUserPicks(new Map());
-            setExistingPicks([]);
         }
-    };
+    }, [selectedLeague, currentRace]);
+
+    const loadExistingSprintPicks = useCallback(async () => {
+        if (!selectedLeague || !currentRace) {
+            setSprintPicks(new Map());
+            return;
+        }
+
+        try {
+            console.log('Loading existing sprint picks...');
+            const response = await picksAPI.getUserPicksForEvent(parseInt(selectedLeague), 'sprint');
+            console.log('Sprint picks response:', response.data);
+
+            if (response.data.success) {
+                const picks = response.data.data;
+                const currentWeekPicks = picks.filter((pick: UserPickV2) => pick.weekNumber === currentRace.weekNumber);
+                console.log('Current week sprint picks:', currentWeekPicks);
+
+                const picksMap = new Map<number, number>();
+                currentWeekPicks.forEach((pick: UserPickV2) => {
+                    picksMap.set(pick.position, pick.driverId);
+                });
+
+                console.log('Sprint picks map:', Array.from(picksMap.entries()));
+                setSprintPicks(picksMap);
+            } else {
+                setSprintPicks(new Map());
+            }
+        } catch (error) {
+            console.error('Error loading existing sprint picks:', error);
+            setSprintPicks(new Map());
+        }
+    }, [selectedLeague, currentRace]);
 
     // Load league positions and existing picks when league changes
     useEffect(() => {
@@ -149,11 +167,14 @@ function PicksV2Form() {
             loadLeaguePositions(selectedLeague);
             if (currentRace) {
                 loadExistingPicks();
+                if (currentRace.hasSprint) {
+                    loadExistingSprintPicks();
+                }
             }
         }
-    }, [selectedLeague, currentRace]);
+    }, [selectedLeague, currentRace, loadExistingPicks, loadExistingSprintPicks]);
 
-    const makePick = async (position: number, driverId: number) => {
+    const makePick = async (position: number, driverId: number, eventType: 'race' | 'sprint' = 'race') => {
         if (!selectedLeague) {
             showToast('Please select a league first', 'error');
             return;
@@ -169,22 +190,35 @@ function PicksV2Form() {
             setSubmitting(true);
 
             // Update local state immediately for better UX
-            const newPicks = new Map(userPicks);
+            const newPicks = new Map(eventType === 'race' ? userPicks : sprintPicks);
             newPicks.set(position, driverId);
-            setUserPicks(newPicks);
 
-            // Prepare picks array for API - send ALL current picks
-            const picks: PickV2[] = Array.from(newPicks.entries()).map(([pos, driverId]) => ({
-                position: parseInt(pos.toString()), // Ensure position is a number
-                driverId: parseInt(driverId.toString()) // Ensure driverId is a number
-            }));
+            if (eventType === 'race') {
+                setUserPicks(newPicks);
+            } else {
+                setSprintPicks(newPicks);
+            }
 
-            const response = await picksAPI.makePickV2(parseInt(selectedLeague), currentWeek, picks);
+            // Prepare picks array for API - send ALL current picks for this event type
+            const picks: PickV2[] = Array.from(newPicks.entries())
+                .filter(([, driverId]) => driverId && driverId > 0) // Filter out invalid driver IDs
+                .map(([pos, driverId]) => ({
+                    position: parseInt(pos.toString()), // Ensure position is a number
+                    driverId: parseInt(driverId.toString()) // Ensure driverId is a number
+                }));
+
+            // Use the appropriate API endpoint based on event type
+            const response = eventType === 'race'
+                ? await picksAPI.makePickV2(parseInt(selectedLeague), currentWeek, picks)
+                : await picksAPI.makeSprintPickV2(parseInt(selectedLeague), currentWeek, picks);
 
             if (response.data.success) {
-                showToast('Pick submitted successfully!', 'success');
+                showToast(`${eventType === 'race' ? 'Race' : 'Sprint'} pick submitted successfully!`, 'success');
                 // Reload existing picks to get updated data
                 await loadExistingPicks();
+                if (eventType === 'sprint') {
+                    await loadExistingSprintPicks();
+                }
             }
         } catch (error: unknown) {
             console.error('Error making pick:', error);
@@ -193,6 +227,67 @@ function PicksV2Form() {
             showToast(errorMessage, 'error');
             // Revert local state on error
             await loadExistingPicks();
+            if (eventType === 'sprint') {
+                await loadExistingSprintPicks();
+            }
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const unselectPick = async (position: number, eventType: 'race' | 'sprint' = 'race') => {
+        if (!selectedLeague) {
+            showToast('Please select a league first', 'error');
+            return;
+        }
+
+        // Check if picks are locked
+        if (currentRace?.picksLocked) {
+            showToast('Picks are currently locked for this race. Picks lock 5 minutes before qualifying starts.', 'error');
+            return;
+        }
+
+        try {
+            setSubmitting(true);
+
+            // Update local state immediately for better UX
+            const newPicks = new Map(eventType === 'race' ? userPicks : sprintPicks);
+            newPicks.delete(position);
+
+            if (eventType === 'race') {
+                setUserPicks(newPicks);
+            } else {
+                setSprintPicks(newPicks);
+            }
+
+            // Use the appropriate delete API endpoint based on event type
+            console.log(`Attempting to delete ${eventType} pick for position ${position}`);
+            const response = eventType === 'race'
+                ? await picksAPI.removePickV2(parseInt(selectedLeague), currentWeek, position)
+                : await picksAPI.removeSprintPickV2(parseInt(selectedLeague), currentWeek, position);
+
+            console.log(`Delete response:`, response.data);
+
+            if (response.data.success) {
+                showToast(`${eventType === 'race' ? 'Race' : 'Sprint'} pick removed successfully!`, 'success');
+                // Reload existing picks to get updated data
+                console.log('Reloading picks after deletion...');
+                await loadExistingPicks();
+                if (eventType === 'sprint') {
+                    await loadExistingSprintPicks();
+                }
+                console.log('Picks reloaded');
+            }
+        } catch (error: unknown) {
+            console.error('Error removing pick:', error);
+
+            const errorMessage = error instanceof Error ? error.message : 'Failed to remove pick. Please try again.';
+            showToast(errorMessage, 'error');
+            // Revert local state on error
+            await loadExistingPicks();
+            if (eventType === 'sprint') {
+                await loadExistingSprintPicks();
+            }
         } finally {
             setSubmitting(false);
         }
@@ -202,8 +297,6 @@ function PicksV2Form() {
     const handleLeagueChange = (leagueId: string) => {
         setSelectedLeague(leagueId);
         setUserPicks(new Map());
-        setExistingPicks([]);
-        setSelectedPosition(null);
     };
 
     const getPositionLabel = (position: number) => {
@@ -232,19 +325,10 @@ function PicksV2Form() {
         return labels[position] || `P${position}`;
     };
 
-    // Check if a driver is already picked for another position
-    const isDriverPickedForOtherPosition = (driverId: number, currentPosition: number) => {
-        for (const [position, pickedDriverId] of userPicks.entries()) {
-            if (position !== currentPosition && pickedDriverId === driverId) {
-                return true;
-            }
-        }
-        return false;
-    };
 
     // Get the position a driver is picked for
-    const getDriverPickedPosition = (driverId: number) => {
-        for (const [position, pickedDriverId] of userPicks.entries()) {
+    const getDriverPickedPosition = (driverId: number, picksMap: Map<number, number> = userPicks) => {
+        for (const [position, pickedDriverId] of picksMap.entries()) {
             if (pickedDriverId === driverId) {
                 return position;
             }
@@ -254,47 +338,16 @@ function PicksV2Form() {
 
     // Time formatting is now handled by the imported utility function
 
-    // Handle position selection
-    const handlePositionClick = (position: number) => {
-        if (isMobile) {
-            // On mobile, show modal instead of setting selected position
-            setModalPosition(position);
-            setShowDriverModal(true);
-        } else {
-            // On desktop, use existing behavior
-            setSelectedPosition(position);
-        }
-    };
 
-    // Handle driver selection for selected position
-    const handleDriverClick = (driver: Driver) => {
-        if (selectedPosition === null) {
-            showToast('Please select a position first', 'error');
-            return;
-        }
 
-        const pickedPosition = getDriverPickedPosition(driver.id);
+    // Handle driver selection from modal
+    const handleModalDriverSelect = (driver: Driver, eventType: 'race' | 'sprint') => {
+        const currentPicks = eventType === 'race' ? userPicks : sprintPicks;
+        const pickedPosition = getDriverPickedPosition(driver.id, currentPicks);
 
-        // Check if this driver is already picked for a different position
-        if (pickedPosition && pickedPosition !== selectedPosition) {
-            showToast(`${driver.name} is already picked for ${getPositionLabel(pickedPosition)}. Please select a different driver.`, 'error');
-            return;
-        }
-
-        // Check if this driver is already picked for the current position
-        if (pickedPosition === selectedPosition) {
-            showToast(`${driver.name} is already picked for ${getPositionLabel(selectedPosition)}.`, 'error');
-            return;
-        }
-
-        // Make the pick for the selected position
-        makePick(selectedPosition, driver.id);
-        setSelectedPosition(null);
-    };
-
-    // Handle driver selection from modal (mobile)
-    const handleModalDriverSelect = (driver: Driver) => {
-        const pickedPosition = getDriverPickedPosition(driver.id);
+        console.log(`handleModalDriverSelect: driver=${driver.name} (${driver.id}), eventType=${eventType}, modalPosition=${modalPosition}`);
+        console.log(`Current picks:`, Array.from(currentPicks.entries()));
+        console.log(`Picked position: ${pickedPosition}`);
 
         // Check if this driver is already picked for a different position
         if (pickedPosition && pickedPosition !== modalPosition) {
@@ -302,14 +355,18 @@ function PicksV2Form() {
             return;
         }
 
-        // Check if this driver is already picked for the current position
+        // Check if this driver is already picked for the current position - if so, unselect it
         if (pickedPosition === modalPosition) {
-            showToast(`${driver.name} is already picked for ${getPositionLabel(modalPosition)}.`, 'error');
+            console.log(`Unselecting driver ${driver.name} from position ${modalPosition}`);
+            // Unselect the driver by removing the pick
+            unselectPick(modalPosition, eventType);
+            setShowDriverModal(false);
             return;
         }
 
+        console.log(`Making new pick for driver ${driver.name} at position ${modalPosition}`);
         // Make the pick for the selected position
-        makePick(modalPosition, driver.id);
+        makePick(modalPosition, driver.id, eventType);
         setShowDriverModal(false);
     };
 
@@ -318,41 +375,6 @@ function PicksV2Form() {
         setModalPosition(0);
     };
 
-    // Remove pick for a position
-    const removePick = async (position: number) => {
-        if (!selectedLeague) {
-            showToast('Please select a league first', 'error');
-            return;
-        }
-
-        // Check if picks are locked
-        if (currentRace?.picksLocked) {
-            showToast('Picks are currently locked for this race. Picks lock 5 minutes before qualifying starts.', 'error');
-            return;
-        }
-
-        try {
-            setSubmitting(true);
-
-            const response = await picksAPI.removePickV2(parseInt(selectedLeague), currentWeek, position);
-
-            if (response.data.success) {
-                showToast('Pick removed successfully!', 'success');
-                // Remove from local state
-                const newPicks = new Map(userPicks);
-                newPicks.delete(position);
-                setUserPicks(newPicks);
-            }
-        } catch (error: unknown) {
-            console.error('Error removing pick:', error);
-
-            const errorMessage = error instanceof Error ? error.message : 'Failed to remove pick. Please try again.';
-            showToast(errorMessage, 'error');
-        } finally {
-            setSubmitting(false);
-            setSelectedPosition(null);
-        }
-    };
 
     if (loading) {
         return (
@@ -596,44 +618,134 @@ function PicksV2Form() {
                     </div>
                 ) : (
                     <>
-                        {/* Position Selection and Current Picks */}
+                        {/* Sprint Race Picks Section */}
+                        {currentRace?.hasSprint && (
+                            <div className="bg-white shadow rounded-lg p-6 mb-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-medium text-gray-900">
+                                        Sprint Race Picks
+                                        <span className="text-sm font-normal text-gray-500 ml-2">
+                                            (Week {currentWeek} - {currentRace?.raceName})
+                                        </span>
+                                    </h2>
+                                    {currentRace?.picksLocked && (
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            Picks Locked
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Position Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {requiredPositions.map((position) => {
+                                        const pickedDriverId = sprintPicks.get(position);
+                                        const pickedDriver = drivers.find(d => d.id === pickedDriverId);
+                                        const isLocked = currentRace?.picksLocked;
+
+                                        return (
+                                            <div
+                                                key={position}
+                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${pickedDriver
+                                                    ? 'border-green-500 bg-green-50'
+                                                    : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                                                    } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                onClick={() => {
+                                                    if (!isLocked) {
+                                                        setModalPosition(position);
+                                                        setModalEventType('sprint');
+                                                        setShowDriverModal(true);
+                                                    }
+                                                }}
+                                            >
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <h3 className="font-medium text-gray-900">{getPositionLabel(position)}</h3>
+                                                    {pickedDriver && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                unselectPick(position, 'sprint');
+                                                            }}
+                                                            className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                                                            title="Remove pick"
+                                                        >
+                                                            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                {pickedDriver ? (
+                                                    <div className="text-sm">
+                                                        <p className="font-medium text-gray-900">{pickedDriver.name}</p>
+                                                        <p className="text-gray-500">{pickedDriver.team}</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-sm">
+                                                        <p className="text-gray-500">Click to select driver</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Sprint Progress Status */}
+                                {sprintPicks.size > 0 && (
+                                    <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
+                                        <div className="flex">
+                                            <div className="flex-shrink-0">
+                                                <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-3">
+                                                <p className="text-sm font-medium text-green-800">
+                                                    {sprintPicks.size} of {requiredPositions.length} sprint positions selected
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Main Race Picks Section */}
                         <div className="bg-white shadow rounded-lg p-6 mb-6">
-                            <h2 className="text-lg font-medium text-gray-900 mb-4">
-                                Week {currentWeek} - Required Positions
-                                {currentRace && (
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-medium text-gray-900">
+                                    Grand Prix Picks
                                     <span className="text-sm font-normal text-gray-500 ml-2">
-                                        ({currentRace.raceName})
+                                        (Week {currentWeek} - {currentRace?.raceName})
+                                    </span>
+                                </h2>
+                                {currentRace?.picksLocked && (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        Picks Locked
                                     </span>
                                 )}
-                            </h2>
-
-                            {selectedPosition && (
-                                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                                    <p className="text-sm text-blue-800">
-                                        <span className="font-medium">Selected:</span> {getPositionLabel(selectedPosition)} -
-                                        Click on a driver below to assign them to this position
-                                    </p>
-                                </div>
-                            )}
+                            </div>
 
                             {/* Position Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {requiredPositions.map((position) => {
                                     const pickedDriverId = userPicks.get(position);
                                     const pickedDriver = drivers.find(d => d.id === pickedDriverId);
-                                    const isSelected = selectedPosition === position;
                                     const isLocked = currentRace?.picksLocked;
 
                                     return (
                                         <div
                                             key={position}
-                                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${isSelected
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : pickedDriver
-                                                    ? 'border-green-500 bg-green-50'
-                                                    : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${pickedDriver
+                                                ? 'border-green-500 bg-green-50'
+                                                : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                                                 } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            onClick={() => handlePositionClick(position)}
+                                            onClick={() => {
+                                                if (!isLocked) {
+                                                    setModalPosition(position);
+                                                    setModalEventType('race');
+                                                    setShowDriverModal(true);
+                                                }
+                                            }}
                                         >
                                             <div className="flex items-center justify-between mb-2">
                                                 <h3 className="font-medium text-gray-900">{getPositionLabel(position)}</h3>
@@ -641,12 +753,12 @@ function PicksV2Form() {
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            removePick(position);
+                                                            unselectPick(position, 'race');
                                                         }}
-                                                        className="text-red-500 hover:text-red-700"
+                                                        className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
                                                         title="Remove pick"
                                                     >
-                                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
                                                     </button>
@@ -660,9 +772,6 @@ function PicksV2Form() {
                                             ) : (
                                                 <div className="text-sm">
                                                     <p className="text-gray-500">Click to select driver</p>
-                                                    {isMobile && (
-                                                        <p className="text-xs text-blue-600 mt-1">Tap to open driver selection</p>
-                                                    )}
                                                 </div>
                                             )}
                                         </div>
@@ -670,9 +779,9 @@ function PicksV2Form() {
                                 })}
                             </div>
 
-                            {/* Progress Status */}
+                            {/* Race Progress Status */}
                             {userPicks.size > 0 && (
-                                <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                                <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
                                     <div className="flex">
                                         <div className="flex-shrink-0">
                                             <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -681,82 +790,31 @@ function PicksV2Form() {
                                         </div>
                                         <div className="ml-3">
                                             <p className="text-sm font-medium text-green-800">
-                                                {userPicks.size} of {requiredPositions.length} positions selected
+                                                {userPicks.size} of {requiredPositions.length} main race positions selected
                                             </p>
-                                            {userPicks.size === requiredPositions.length && (
-                                                <p className="text-sm text-green-700 mt-1">
-                                                    All picks submitted for Week {currentWeek}!
-                                                </p>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Drivers Grid - Hidden on Mobile */}
-                        {!isMobile && (
-                            <div className="bg-white shadow rounded-lg p-6">
-                                <h2 className="text-lg font-medium text-gray-900 mb-4">Select Drivers</h2>
-                                <p className="text-sm text-gray-600 mb-4">
-                                    {selectedPosition
-                                        ? `Click on a driver to assign them to ${getPositionLabel(selectedPosition)}`
-                                        : 'Click on a position above to start selecting drivers'
-                                    }
-                                </p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {drivers.map((driver) => {
-                                        const pickedPosition = getDriverPickedPosition(driver.id);
-                                        const isDisabled = submitting || (selectedPosition === null) || currentRace?.picksLocked;
-                                        const isAlreadyPicked = pickedPosition && pickedPosition !== selectedPosition;
-
-                                        return (
-                                            <button
-                                                key={driver.id}
-                                                onClick={() => handleDriverClick(driver)}
-                                                disabled={isDisabled}
-                                                className={`p-4 border rounded-lg text-left transition-colors ${pickedPosition
-                                                    ? pickedPosition === selectedPosition
-                                                        ? 'border-blue-500 bg-blue-50'
-                                                        : 'border-green-500 bg-green-50'
-                                                    : isAlreadyPicked
-                                                        ? 'border-gray-300 bg-gray-100 opacity-50'
-                                                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                                                    } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-sm font-medium text-gray-500">#{driver.driverNumber}</span>
-                                                    <span className="text-xs text-gray-400">{driver.country}</span>
-                                                </div>
-                                                <h3 className="font-medium text-gray-900 mb-2 sm:mb-1">{driver.name}</h3>
-                                                <p className="text-sm text-gray-500">{driver.team}</p>
-                                                {pickedPosition && (
-                                                    <div className="mt-2">
-                                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                            {getPositionLabel(pickedPosition)}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
                     </>
                 )}
 
-                {/* Driver Selection Modal for Mobile */}
+                {/* Driver Selection Modal */}
                 <DriverSelectionModal
                     isOpen={showDriverModal}
                     onClose={closeDriverModal}
                     position={modalPosition}
                     drivers={drivers}
-                    selectedDriverId={modalPosition ? userPicks.get(modalPosition) : undefined}
+                    selectedDriverId={modalPosition ? (modalEventType === 'race' ? userPicks.get(modalPosition) : sprintPicks.get(modalPosition)) : undefined}
                     onDriverSelect={handleModalDriverSelect}
                     disabled={currentRace?.picksLocked}
                     submitting={submitting}
                     userPicks={userPicks}
+                    sprintPicks={sprintPicks}
+                    hasSprint={currentRace?.hasSprint || false}
+                    eventType={modalEventType}
                 />
             </main>
         </div>

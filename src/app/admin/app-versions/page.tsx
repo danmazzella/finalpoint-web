@@ -64,7 +64,7 @@ export default function AppVersionsPage() {
                 ios_build_number: formData.platform === 'ios' ? formData.ios_build_number : undefined,
                 is_required: formData.is_required,
                 release_notes: formData.release_notes,
-                update_url: formData.update_url || null,
+                update_url: formData.update_url || undefined,
             };
 
             await adminAPI.createAppVersion(payload);

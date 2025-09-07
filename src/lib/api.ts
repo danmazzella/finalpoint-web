@@ -203,8 +203,12 @@ export const adminAPI = {
   updatePickLockingStatus: (data: { enabled: boolean; lockTime: string; unlockTime: string }) => apiService.put('/admin/pick-locking-status', data),
   enterRaceResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>) =>
     apiService.post('/admin/enter-race-results', { weekNumber, results }),
+  enterSprintResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>) =>
+    apiService.post('/admin/enter-sprint-results', { weekNumber, results }),
   rescoreRaceResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>, leagueId?: number, logActivity: boolean = true) =>
     apiService.post('/admin/rescore-race-results', { weekNumber, results, leagueId, logActivity }),
+  rescoreSprintResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>, leagueId?: number, logActivity: boolean = true) =>
+    apiService.post('/admin/rescore-sprint-results', { weekNumber, results, leagueId, logActivity }),
   rescheduleAllPicks: () => apiService.post('/admin/reschedule-all-picks'),
   rescheduleAllReminders: () => apiService.post('/admin/reschedule-all-reminders'),
 
@@ -307,14 +311,27 @@ export const picksAPI = {
   getUserPicksV2: (leagueId: number) => apiService.get(`/picks/user/${leagueId}/v2`),
   getLeaguePicksV2: (leagueId: number, weekNumber: number) =>
     apiService.get(`/picks/league/${leagueId}/week/${weekNumber}/v2`),
-  getRaceResultsV2: (leagueId: number, weekNumber: number) =>
-    apiService.get(`/picks/results/${leagueId}/week/${weekNumber}/v2`),
+  getRaceResultsV2: (leagueId: number, weekNumber: number, eventType: 'race' | 'sprint' = 'race') =>
+    apiService.get(`/picks/results/${leagueId}/week/${weekNumber}/v2?eventType=${eventType}`),
 
-  // New V2 result views
-  getResultsByPositionV2: (leagueId: number, weekNumber: number, position: number) =>
-    apiService.get(`/picks/results/${leagueId}/week/${weekNumber}/position/${position}/v2`),
-  getMemberPicksV2: (leagueId: number, weekNumber: number, userId: number) =>
-    apiService.get(`/picks/results/${leagueId}/week/${weekNumber}/member/${userId}/v2`),
+  // Sprint race methods
+  makeSprintPickV2: (leagueId: number, weekNumber: number, picks: PickV2[]) =>
+    apiService.post('/picks/sprint/make-v2', { leagueId, weekNumber, picks }),
+  removeSprintPickV2: (leagueId: number, weekNumber: number, position: number) =>
+    apiService.post('/picks/sprint/remove-v2', { leagueId, weekNumber, position }),
+  getUserPicksForEvent: (leagueId: number, eventType: 'race' | 'sprint') =>
+    apiService.get(`/picks/user/${leagueId}/event/${eventType}`),
+  getLeaguePicksForEvent: (leagueId: number, weekNumber: number, eventType: 'race' | 'sprint') =>
+    apiService.get(`/picks/league/${leagueId}/week/${weekNumber}/event/${eventType}`),
+  getUserPicksForWeekForEvent: (leagueId: number, weekNumber: number, eventType: 'race' | 'sprint') =>
+    apiService.get(`/picks/user/${leagueId}/week/${weekNumber}/event/${eventType}`),
+
+  // Results methods with event type support
+  getResultsByPositionV2: (leagueId: number, weekNumber: number, position: number, eventType: 'race' | 'sprint' = 'race') =>
+    apiService.get(`/picks/results/${leagueId}/week/${weekNumber}/position/${position}/v2?eventType=${eventType}`),
+  getMemberPicksV2: (leagueId: number, weekNumber: number, userId: number, eventType: 'race' | 'sprint' = 'race') =>
+    apiService.get(`/picks/results/${leagueId}/week/${weekNumber}/member/${userId}/v2?eventType=${eventType}`),
+
 
   // League position management
   getLeaguePositions: (leagueId: number) => apiService.get(`/picks/league/${leagueId}/positions`),
@@ -444,7 +461,13 @@ export interface League {
 // Position status types for efficient pick status
 export interface PositionStatus {
   weekNumber: number;
-  positions: PositionPickStatus[];
+  hasSprint?: boolean;
+  race: {
+    positions: PositionPickStatus[];
+  };
+  sprint?: {
+    positions: PositionPickStatus[];
+  };
 }
 
 export interface PositionPickStatus {

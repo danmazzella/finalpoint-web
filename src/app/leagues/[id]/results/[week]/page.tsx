@@ -15,6 +15,7 @@ interface Race {
     weekNumber: number;
     raceName: string;
     status: string;
+    hasSprint?: boolean;
 }
 
 interface League {
@@ -43,15 +44,10 @@ export default function RaceResultsPage() {
     const [showWeekSelector, setShowWeekSelector] = useState(false);
     const [league, setLeague] = useState<League | null>(null);
     const [requiredPositions, setRequiredPositions] = useState<number[]>([10]);
+    const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
+    const [defaultEventTypeSet, setDefaultEventTypeSet] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const selectedWeekRef = useRef<HTMLButtonElement>(null);
-
-    useEffect(() => {
-        // Load data for both authenticated and unauthenticated users
-        loadLeague();
-        loadRaces();
-        loadRaceResults();
-    }, [leagueId, selectedWeek]);
 
     const loadLeague = async () => {
         try {
@@ -80,7 +76,7 @@ export default function RaceResultsPage() {
     const loadRaceResults = async () => {
         try {
             setLoading(true);
-            const response = await picksAPI.getRaceResultsV2(parseInt(leagueId), selectedWeek);
+            const response = await picksAPI.getRaceResultsV2(parseInt(leagueId), selectedWeek, selectedEventType);
 
             if (response.data.success) {
                 // The API returns an object with a 'results' property containing the array
@@ -126,8 +122,29 @@ export default function RaceResultsPage() {
     const handleWeekChange = (week: number) => {
         setSelectedWeek(week);
         setShowWeekSelector(false);
+        setDefaultEventTypeSet(false); // Reset flag when week changes
         router.push(`/leagues/${leagueId}/results/${week}`);
     };
+
+    // Load data when dependencies change
+    useEffect(() => {
+        loadLeague();
+        loadRaces();
+        loadRaceResults();
+    }, [leagueId, selectedWeek, selectedEventType]);
+
+    // Set default event type based on whether it's a sprint weekend (only once when races are first loaded)
+    useEffect(() => {
+        if (races.length > 0 && !defaultEventTypeSet) {
+            const currentRace = races.find(race => race.weekNumber === selectedWeek);
+            if (currentRace?.hasSprint) {
+                setSelectedEventType('sprint');
+            } else {
+                setSelectedEventType('race');
+            }
+            setDefaultEventTypeSet(true);
+        }
+    }, [races, selectedWeek, defaultEventTypeSet]);
 
     // Auto-scroll to selected week when dropdown opens
     useEffect(() => {
@@ -205,12 +222,12 @@ export default function RaceResultsPage() {
     }
 
     if (!results || results.length === 0) {
-        const currentRace = getCurrentRace();
+        const currentRaceData = getCurrentRace();
         console.log('No results available. Debug info:', {
             results,
             resultsLength: results?.length,
             league,
-            currentRace,
+            currentRace: currentRaceData,
             selectedWeek,
             user: !!user
         });
@@ -228,8 +245,8 @@ export default function RaceResultsPage() {
                             </p>
                         </div>
                         <p className="text-gray-600 mb-6">
-                            {currentRace ? (
-                                <>No results are available for <strong>{currentRace.raceName}</strong> (Week {selectedWeek}). The race may not have finished yet or results haven&apos;t been entered.</>
+                            {currentRaceData ? (
+                                <>No results are available for <strong>{currentRaceData.raceName}</strong> (Week {selectedWeek}). The race may not have finished yet or results haven&apos;t been entered.</>
                             ) : (
                                 <>No results are available for Week {selectedWeek}. The race may not have finished yet or results haven&apos;t been entered.</>
                             )}
@@ -257,7 +274,7 @@ export default function RaceResultsPage() {
         );
     }
 
-    const currentRace = getCurrentRace();
+    const currentRaceData = getCurrentRace();
     const currentIndex = getCurrentRaceIndex();
     const canGoPrevious = currentIndex > 0;
     const canGoNext = currentIndex < races.length - 1;
@@ -280,13 +297,14 @@ export default function RaceResultsPage() {
                             </span>
                             <span className="hidden sm:inline">•</span>
                             <span className="text-gray-600">
-                                {currentRace ? currentRace.raceName : `Week ${selectedWeek}`} Results
+                                {currentRaceData ? currentRaceData.raceName : `Week ${selectedWeek}`} Results
                             </span>
                         </div>
                     }
                 >
                     <BackToLeagueButton leagueId={leagueId} className="text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2" />
                 </PageTitle>
+
 
                 {/* Week Navigation */}
                 <div className="bg-white shadow rounded-lg p-4 mb-6">
@@ -328,7 +346,7 @@ export default function RaceResultsPage() {
                             >
                                 <div className="flex items-center">
                                     <span className="text-lg font-bold text-blue-600 mr-2">Week {selectedWeek}</span>
-                                    <span className="text-gray-600 truncate">{currentRace?.raceName}</span>
+                                    <span className="text-gray-600 truncate">{currentRaceData?.raceName}</span>
                                 </div>
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -404,7 +422,7 @@ export default function RaceResultsPage() {
                                 >
                                     <span className="flex items-center">
                                         <span className="text-lg font-bold text-blue-600 mr-2">Week {selectedWeek}</span>
-                                        <span className="text-gray-600">{currentRace?.raceName}</span>
+                                        <span className="text-gray-600">{currentRaceData?.raceName}</span>
                                     </span>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -469,7 +487,7 @@ export default function RaceResultsPage() {
                             {requiredPositions.map((position) => (
                                 <Link
                                     key={position}
-                                    href={`/leagues/${leagueId}/results/${selectedWeek}/position/${position}`}
+                                    href={`/leagues/${leagueId}/results/${selectedWeek}/position/${position}?eventType=${selectedEventType}`}
                                     className="group relative bg-white border-2 border-blue-300 rounded-lg p-4 hover:bg-blue-50 hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer shadow-sm"
                                 >
                                     <div className="text-center">
@@ -501,7 +519,7 @@ export default function RaceResultsPage() {
                             {requiredPositions.map((position) => (
                                 <Link
                                     key={position}
-                                    href={`/leagues/${leagueId}/results/${selectedWeek}/unscored-position/${position}`}
+                                    href={`/leagues/${leagueId}/results/${selectedWeek}/unscored-position/${position}?eventType=${selectedEventType}`}
                                     className="group relative bg-white border-2 border-gray-300 rounded-lg p-4 hover:bg-gray-50 hover:border-gray-500 hover:shadow-md transition-all duration-200 cursor-pointer shadow-sm"
                                 >
                                     <div className="text-center">
@@ -620,6 +638,34 @@ export default function RaceResultsPage() {
                     </div>
                 </div>
 
+                {/* Event Type Selector */}
+                {currentRaceData?.hasSprint && (
+                    <div className="bg-white shadow rounded-lg p-4 mb-6">
+                        <div className="flex items-center justify-center">
+                            <div className="flex bg-gray-100 rounded-lg p-1">
+                                <button
+                                    onClick={() => setSelectedEventType('sprint')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'sprint'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    Sprint Results
+                                </button>
+                                <button
+                                    onClick={() => setSelectedEventType('race')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'race'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    Race Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Results Table */}
                 <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-200">
@@ -702,7 +748,7 @@ export default function RaceResultsPage() {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {user ? (
                                                 <Link
-                                                    href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}`}
+                                                    href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}&eventType=${selectedEventType}`}
                                                     className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
                                                 >
                                                     View All Picks
@@ -781,7 +827,7 @@ export default function RaceResultsPage() {
                                     <div className="flex justify-end">
                                         {user ? (
                                             <Link
-                                                href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}`}
+                                                href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}&eventType=${selectedEventType}`}
                                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
                                             >
                                                 View All Picks

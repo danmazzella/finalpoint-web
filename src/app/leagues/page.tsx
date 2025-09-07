@@ -83,16 +83,24 @@ export default function LeaguesPage() {
     }
   };
 
-  const hasPickForPosition = (league: League, position: number): boolean => {
-    if (!league.positionStatus || !league.positionStatus.positions) {
+  const hasPickForPosition = (league: League, position: number, eventType: 'race' | 'sprint' = 'race'): boolean => {
+    if (!league.positionStatus) {
       return false;
     }
-    const positionStatus = league.positionStatus.positions.find(p => p.position === position);
-    return positionStatus ? positionStatus.hasPick : false;
+
+    if (eventType === 'race' && league.positionStatus.race) {
+      const positionStatus = league.positionStatus.race.positions.find(p => p.position === position);
+      return positionStatus ? positionStatus.hasPick : false;
+    } else if (eventType === 'sprint' && league.positionStatus.sprint) {
+      const positionStatus = league.positionStatus.sprint.positions.find(p => p.position === position);
+      return positionStatus ? positionStatus.hasPick : false;
+    }
+
+    return false;
   };
 
-  const getPositionBadgeClass = (league: League, position: number): string => {
-    const hasPick = hasPickForPosition(league, position);
+  const getPositionBadgeClass = (league: League, position: number, eventType: 'race' | 'sprint' = 'race'): string => {
+    const hasPick = hasPickForPosition(league, position, eventType);
     return hasPick
       ? 'inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300'
       : 'inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300';
@@ -265,18 +273,40 @@ export default function LeaguesPage() {
                     {/* Required Positions with Status */}
                     {league.requiredPositions && league.requiredPositions.length > 0 && (
                       <div className="mt-3">
-                        <div className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-gray-500">Positions:</span>
-                        </div>
-                        <div className="flex space-x-1">
-                          {league.requiredPositions.map((position, index) => (
-                            <span
-                              key={position}
-                              className={getPositionBadgeClass(league, position)}
-                            >
-                              P{position}
-                            </span>
-                          ))}
+                        {/* Sprint Positions (only show if this is a sprint weekend) */}
+                        {league.positionStatus?.hasSprint === true && (
+                          <div className="mb-2">
+                            <div className="flex items-center justify-between text-sm mb-1">
+                              <span className="text-gray-500">Sprint Positions:</span>
+                            </div>
+                            <div className="flex space-x-1">
+                              {league.requiredPositions.sort((a, b) => a - b).map((position, index) => (
+                                <span
+                                  key={`sprint-${position}`}
+                                  className={getPositionBadgeClass(league, position, 'sprint')}
+                                >
+                                  P{position}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Race Positions */}
+                        <div className="mb-2">
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-500">Race Positions:</span>
+                          </div>
+                          <div className="flex space-x-1">
+                            {league.requiredPositions.sort((a, b) => a - b).map((position, index) => (
+                              <span
+                                key={`race-${position}`}
+                                className={getPositionBadgeClass(league, position, 'race')}
+                              >
+                                P{position}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -345,17 +375,37 @@ export default function LeaguesPage() {
 
                       {/* Required Positions */}
                       {league.requiredPositions && league.requiredPositions.length > 0 && (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">Positions:</span>
-                          <div className="flex space-x-1">
-                            {league.requiredPositions.map((position, index) => (
-                              <span
-                                key={position}
-                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-white text-gray-700 border border-gray-300"
-                              >
-                                P{position}
-                              </span>
-                            ))}
+                        <div className="space-y-1">
+                          {/* Sprint Positions (only show if this is a sprint weekend) */}
+                          {league.positionStatus?.hasSprint === true && (
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-500">Sprint Positions:</span>
+                              <div className="flex space-x-1">
+                                {league.requiredPositions.sort((a, b) => a - b).map((position, index) => (
+                                  <span
+                                    key={`sprint-${position}`}
+                                    className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-white text-gray-700 border border-gray-300"
+                                  >
+                                    P{position}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Race Positions */}
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">Race Positions:</span>
+                            <div className="flex space-x-1">
+                              {league.requiredPositions.sort((a, b) => a - b).map((position, index) => (
+                                <span
+                                  key={`race-${position}`}
+                                  className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-white text-gray-700 border border-gray-300"
+                                >
+                                  P{position}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       )}

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, driversAPI, f1racesAPI } from '@/lib/api';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import logger from '@/utils/logger';
 
 interface Driver {
@@ -19,6 +19,7 @@ interface Race {
     circuitName: string;
     country: string;
     hasResults?: boolean;
+    hasSprint?: boolean;
 }
 
 interface RaceResult {
@@ -28,6 +29,7 @@ interface RaceResult {
 
 export default function RaceResultsEntryPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [allRaces, setAllRaces] = useState<Race[]>([]);
     const [selectedWeek, setSelectedWeek] = useState<number>(1);
@@ -44,17 +46,45 @@ export default function RaceResultsEntryPage() {
     const [rescoringMode, setRescoringMode] = useState<'all' | 'specific'>('all');
     const [originalResults, setOriginalResults] = useState<RaceResult[]>([]);
     const [logActivity, setLogActivity] = useState<boolean>(true);
+    const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
+    const [sprintResults, setSprintResults] = useState<RaceResult[]>([]);
 
     useEffect(() => {
         loadInitialData();
     }, []);
 
     useEffect(() => {
-        if (selectedWeek && allRaces.length > 0) {
-            const race = allRaces.find(r => r.weekNumber === selectedWeek);
+        if (allRaces.length > 0) {
+            // Handle URL parameter for week number first
+            const weekParam = searchParams.get('week');
+            let weekToSet = selectedWeek;
+
+            if (weekParam) {
+                const weekNumber = parseInt(weekParam, 10);
+                if (!isNaN(weekNumber) && weekNumber > 0) {
+                    // Check if the week exists in the races data
+                    const raceExists = allRaces.find(r => r.weekNumber === weekNumber);
+                    if (raceExists) {
+                        weekToSet = weekNumber;
+                    }
+                }
+            }
+
+            // Set the week (either from URL or current selection)
+            setSelectedWeek(weekToSet);
+
+            // Find and set the race
+            const race = allRaces.find(r => r.weekNumber === weekToSet);
             setSelectedRace(race || null);
+
+            // Set default event type based on whether the race has a sprint
+            if (race?.hasSprint) {
+                setSelectedEventType('sprint');
+            } else {
+                setSelectedEventType('race');
+            }
         }
-    }, [selectedWeek, allRaces]);
+    }, [allRaces, searchParams]);
 
     useEffect(() => {
         // Initialize results array with 20 positions
@@ -65,7 +95,18 @@ export default function RaceResultsEntryPage() {
         setResults(initialResults);
     }, []);
 
-    const loadInitialData = async () => {
+    useEffect(() => {
+        // Initialize sprint results array with 20 positions when switching to sprint
+        if (selectedEventType === 'sprint') {
+            const initialSprintResults: RaceResult[] = Array.from({ length: 20 }, (_, i) => ({
+                driverId: 0,
+                finishingPosition: i + 1
+            }));
+            setSprintResults(initialSprintResults);
+        }
+    }, [selectedEventType]);
+
+    const loadInitialData = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -83,8 +124,8 @@ export default function RaceResultsEntryPage() {
             if (allRacesResponse.status === 200) {
                 setAllRaces(allRacesResponse.data.data || []);
 
-                // Set the selected week to the first available race (lowest week number)
-                if (allRacesResponse.data.data?.length > 0) {
+                // Only set the selected week to the first available race if no URL parameter exists
+                if (allRacesResponse.data.data?.length > 0 && !searchParams.get('week')) {
                     const firstRace = allRacesResponse.data.data.sort((a: Race, b: Race) => a.weekNumber - b.weekNumber)[0];
                     setSelectedWeek(firstRace.weekNumber);
                 }
@@ -99,7 +140,7 @@ export default function RaceResultsEntryPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchParams]);
 
     const loadExistingResults = async (weekNumber: number) => {
         try {
@@ -128,6 +169,12 @@ export default function RaceResultsEntryPage() {
 
     const handleWeekChange = async (weekNumber: number) => {
         setSelectedWeek(weekNumber);
+
+        // Update URL with week parameter
+        const url = new URL(window.location.href);
+        url.searchParams.set('week', weekNumber.toString());
+        window.history.replaceState({}, '', url.toString());
+
         const race = allRaces.find(r => r.weekNumber === weekNumber);
         setIsRescoring(race?.hasResults || false);
 
@@ -152,9 +199,12 @@ export default function RaceResultsEntryPage() {
     };
 
     const handleDriverChange = (position: number, driverId: number) => {
-        const newResults = [...results];
+        const currentResults = selectedEventType === 'race' ? results : sprintResults;
+        const setCurrentResults = selectedEventType === 'race' ? setResults : setSprintResults;
+
+        const newResults = [...currentResults];
         newResults[position - 1] = { ...newResults[position - 1], driverId };
-        setResults(newResults);
+        setCurrentResults(newResults);
 
         // Clear validation errors when user makes a change
         setError(null);
@@ -175,16 +225,16 @@ export default function RaceResultsEntryPage() {
         }
     };
 
-    const validateResults = (): boolean => {
+    const validateResults = (resultsToValidate: RaceResult[] = results): boolean => {
         // Check if all positions have drivers selected
-        const hasAllDrivers = results.every(result => result.driverId > 0);
+        const hasAllDrivers = resultsToValidate.every(result => result.driverId > 0);
         if (!hasAllDrivers) {
             setError('All 20 positions must have drivers selected');
             return false;
         }
 
         // Check for duplicate drivers
-        const driverIds = results.map(result => result.driverId);
+        const driverIds = resultsToValidate.map(result => result.driverId);
         const uniqueDriverIds = new Set(driverIds);
         if (uniqueDriverIds.size !== 20) {
             setError('Each driver can only finish in one position');
@@ -210,7 +260,8 @@ export default function RaceResultsEntryPage() {
 
     // Get drivers that are already selected in other positions
     const getSelectedDrivers = (excludePosition: number): number[] => {
-        return results
+        const currentResults = selectedEventType === 'race' ? results : sprintResults;
+        return currentResults
             .filter((_, index) => index !== excludePosition - 1) // Exclude current position
             .map(result => result.driverId)
             .filter(id => id > 0); // Only include selected drivers
@@ -224,7 +275,9 @@ export default function RaceResultsEntryPage() {
     };
 
     const handleSubmit = async () => {
-        if (!validateResults()) {
+        const currentResults = selectedEventType === 'race' ? results : sprintResults;
+
+        if (!validateResults(currentResults)) {
             return;
         }
 
@@ -236,33 +289,52 @@ export default function RaceResultsEntryPage() {
             let response;
             if (isRescoring) {
                 // For specific league rescoring, we don't need to send results since we're not changing them
-                const resultsToSend = rescoringMode === 'specific' ? [] : results;
-                response = await adminAPI.rescoreRaceResults(
-                    selectedWeek,
-                    resultsToSend,
-                    rescoringMode === 'specific' && selectedLeagueId ? selectedLeagueId : undefined,
-                    logActivity
-                );
+                const resultsToSend = rescoringMode === 'specific' ? [] : currentResults;
+                if (selectedEventType === 'race') {
+                    response = await adminAPI.rescoreRaceResults(
+                        selectedWeek,
+                        resultsToSend,
+                        rescoringMode === 'specific' && selectedLeagueId ? selectedLeagueId : undefined,
+                        logActivity
+                    );
+                } else {
+                    response = await adminAPI.rescoreSprintResults(
+                        selectedWeek,
+                        resultsToSend,
+                        rescoringMode === 'specific' && selectedLeagueId ? selectedLeagueId : undefined,
+                        logActivity
+                    );
+                }
             } else {
-                response = await adminAPI.enterRaceResults(selectedWeek, results);
+                if (selectedEventType === 'race') {
+                    response = await adminAPI.enterRaceResults(selectedWeek, currentResults);
+                } else {
+                    response = await adminAPI.enterSprintResults(selectedWeek, currentResults);
+                }
             }
 
             if (response.status === 200) {
                 const action = isRescoring ? 'rescored' : 'entered';
+                const eventType = selectedEventType === 'race' ? 'race' : 'sprint';
                 const leaguesAffected = isRescoring ? response.data.data.leaguesRescored : response.data.data.leaguesScored;
-                setSuccess(`Successfully ${action} race results for ${selectedRace?.raceName} (Week ${selectedWeek}) and ${isRescoring ? 'rescored' : 'scored'} ${leaguesAffected} leagues!`);
+                setSuccess(`Successfully ${action} ${eventType} results for ${selectedRace?.raceName} (Week ${selectedWeek}) and ${isRescoring ? 'rescored' : 'scored'} ${leaguesAffected} leagues!`);
 
                 // Reset form after successful submission
                 setTimeout(() => {
-                    setResults(Array.from({ length: 20 }, (_, i) => ({
+                    const resetResults = Array.from({ length: 20 }, (_, i) => ({
                         driverId: 0,
                         finishingPosition: i + 1
-                    })));
+                    }));
+                    if (selectedEventType === 'race') {
+                        setResults(resetResults);
+                    } else {
+                        setSprintResults(resetResults);
+                    }
                     setSuccess(null);
                 }, 5000);
             }
         } catch (error: unknown) {
-            logger.forceError(`Error ${isRescoring ? 'rescoring' : 'entering'} race results:`, error);
+            logger.forceError(`Error ${isRescoring ? 'rescoring' : 'entering'} ${selectedEventType} results:`, error);
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             setError(errorMessage);
         } finally {
@@ -348,6 +420,33 @@ export default function RaceResultsEntryPage() {
                                 <p className="text-sm text-gray-600">
                                     {new Date(selectedRace.raceDate).toLocaleDateString()} • {selectedRace.circuitName}, {selectedRace.country}
                                 </p>
+                                {selectedRace.hasSprint && (
+                                    <div className="mt-3">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Event Type
+                                        </label>
+                                        <div className="flex bg-gray-100 rounded-lg p-1">
+                                            <button
+                                                onClick={() => setSelectedEventType('sprint')}
+                                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'sprint'
+                                                    ? 'bg-white text-blue-600 shadow-sm'
+                                                    : 'text-gray-600 hover:text-gray-900'
+                                                    }`}
+                                            >
+                                                Sprint Results
+                                            </button>
+                                            <button
+                                                onClick={() => setSelectedEventType('race')}
+                                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'race'
+                                                    ? 'bg-white text-blue-600 shadow-sm'
+                                                    : 'text-gray-600 hover:text-gray-900'
+                                                    }`}
+                                            >
+                                                Race Results
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                                 {isRescoring && (
                                     <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
                                         <p className="text-sm text-blue-800 font-medium">
@@ -433,7 +532,7 @@ export default function RaceResultsEntryPage() {
             {allRaces.length > 0 && (
                 <div className="bg-white shadow-lg rounded-lg p-6">
                     <h2 className="text-lg font-medium text-gray-900 mb-4">
-                        {isRescoring && rescoringMode === 'specific' ? 'Current Race Results (Read-only)' : 'Enter Finishing Positions'}
+                        {isRescoring && rescoringMode === 'specific' ? `Current ${selectedEventType === 'race' ? 'Race' : 'Sprint'} Results (Read-only)` : `Enter ${selectedEventType === 'race' ? 'Race' : 'Sprint'} Finishing Positions`}
                     </h2>
                     <p className="text-sm text-gray-600 mb-6">
                         {isRescoring && rescoringMode === 'specific'
@@ -443,7 +542,7 @@ export default function RaceResultsEntryPage() {
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {results.map((result, index) => (
+                        {(selectedEventType === 'race' ? results : sprintResults).map((result, index) => (
                             <div key={result.finishingPosition} className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">
                                     P{result.finishingPosition}
@@ -492,7 +591,7 @@ export default function RaceResultsEntryPage() {
                     <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mt-6">
                         <h3 className="text-sm font-medium text-blue-900 mb-2">Selected Drivers Summary</h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 text-xs">
-                            {results.map((result) => (
+                            {(selectedEventType === 'race' ? results : sprintResults).map((result) => (
                                 <div key={result.finishingPosition} className="flex items-center space-x-1">
                                     <span className="font-medium text-blue-700">P{result.finishingPosition}:</span>
                                     <span className="text-blue-600">

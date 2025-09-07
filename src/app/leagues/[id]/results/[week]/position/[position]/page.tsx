@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { picksAPI, PositionResultV2 } from '@/lib/api';
+import { picksAPI, PositionResultV2, f1racesAPI } from '@/lib/api';
 import { useToast } from '@/contexts/ToastContext';
 import PageTitle from '@/components/PageTitle';
 import BackToLeagueButton from '@/components/BackToLeagueButton';
@@ -12,21 +12,47 @@ import Avatar from '@/components/Avatar';
 export default function PositionResultsPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { showToast } = useToast();
 
     const [results, setResults] = useState<PositionResultV2 | null>(null);
     const [availablePositions, setAvailablePositions] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
+    const [currentRace, setCurrentRace] = useState<any>(null);
 
     const leagueId = params.id as string;
     const weekNumber = params.week as string;
     const position = params.position as string;
 
+    // Handle eventType URL parameter
+    useEffect(() => {
+        const eventTypeParam = searchParams.get('eventType');
+        if (eventTypeParam === 'sprint' || eventTypeParam === 'race') {
+            setSelectedEventType(eventTypeParam);
+        }
+    }, [searchParams]);
+
+    // Set default event type based on whether the race has a sprint
+    useEffect(() => {
+        if (currentRace?.hasSprint && !searchParams.get('eventType')) {
+            setSelectedEventType('sprint');
+        }
+    }, [currentRace, searchParams]);
+
+    // Update URL when selectedEventType changes
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('eventType', selectedEventType);
+        window.history.replaceState({}, '', url.toString());
+    }, [selectedEventType]);
+
     useEffect(() => {
         loadResults();
         loadAvailablePositions();
-    }, [leagueId, weekNumber, position]);
+        loadCurrentRace();
+    }, [leagueId, weekNumber, position, selectedEventType]);
 
     const loadResults = async () => {
         try {
@@ -36,7 +62,8 @@ export default function PositionResultsPage() {
             const response = await picksAPI.getResultsByPositionV2(
                 parseInt(leagueId),
                 parseInt(weekNumber),
-                parseInt(position)
+                parseInt(position),
+                selectedEventType
             );
 
             if (response.data.success) {
@@ -62,6 +89,21 @@ export default function PositionResultsPage() {
             }
         } catch (error) {
             console.error('Error loading available positions:', error);
+        }
+    };
+
+    const loadCurrentRace = async () => {
+        try {
+            console.log('DEBUG: Loading race data for week', weekNumber);
+            const response = await f1racesAPI.getAllRaces();
+            console.log('DEBUG: getAllRaces response:', response.data);
+            if (response.data.success) {
+                const currentRaceData = response.data.data.find((race: any) => race.weekNumber === parseInt(weekNumber));
+                console.log('DEBUG: Found race data:', currentRaceData);
+                setCurrentRace(currentRaceData);
+            }
+        } catch (error) {
+            console.error('Error loading current race:', error);
         }
     };
 
@@ -306,6 +348,35 @@ export default function PositionResultsPage() {
                                 <p className="text-lg font-medium text-gray-900">{results.actualResult.driverName}</p>
                                 <p className="text-sm text-gray-500">{results.actualResult.driverTeam}</p>
                                 <p className="text-xs text-gray-400">Finished in P{results.position}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Event Type Selector */}
+                {console.log('DEBUG: currentRace =', currentRace, 'hasSprint =', currentRace?.hasSprint)}
+                {currentRace?.hasSprint && (
+                    <div className="bg-white shadow rounded-lg p-4 mb-6">
+                        <div className="flex items-center justify-center">
+                            <div className="flex bg-gray-100 rounded-lg p-1">
+                                <button
+                                    onClick={() => setSelectedEventType('sprint')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'sprint'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    Sprint Results
+                                </button>
+                                <button
+                                    onClick={() => setSelectedEventType('race')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'race'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    Race Results
+                                </button>
                             </div>
                         </div>
                     </div>

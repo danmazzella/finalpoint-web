@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { picksAPI, MemberPicksV2, leaguesAPI } from '@/lib/api';
+import { picksAPI, MemberPicksV2, leaguesAPI, f1racesAPI } from '@/lib/api';
 import PageTitle from '@/components/PageTitle';
 import Avatar from '@/components/Avatar';
 
@@ -17,15 +17,33 @@ interface Member {
 export default function MemberPicksPage() {
     const params = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [memberPicks, setMemberPicks] = useState<MemberPicksV2 | null>(null);
     const [leagueMembers, setLeagueMembers] = useState<Member[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
+    const [currentRace, setCurrentRace] = useState<any>(null);
 
     const leagueId = params.id as string;
     const weekNumber = params.week as string;
     const userId = params.userId as string;
+
+    // Handle eventType URL parameter
+    useEffect(() => {
+        const eventTypeParam = searchParams.get('eventType');
+        if (eventTypeParam === 'sprint' || eventTypeParam === 'race') {
+            setSelectedEventType(eventTypeParam);
+        }
+    }, [searchParams]);
+
+    // Update URL when selectedEventType changes
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('eventType', selectedEventType);
+        window.history.replaceState({}, '', url.toString());
+    }, [selectedEventType]);
 
     const loadMemberPicks = useCallback(async () => {
         try {
@@ -35,7 +53,8 @@ export default function MemberPicksPage() {
             const response = await picksAPI.getMemberPicksV2(
                 parseInt(leagueId),
                 parseInt(weekNumber),
-                parseInt(userId)
+                parseInt(userId),
+                selectedEventType
             );
 
             if (response.data.success) {
@@ -49,7 +68,7 @@ export default function MemberPicksPage() {
         } finally {
             setLoading(false);
         }
-    }, [leagueId, weekNumber, userId]);
+    }, [leagueId, weekNumber, userId, selectedEventType]);
 
     const loadLeagueMembers = useCallback(async () => {
         try {
@@ -78,9 +97,30 @@ export default function MemberPicksPage() {
         }
     }, [leagueId, weekNumber]);
 
+    const loadCurrentRace = async () => {
+        try {
+            const response = await f1racesAPI.getAllRaces();
+            if (response.data.success) {
+                const currentRaceData = response.data.data.find((race: any) => race.weekNumber === parseInt(weekNumber));
+                setCurrentRace(currentRaceData);
+            }
+        } catch (error) {
+            console.error('Error loading current race:', error);
+        }
+    };
+
     const navigateToMember = (newUserId: number, memberIndex?: number) => {
         const url = `/leagues/${leagueId}/results/${weekNumber}/member/${newUserId}`;
-        const finalUrl = memberIndex !== undefined ? `${url}?memberIndex=${memberIndex}` : url;
+        const params = new URLSearchParams();
+
+        if (memberIndex !== undefined) {
+            params.set('memberIndex', memberIndex.toString());
+        }
+
+        // Preserve the current event type
+        params.set('eventType', selectedEventType);
+
+        const finalUrl = `${url}?${params.toString()}`;
         // Use replace instead of push to avoid building up navigation stack
         router.replace(finalUrl);
     };
@@ -135,7 +175,8 @@ export default function MemberPicksPage() {
     useEffect(() => {
         loadMemberPicks();
         loadLeagueMembers();
-    }, [loadMemberPicks, loadLeagueMembers]);
+        loadCurrentRace();
+    }, [loadMemberPicks, loadLeagueMembers, selectedEventType]);
 
     const getPositionLabel = (position: number) => {
         const labels: { [key: number]: string } = {
@@ -390,6 +431,34 @@ export default function MemberPicksPage() {
                 </div>
 
 
+
+                {/* Event Type Selector */}
+                {currentRace?.hasSprint && (
+                    <div className="bg-white shadow rounded-lg p-4 mb-6">
+                        <div className="flex items-center justify-center">
+                            <div className="flex bg-gray-100 rounded-lg p-1">
+                                <button
+                                    onClick={() => setSelectedEventType('sprint')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'sprint'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    Sprint Results
+                                </button>
+                                <button
+                                    onClick={() => setSelectedEventType('race')}
+                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'race'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    Race Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Member's Picks Section */}
                 <div className="bg-white shadow-lg rounded-lg overflow-hidden">
