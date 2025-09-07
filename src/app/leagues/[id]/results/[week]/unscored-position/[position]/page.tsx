@@ -26,32 +26,24 @@ export default function UnscoredPositionPicksPage() {
   const weekNumber = params.week as string;
   const position = params.position as string;
 
-  // Handle eventType URL parameter
+  // Handle eventType URL parameter and set default based on race data
   useEffect(() => {
     const eventTypeParam = searchParams.get('eventType');
     if (eventTypeParam === 'sprint' || eventTypeParam === 'race') {
       setSelectedEventType(eventTypeParam);
-    }
-  }, [searchParams]);
-
-  // Update URL when selectedEventType changes
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('eventType', selectedEventType);
-    window.history.replaceState({}, '', url.toString());
-  }, [selectedEventType]);
-
-  // Set default event type based on whether the race has a sprint
-  useEffect(() => {
-    if (currentRace?.hasSprint && !searchParams.get('eventType')) {
+    } else if (currentRace?.hasSprint) {
+      // Only set default to sprint if no URL param and race has sprint
       setSelectedEventType('sprint');
     }
-  }, [currentRace, searchParams]);
+  }, [searchParams, currentRace]);
 
   useEffect(() => {
-    loadResults();
-    loadAvailablePositions();
-    loadCurrentRace();
+    // Only load data if we have valid parameters
+    if (leagueId && weekNumber && position) {
+      loadResults();
+      loadAvailablePositions();
+      loadCurrentRace();
+    }
   }, [leagueId, weekNumber, position, selectedEventType]);
 
   const loadResults = async () => {
@@ -69,11 +61,13 @@ export default function UnscoredPositionPicksPage() {
       if (response.data.success) {
         setResults(response.data.data);
       } else {
+        console.error('API response not successful:', response.data);
         setError('Failed to load picks');
       }
     } catch (error) {
       console.error('Error loading position picks:', error);
       setError('Failed to load picks');
+      showToast('Failed to load picks', 'error');
     } finally {
       setLoading(false);
     }
@@ -86,9 +80,13 @@ export default function UnscoredPositionPicksPage() {
         // Sort positions in ascending order (P1, P2, P3, etc.)
         const sortedPositions = (response.data.data.positions || []).sort((a: number, b: number) => a - b);
         setAvailablePositions(sortedPositions);
+      } else {
+        console.error('Failed to load available positions:', response.data);
+        setAvailablePositions([]);
       }
     } catch (error) {
       console.error('Error loading available positions:', error);
+      setAvailablePositions([]);
     }
   };
 
@@ -111,6 +109,14 @@ export default function UnscoredPositionPicksPage() {
     params.set('eventType', selectedEventType);
     const finalUrl = `${url}?${params.toString()}`;
     router.replace(finalUrl);
+  };
+
+  const handleEventTypeChange = (newEventType: 'race' | 'sprint') => {
+    setSelectedEventType(newEventType);
+    // Update URL without causing navigation loop
+    const url = new URL(window.location.href);
+    url.searchParams.set('eventType', newEventType);
+    window.history.replaceState({}, '', url.toString());
   };
 
   const getCurrentPositionIndex = () => {
@@ -343,7 +349,7 @@ export default function UnscoredPositionPicksPage() {
             <div className="flex items-center justify-center">
               <div className="flex bg-gray-100 rounded-lg p-1">
                 <button
-                  onClick={() => setSelectedEventType('sprint')}
+                  onClick={() => handleEventTypeChange('sprint')}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'sprint'
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -352,7 +358,7 @@ export default function UnscoredPositionPicksPage() {
                   Sprint Results
                 </button>
                 <button
-                  onClick={() => setSelectedEventType('race')}
+                  onClick={() => handleEventTypeChange('race')}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'race'
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
