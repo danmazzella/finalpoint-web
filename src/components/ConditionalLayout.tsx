@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import ProtectedRoute from './ProtectedRoute';
@@ -13,6 +14,16 @@ interface ConditionalLayoutProps {
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
     const pathname = usePathname();
     const { user, isLoading } = useAuth();
+
+    // Debug logging for white page issue
+    useEffect(() => {
+        console.log('ConditionalLayout render:', {
+            pathname,
+            user: user ? { id: user.id, email: user.email } : null,
+            isLoading,
+            timestamp: new Date().toISOString()
+        });
+    }, [pathname, user, isLoading]);
 
     const isScoringPage = pathname === '/scoring';
     const isInfoPage = pathname === '/info';

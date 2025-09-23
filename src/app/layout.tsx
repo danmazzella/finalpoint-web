@@ -8,6 +8,7 @@ import { FeatureFlagProvider } from '@/contexts/FeatureFlagContext';
 import ConditionalLayout from '@/components/ConditionalLayout';
 import ServiceWorkerManager from '@/components/ServiceWorkerManager';
 import PageViewTracker from '@/components/PageViewTracker';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Suspense } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -25,21 +26,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Suspense fallback={null}>
-          <PageViewTracker />
-        </Suspense>
-        <ServiceWorkerManager />
-        <ThemeProvider>
-          <AuthProvider>
-            <FeatureFlagProvider>
-              <ToastProvider>
-                <ConditionalLayout>
-                  {children}
-                </ConditionalLayout>
-              </ToastProvider>
-            </FeatureFlagProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <Suspense fallback={null}>
+            <PageViewTracker />
+          </Suspense>
+          <ServiceWorkerManager />
+          <ThemeProvider>
+            <AuthProvider>
+              <FeatureFlagProvider>
+                <ToastProvider>
+                  <ConditionalLayout>
+                    {children}
+                  </ConditionalLayout>
+                </ToastProvider>
+              </FeatureFlagProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

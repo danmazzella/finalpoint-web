@@ -24,6 +24,7 @@ interface DetailedStanding {
     averagePointsPerRace: number;
     avatar: string;
     newAccuracy?: number; // New position-based accuracy
+    completedRacePicks?: number; // Picks from completed races only
     correctPicksByPosition?: {
         userId: number;
         userName: string;
@@ -275,9 +276,9 @@ export default function StandingsPage() {
                                 <p className="text-lg font-bold text-gray-900">
                                     {standings.length > 0
                                         ? (() => {
-                                            const totalPicks = standings.reduce((sum, s) => sum + s.totalPicks, 0);
+                                            const completedRacePicks = standings.reduce((sum, s) => sum + (s.completedRacePicks || 0), 0);
                                             const totalPoints = standings.reduce((sum, s) => sum + s.totalPoints, 0);
-                                            const maxPotentialPoints = totalPicks * 10;
+                                            const maxPotentialPoints = completedRacePicks * 10;
                                             return maxPotentialPoints > 0 ? Math.round((totalPoints / maxPotentialPoints) * 100) : 0;
                                         })()
                                         : 0}%

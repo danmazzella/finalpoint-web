@@ -50,7 +50,21 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            value: 'public, max-age=86400, immutable', // 1 day instead of 1 year
+          },
+        ],
+      },
+      // Add JavaScript bundle headers with shorter cache
+      {
+        source: '/_next/static/chunks/(.*)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, immutable', // 1 day instead of 1 year
           },
         ],
       },

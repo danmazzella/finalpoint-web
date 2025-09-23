@@ -91,35 +91,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
 
         // Try to refresh user data from API to get latest feature flags
-        try {
-          await refreshUserData();
-        } catch (refreshError) {
-          console.log('⚠️ AuthContext: Error refreshing user data, using cached data:', refreshError);
-        }
+        // Use Promise.allSettled to prevent one failure from blocking others
+        const refreshPromises = [
+          refreshUserData().catch(error => {
+            logger.warn('AuthContext: Error refreshing user data, using cached data:', error);
+            return false;
+          }),
+          // Initialize WebSocket connection for existing authenticated users
+          import('../services/secureChatService').then(({ SecureChatService }) => {
+            SecureChatService.updateWebSocketToken(storedToken);
+            return SecureChatService.initializeWebSocket();
+          }).catch(error => {
+            logger.error('Could not initialize WebSocket for existing user:', error);
+            return false;
+          }),
+          // Initialize push notification refresh for existing authenticated users
+          import('../services/notificationRefreshService').then(({ notificationRefreshService }) => {
+            return notificationRefreshService.initialize();
+          }).catch(error => {
+            logger.error('Could not initialize push notification refresh:', error);
+            return false;
+          })
+        ];
 
-        // Initialize WebSocket connection for existing authenticated users
-        try {
-          const { SecureChatService } = await import('../services/secureChatService');
-          SecureChatService.updateWebSocketToken(storedToken);
-          await SecureChatService.initializeWebSocket();
-        } catch (wsError) {
-          logger.error('Could not initialize WebSocket for existing user:', wsError);
-          // Don't fail auth initialization if WebSocket initialization fails
-        }
-
-        // Initialize push notification refresh for existing authenticated users
-        try {
-          const { notificationRefreshService } = await import('../services/notificationRefreshService');
-          await notificationRefreshService.initialize();
-        } catch (notificationError) {
-          logger.error('Could not initialize push notification refresh:', notificationError);
-          // Don't fail auth initialization if notification initialization fails
-        }
+        // Wait for all promises to settle, but don't fail if any individual one fails
+        await Promise.allSettled(refreshPromises);
       } else {
         logger.info('AuthContext: No stored user or token found');
       }
     } catch (error) {
       logger.error('Error loading stored user:', error);
+      // Clear potentially corrupted data
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
