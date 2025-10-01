@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, immutable', // 1 day instead of 1 year
+            value: 'public, max-age=3600, must-revalidate', // 1 hour with revalidation
           },
         ],
       },
@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, immutable', // 1 day instead of 1 year
+            value: 'public, max-age=3600, must-revalidate', // 1 hour with revalidation
           },
         ],
       },

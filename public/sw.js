@@ -1,12 +1,6 @@
 // Service Worker for FinalPoint Push Notifications
 
-const CACHE_NAME = 'finalpoint-v2'; // Increment version to clear old cache
-const urlsToCache = [
-    '/',
-    '/dashboard',
-    '/profile',
-    '/picks'
-];
+const CACHE_NAME = 'finalpoint-v3'; // Increment version to clear old cache
 
 // Install event
 self.addEventListener('install', (event) => {
@@ -38,8 +32,18 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
+        }).then(() => {
+            // Clear all caches to prevent stale assets
+            console.log('Clearing all caches to prevent stale assets');
+            return caches.keys().then((cacheNames) => {
+                return Promise.all(
+                    cacheNames.map((cacheName) => caches.delete(cacheName))
+                );
+            });
         })
     );
+    // Take control of all clients immediately
+    return self.clients.claim();
 });
 
 // Fetch event
@@ -49,16 +53,22 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Skip Next.js static files and development assets
+    // Skip Next.js static files, API routes, and development assets
     const url = new URL(event.request.url);
     if (url.pathname.startsWith('/_next/') ||
+        url.pathname.startsWith('/api/') ||
         url.pathname.includes('localhost:3000') ||
         url.pathname.includes('localhost:3001') ||
         url.pathname.includes('localhost:3002') ||
         url.pathname.includes('localhost:3003') ||
         url.pathname.includes('localhost:3004') ||
-        url.pathname.includes('localhost:3005')) {
-        // Let these requests pass through to the network
+        url.pathname.includes('localhost:3005') ||
+        url.pathname.includes('webpack') ||
+        url.pathname.includes('.js') ||
+        url.pathname.includes('.css') ||
+        url.pathname.includes('.map') ||
+        url.pathname.includes('.json')) {
+        // Let these requests pass through to the network without caching
         return;
     }
 

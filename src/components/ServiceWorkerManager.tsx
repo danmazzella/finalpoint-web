@@ -19,10 +19,20 @@ export default function ServiceWorkerManager() {
     // Production service worker management
     if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
       if ('serviceWorker' in navigator) {
-        // Register service worker with cache busting
-        navigator.serviceWorker.register('/sw.js', {
-          scope: '/',
-          updateViaCache: 'none' // Always check for updates
+        // Clear all caches first to prevent stale assets
+        caches.keys().then((cacheNames) => {
+          return Promise.all(
+            cacheNames.map((cacheName) => {
+              console.log('Clearing cache:', cacheName);
+              return caches.delete(cacheName);
+            })
+          );
+        }).then(() => {
+          // Register service worker with cache busting
+          return navigator.serviceWorker.register('/sw.js', {
+            scope: '/',
+            updateViaCache: 'none' // Always check for updates
+          });
         }).then((registration) => {
           console.log('Service worker registered:', registration.scope);
 
