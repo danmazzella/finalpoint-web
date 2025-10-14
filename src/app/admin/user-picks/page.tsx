@@ -28,6 +28,7 @@ interface Race {
     weekNumber: number;
     raceName: string;
     raceDate: string;
+    hasSprint?: boolean;
 }
 
 interface UserPick {
@@ -39,6 +40,7 @@ interface UserPick {
     driverId: number;
     driverName: string;
     driverTeam: string;
+    eventType?: 'race' | 'sprint';
 }
 
 export default function AdminUserPicksPage() {
@@ -49,6 +51,7 @@ export default function AdminUserPicksPage() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedLeague, setSelectedLeague] = useState<League | null>(null);
     const [selectedWeek, setSelectedWeek] = useState<number>(1);
+    const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
     const [userPicks, setUserPicks] = useState<UserPick[]>([]);
     const [loading, setLoading] = useState(false);
     const [picksLoading, setPicksLoading] = useState(false);
@@ -58,12 +61,27 @@ export default function AdminUserPicksPage() {
     const [pickForm, setPickForm] = useState({
         position: 1,
         driverId: 0,
-        weekNumber: 1
+        weekNumber: 1,
+        eventType: 'race' as 'race' | 'sprint'
     });
 
     useEffect(() => {
         loadInitialData();
     }, []);
+
+    // Set default event type based on selected race
+    useEffect(() => {
+        if (races.length > 0 && selectedWeek) {
+            const selectedRace = races.find(race => race.weekNumber === selectedWeek);
+            if (selectedRace?.hasSprint) {
+                setSelectedEventType('sprint');
+                setPickForm(prev => ({ ...prev, eventType: 'sprint' }));
+            } else {
+                setSelectedEventType('race');
+                setPickForm(prev => ({ ...prev, eventType: 'race' }));
+            }
+        }
+    }, [races, selectedWeek]);
 
     const loadInitialData = async () => {
         try {
@@ -108,7 +126,7 @@ export default function AdminUserPicksPage() {
 
         try {
             setPicksLoading(true);
-            const response = await adminAPI.getUserPicks(selectedUser.id, selectedLeague.id);
+            const response = await adminAPI.getUserPicks(selectedUser.id, selectedLeague.id, selectedEventType);
 
             if (response.status === 200) {
                 setUserPicks(response.data.data);
@@ -205,12 +223,15 @@ export default function AdminUserPicksPage() {
                 selectedLeague.id,
                 pickForm.weekNumber,
                 pickForm.position,
-                pickForm.driverId
+                pickForm.driverId,
+                pickForm.eventType
             );
 
             if (response.status === 200) {
                 setMessage({ type: 'success', text: 'Pick created successfully' });
-                setPickForm({ position: 1, driverId: 0, weekNumber: pickForm.weekNumber });
+                setPickForm({ position: 1, driverId: 0, weekNumber: pickForm.weekNumber, eventType: pickForm.eventType });
+                // Update selectedEventType to match the pickForm.eventType used for creation
+                setSelectedEventType(pickForm.eventType);
                 loadUserPicks();
             } else {
                 setMessage({ type: 'error', text: response.data.message || 'Failed to create pick' });
@@ -228,7 +249,8 @@ export default function AdminUserPicksPage() {
                 pick.leagueId,
                 pick.weekNumber,
                 pick.position,
-                newDriverId
+                newDriverId,
+                selectedEventType
             );
 
             if (response.status === 200) {
@@ -253,7 +275,8 @@ export default function AdminUserPicksPage() {
                 pick.userId,
                 pick.leagueId,
                 pick.weekNumber,
-                pick.position
+                pick.position,
+                selectedEventType
             );
 
             if (response.status === 200) {
@@ -342,6 +365,7 @@ export default function AdminUserPicksPage() {
                     </div>
                 </div>
 
+
                 {/* League Membership Actions */}
                 {selectedUser && selectedLeague && (
                     <div className="mt-6 p-4 bg-gray-50 rounded-lg">
@@ -371,19 +395,38 @@ export default function AdminUserPicksPage() {
                         {/* Create/Edit Pick Form */}
                         <div className="bg-gray-50 p-4 rounded-lg mb-4">
                             <h3 className="text-md font-medium text-gray-900 mb-3">Create/Edit Pick</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Week</label>
                                     <select
                                         className="w-full p-2 border border-gray-300 rounded-lg"
                                         value={pickForm.weekNumber}
-                                        onChange={(e) => setPickForm(prev => ({ ...prev, weekNumber: parseInt(e.target.value) }))}
+                                        onChange={(e) => {
+                                            const weekNumber = parseInt(e.target.value);
+                                            setPickForm(prev => ({ ...prev, weekNumber }));
+                                            setSelectedWeek(weekNumber);
+                                        }}
                                     >
                                         {races.map(race => (
                                             <option key={race.weekNumber} value={race.weekNumber}>
                                                 Week {race.weekNumber} - {race.raceName}
                                             </option>
                                         ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+                                    <select
+                                        className="w-full p-2 border border-gray-300 rounded-lg"
+                                        value={pickForm.eventType}
+                                        onChange={(e) => setPickForm(prev => ({ ...prev, eventType: e.target.value as 'race' | 'sprint' }))}
+                                        disabled={!races.find(r => r.weekNumber === pickForm.weekNumber)?.hasSprint}
+                                    >
+                                        <option value="race">Grand Prix</option>
+                                        <option value="sprint" disabled={!races.find(r => r.weekNumber === pickForm.weekNumber)?.hasSprint}>
+                                            Sprint Race
+                                        </option>
                                     </select>
                                 </div>
 
@@ -429,20 +472,69 @@ export default function AdminUserPicksPage() {
                             </div>
                         </div>
 
-                        {/* Load Picks Button */}
+                        {/* Event Type Selection and Load Picks Button */}
                         <div className="mb-4">
-                            <button
-                                onClick={loadUserPicks}
-                                disabled={picksLoading}
-                                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
-                            >
-                                {picksLoading ? 'Loading...' : 'Load User Picks'}
-                            </button>
+                            <div className="flex items-center space-x-6 mb-4">
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-700 mb-2">Event Type</h3>
+                                    <div className="flex space-x-4">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="eventType"
+                                                value="race"
+                                                checked={selectedEventType === 'race'}
+                                                onChange={() => {
+                                                    setSelectedEventType('race');
+                                                    setPickForm(prev => ({ ...prev, eventType: 'race' }));
+                                                }}
+                                                className="mr-2"
+                                            />
+                                            <span className="text-gray-700">Grand Prix</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="eventType"
+                                                value="sprint"
+                                                checked={selectedEventType === 'sprint'}
+                                                onChange={() => {
+                                                    setSelectedEventType('sprint');
+                                                    setPickForm(prev => ({ ...prev, eventType: 'sprint' }));
+                                                }}
+                                                className="mr-2"
+                                                disabled={!races.find(r => r.weekNumber === pickForm.weekNumber)?.hasSprint}
+                                            />
+                                            <span className={`${!races.find(r => r.weekNumber === pickForm.weekNumber)?.hasSprint ? 'text-gray-400' : 'text-gray-700'}`}>
+                                                Sprint Race
+                                            </span>
+                                        </label>
+                                    </div>
+                                    {!races.find(r => r.weekNumber === pickForm.weekNumber)?.hasSprint && (
+                                        <p className="text-sm text-gray-500 mt-1">This week does not have a sprint race</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-700 mb-2">Load Picks</h3>
+                                    <button
+                                        onClick={loadUserPicks}
+                                        disabled={picksLoading}
+                                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+                                    >
+                                        {picksLoading ? 'Loading...' : 'Load User Picks'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         {/* User Picks Display */}
                         {userPicks.length > 0 && (
                             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                <div className="px-6 py-3 bg-gray-100 border-b border-gray-200">
+                                    <h3 className="text-sm font-medium text-gray-900">
+                                        {selectedEventType === 'race' ? 'Grand Prix' : 'Sprint Race'} Picks
+                                    </h3>
+                                </div>
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
@@ -455,7 +547,7 @@ export default function AdminUserPicksPage() {
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {userPicks.map((pick) => (
-                                            <tr key={`${pick.weekNumber}-${pick.position}`}>
+                                            <tr key={`${pick.weekNumber}-${pick.position}-${pick.eventType || 'race'}`}>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     Week {pick.weekNumber}
                                                 </td>

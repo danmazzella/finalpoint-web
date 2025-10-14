@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { adminAPI, PicksByPositionDetailed } from '@/lib/api';
+import { adminAPI, PicksByPositionDetailed, f1racesAPI } from '@/lib/api';
 import Link from 'next/link';
 
 function PicksByPositionPageContent() {
@@ -12,11 +12,14 @@ function PicksByPositionPageContent() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedWeek, setSelectedWeek] = useState<number>(1);
+    const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
     const [availableWeeks, setAvailableWeeks] = useState<number[]>([]);
+    const [races, setRaces] = useState<any[]>([]);
     const [showPickCounts, setShowPickCounts] = useState(true);
 
     useEffect(() => {
         loadAvailableWeeks();
+        loadRaces();
     }, []);
 
     // Initialize week number from query params after available weeks are loaded
@@ -47,12 +50,23 @@ function PicksByPositionPageContent() {
         }
     };
 
+    const loadRaces = async () => {
+        try {
+            const response = await f1racesAPI.getAllRaces();
+            if (response.data.success) {
+                setRaces(response.data.data);
+            }
+        } catch (error) {
+            console.error('Error loading races:', error);
+        }
+    };
+
     const loadOverview = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await adminAPI.getPicksByPositionDetailed(selectedWeek);
+            const response = await adminAPI.getPicksByPositionDetailedForEvent(selectedWeek, selectedEventType);
 
             if (response.data.success) {
                 setOverview(response.data.data);
@@ -65,13 +79,25 @@ function PicksByPositionPageContent() {
         } finally {
             setLoading(false);
         }
-    }, [selectedWeek]);
+    }, [selectedWeek, selectedEventType]);
 
     useEffect(() => {
         if (selectedWeek) {
             loadOverview();
         }
     }, [selectedWeek, loadOverview]);
+
+    // Set default event type based on selected race
+    useEffect(() => {
+        if (races.length > 0 && selectedWeek) {
+            const selectedRace = races.find(race => race.weekNumber === selectedWeek);
+            if (selectedRace?.hasSprint) {
+                setSelectedEventType('sprint');
+            } else {
+                setSelectedEventType('race');
+            }
+        }
+    }, [races, selectedWeek]);
 
     const getPositionLabel = (position: number) => {
         return `P${position}`;
@@ -139,7 +165,9 @@ function PicksByPositionPageContent() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Popular Picks by Position</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        Popular Picks by Position - {selectedEventType === 'race' ? 'Grand Prix' : 'Sprint Race'}
+                    </h1>
                     <p className="text-gray-600 mt-1">View all picks for each position across all leagues</p>
                 </div>
                 <Link
@@ -153,23 +181,63 @@ function PicksByPositionPageContent() {
             {/* Controls */}
             <div className="bg-white shadow-lg rounded-lg p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                    {/* Week Selector */}
-                    <div className="flex items-center space-x-4">
-                        <label htmlFor="week-select" className="text-sm font-medium text-gray-700">
-                            Select Week:
-                        </label>
-                        <select
-                            id="week-select"
-                            value={selectedWeek}
-                            onChange={(e) => handleWeekChange(parseInt(e.target.value))}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            {availableWeeks.map((week) => (
-                                <option key={week} value={week}>
-                                    Week {week}
-                                </option>
-                            ))}
-                        </select>
+                    {/* Week and Event Type Selector */}
+                    <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                        {/* Week Selector */}
+                        <div className="flex items-center space-x-4">
+                            <label htmlFor="week-select" className="text-sm font-medium text-gray-700">
+                                Select Week:
+                            </label>
+                            <select
+                                id="week-select"
+                                value={selectedWeek}
+                                onChange={(e) => handleWeekChange(parseInt(e.target.value))}
+                                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                {availableWeeks.map((week) => (
+                                    <option key={week} value={week}>
+                                        Week {week}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Event Type Selector */}
+                        <div className="flex items-center space-x-4">
+                            <label className="text-sm font-medium text-gray-700">
+                                Event Type:
+                            </label>
+                            <div className="flex space-x-4">
+                                <label className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        name="eventType"
+                                        value="race"
+                                        checked={selectedEventType === 'race'}
+                                        onChange={(e) => setSelectedEventType('race')}
+                                        className="mr-2"
+                                    />
+                                    <span className="text-gray-700">Grand Prix</span>
+                                </label>
+                                <label className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        name="eventType"
+                                        value="sprint"
+                                        checked={selectedEventType === 'sprint'}
+                                        onChange={(e) => setSelectedEventType('sprint')}
+                                        className="mr-2"
+                                        disabled={!races.find(r => r.weekNumber === selectedWeek)?.hasSprint}
+                                    />
+                                    <span className={`${!races.find(r => r.weekNumber === selectedWeek)?.hasSprint ? 'text-gray-400' : 'text-gray-700'}`}>
+                                        Sprint Race
+                                    </span>
+                                </label>
+                            </div>
+                            {!races.find(r => r.weekNumber === selectedWeek)?.hasSprint && (
+                                <p className="text-sm text-gray-500 ml-2">This week does not have a sprint race</p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Toggle for Pick Counts */}

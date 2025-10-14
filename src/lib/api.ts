@@ -194,8 +194,12 @@ export const adminAPI = {
   getRacesWithResultStatus: () => apiService.get('/admin/races-with-result-status'),
   getExistingRaceResults: (weekNumber: number) => apiService.get(`/admin/existing-race-results/${weekNumber}`),
   getLeaguePicksOverview: (weekNumber: number) => apiService.get(`/admin/league-picks-overview?weekNumber=${weekNumber}`),
+  getLeaguePicksOverviewForEvent: (weekNumber: number, eventType: 'race' | 'sprint') => apiService.get(`/admin/league-picks-overview/event?weekNumber=${weekNumber}&eventType=${eventType}`),
   getPicksByPositionOverview: (weekNumber: number) => apiService.get(`/admin/picks-by-position-overview?weekNumber=${weekNumber}`),
+  getPicksByPositionOverviewForEvent: (weekNumber: number, eventType: 'race' | 'sprint') => apiService.get(`/admin/picks-by-position-overview/event?weekNumber=${weekNumber}&eventType=${eventType}`),
+  getPicksByPositionOverviewOverallForEvent: (eventType: 'race' | 'sprint') => apiService.get(`/admin/picks-by-position-overview/overall/event?eventType=${eventType}`),
   getPicksByPositionDetailed: (weekNumber: number) => apiService.get(`/admin/picks-by-position-detailed?weekNumber=${weekNumber}`),
+  getPicksByPositionDetailedForEvent: (weekNumber: number, eventType: 'race' | 'sprint') => apiService.get(`/admin/picks-by-position-detailed/event?weekNumber=${weekNumber}&eventType=${eventType}`),
   getUsersWithoutPicks: (weekNumber: number) => apiService.get(`/admin/users-without-picks?weekNumber=${weekNumber}`),
   testNotifications: (data: { userId: number; notificationType: 'email' | 'push' | 'both'; customMessage?: string; templateId?: string; templateFields?: Record<string, string> }) => apiService.post('/admin/test-notifications', data),
   getUserNotificationHistory: (userId: number) => apiService.get(`/admin/users/${userId}/notification-history`),
@@ -217,14 +221,14 @@ export const adminAPI = {
     apiService.post(`/admin/leagues/${leagueId}/add-user`, { userId }),
   removeUserFromLeague: (leagueId: number, userId: number) =>
     apiService.delete(`/admin/leagues/${leagueId}/remove-user/${userId}`),
-  createUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, driverId: number) =>
-    apiService.post(`/admin/users/${userId}/picks`, { leagueId, weekNumber, position, driverId }),
-  updateUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, driverId: number) =>
-    apiService.put(`/admin/users/${userId}/picks`, { leagueId, weekNumber, position, driverId }),
-  deleteUserPick: (userId: number, leagueId: number, weekNumber: number, position: number) =>
-    apiService.delete(`/admin/users/${userId}/picks`, { data: { leagueId, weekNumber, position } }),
-  getUserPicks: (userId: number, leagueId: number) =>
-    apiService.get(`/admin/users/${userId}/picks/${leagueId}`),
+  createUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, driverId: number, eventType: 'race' | 'sprint' = 'race') =>
+    apiService.post(`/admin/users/${userId}/picks`, { leagueId, weekNumber, position, driverId, eventType }),
+  updateUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, driverId: number, eventType: 'race' | 'sprint' = 'race') =>
+    apiService.put(`/admin/users/${userId}/picks`, { leagueId, weekNumber, position, driverId, eventType }),
+  deleteUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, eventType: 'race' | 'sprint' = 'race') =>
+    apiService.delete(`/admin/users/${userId}/picks`, { data: { leagueId, weekNumber, position, eventType } }),
+  getUserPicks: (userId: number, leagueId: number, eventType: 'race' | 'sprint' = 'race') =>
+    apiService.get(`/admin/users/${userId}/picks/${leagueId}?eventType=${eventType}`),
 
   // Feature flags management (unified)
   getUserFeatureFlags: (userId: number) =>

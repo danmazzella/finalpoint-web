@@ -44,6 +44,7 @@ export default function AdminOverviewPage() {
   const [reschedulingPicks, setReschedulingPicks] = useState(false);
   const [reschedulingReminders, setReschedulingReminders] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
+  const [selectedEventType, setSelectedEventType] = useState<'all' | 'race' | 'sprint'>('all');
   const [positionBreakdown, setPositionBreakdown] = useState<Array<{
     position: number;
     totalPicks: number;
@@ -76,14 +77,137 @@ export default function AdminOverviewPage() {
     }
   };
 
-  const loadPositionBreakdownByWeek = async (weekNumber: number | null) => {
+  const loadPositionBreakdownByWeek = async (weekNumber: number | null, eventType: 'all' | 'race' | 'sprint' = 'all') => {
     try {
-      const response = await adminAPI.getPositionBreakdownByWeek(weekNumber);
+      if (eventType === 'all') {
+        // For "All Races", we need to combine data from both race and sprint
+        if (weekNumber) {
+          // Load both race and sprint data and combine them
+          const [raceResponse, sprintResponse] = await Promise.all([
+            adminAPI.getPicksByPositionOverviewForEvent(weekNumber, 'race'),
+            adminAPI.getPicksByPositionOverviewForEvent(weekNumber, 'sprint')
+          ]);
 
-      if (response.status === 200) {
-        setPositionBreakdown(response.data.data);
+          if (raceResponse.status === 200 && sprintResponse.status === 200) {
+            const raceData = raceResponse.data.data;
+            const sprintData = sprintResponse.data.data;
+
+            // Combine the data by position
+            const combinedData = new Map();
+
+            // Add race data
+            raceData.forEach((item: { position: number; totalPicks?: number; scoredPicks?: number; correctPicks?: number }) => {
+              combinedData.set(item.position, {
+                position: item.position,
+                totalPicks: item.totalPicks || 0,
+                scoredPicks: item.scoredPicks || 0,
+                correctPicks: item.correctPicks || 0,
+                accuracy: 0 // Will calculate below
+              });
+            });
+
+            // Add sprint data
+            sprintData.forEach((item: { position: number; totalPicks?: number; scoredPicks?: number; correctPicks?: number }) => {
+              const existing = combinedData.get(item.position);
+              if (existing) {
+                existing.totalPicks += item.totalPicks || 0;
+                existing.scoredPicks += item.scoredPicks || 0;
+                existing.correctPicks += item.correctPicks || 0;
+              } else {
+                combinedData.set(item.position, {
+                  position: item.position,
+                  totalPicks: item.totalPicks || 0,
+                  scoredPicks: item.scoredPicks || 0,
+                  correctPicks: item.correctPicks || 0,
+                  accuracy: 0
+                });
+              }
+            });
+
+            // Calculate accuracy for combined data
+            const finalData = Array.from(combinedData.values()).map(item => ({
+              ...item,
+              accuracy: item.scoredPicks > 0 ? Math.round((item.correctPicks / item.scoredPicks) * 100) : 0
+            }));
+
+            setPositionBreakdown(finalData);
+          } else {
+            console.error('Error loading combined position breakdown:', raceResponse.data, sprintResponse.data);
+          }
+        } else {
+          // For overall stats, use the regular API
+          const response = await adminAPI.getPositionBreakdownByWeek(weekNumber);
+          if (response.status === 200) {
+            setPositionBreakdown(response.data.data);
+          } else {
+            console.error('Position breakdown response error:', response.data);
+          }
+        }
       } else {
-        console.error('Position breakdown response error:', response.data);
+        // For specific event types, use the event-specific API
+        if (weekNumber) {
+          const response = await adminAPI.getPicksByPositionOverviewForEvent(weekNumber, eventType);
+          if (response.status === 200) {
+            setPositionBreakdown(response.data.data);
+          } else {
+            console.error('Position breakdown response error:', response.data);
+            setPositionBreakdown([]);
+          }
+        } else {
+          // For overall stats with specific event type, fetch data for all weeks
+          // and combine them for the selected event type
+          try {
+            // Get all available weeks to fetch data for each week
+            const weeksResponse = await adminAPI.getAvailableRaces();
+            const availableWeeks = weeksResponse.data.data || [];
+
+            // Fetch data for all weeks for the selected event type
+            const allWeekData = await Promise.all(
+              availableWeeks.map(async (week: { weekNumber: number }) => {
+                try {
+                  const response = await adminAPI.getPicksByPositionOverviewForEvent(week.weekNumber, selectedEventType as 'race' | 'sprint');
+                  return response.data.data || [];
+                } catch (error) {
+                  console.warn(`Failed to fetch data for week ${week.weekNumber}:`, error);
+                  return [];
+                }
+              })
+            );
+
+            // Combine all week data
+            const combinedData = allWeekData.flat();
+
+            // Group by position and sum up the statistics
+            const positionMap = new Map();
+            combinedData.forEach((item: { position: number; totalPicks: number; scoredPicks: number; correctPicks: number }) => {
+              const position = item.position;
+              if (!positionMap.has(position)) {
+                positionMap.set(position, {
+                  position: position,
+                  totalPicks: 0,
+                  scoredPicks: 0,
+                  correctPicks: 0,
+                  accuracy: 0
+                });
+              }
+              const existing = positionMap.get(position);
+              existing.totalPicks += item.totalPicks || 0;
+              existing.scoredPicks += item.scoredPicks || 0;
+              existing.correctPicks += item.correctPicks || 0;
+            });
+
+            // Calculate accuracy for each position
+            const finalData = Array.from(positionMap.values()).map(item => ({
+              ...item,
+              accuracy: item.scoredPicks > 0 ? Math.round((item.correctPicks / item.scoredPicks) * 100) : 0
+            })).sort((a, b) => a.position - b.position);
+
+            setPositionBreakdown(finalData);
+          } catch (error) {
+            console.error('Error loading overall stats for event type:', error);
+            setPositionBreakdown([]);
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading position breakdown:', error);
@@ -92,7 +216,12 @@ export default function AdminOverviewPage() {
 
   const handleWeekChange = (weekNumber: number | null) => {
     setSelectedWeek(weekNumber);
-    loadPositionBreakdownByWeek(weekNumber);
+    loadPositionBreakdownByWeek(weekNumber, selectedEventType);
+  };
+
+  const handleEventTypeChange = (eventType: 'all' | 'race' | 'sprint') => {
+    setSelectedEventType(eventType);
+    loadPositionBreakdownByWeek(selectedWeek, eventType);
   };
 
   const handleRescheduleAllPicks = async () => {
@@ -324,23 +453,6 @@ export default function AdminOverviewPage() {
           </button>
 
           <Link
-            href="/admin/user-picks"
-            className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-teal-300 hover:bg-teal-50 transition-colors"
-          >
-            <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 00-2 2v2h2V7z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-900">User Picks</h3>
-              <p className="text-sm text-gray-500">View and manage individual user picks</p>
-            </div>
-          </Link>
-
-          <Link
             href="/admin/users-without-picks"
             className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors"
           >
@@ -353,7 +465,7 @@ export default function AdminOverviewPage() {
             </div>
             <div className="ml-4">
               <h3 className="text-sm font-medium text-gray-900">Missing Picks</h3>
-              <p className="text-sm text-gray-500">Users who haven't made picks for specific weeks</p>
+              <p className="text-sm text-gray-500">Users who haven&apos;t made picks for specific weeks</p>
             </div>
           </Link>
 
@@ -448,23 +560,40 @@ export default function AdminOverviewPage() {
       <div className="bg-white shadow-lg rounded-lg p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium text-gray-900">Position Breakdown</h2>
-          <div className="flex items-center space-x-3">
-            <label htmlFor="week-selector" className="text-sm font-medium text-gray-700">
-              Filter by week:
-            </label>
-            <select
-              id="week-selector"
-              value={selectedWeek || ''}
-              onChange={(e) => handleWeekChange(e.target.value ? parseInt(e.target.value) : null)}
-              className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            >
-              <option value="">All weeks (overall)</option>
-              {stats?.availableWeeks?.map((week) => (
-                <option key={week.weekNumber} value={week.weekNumber}>
-                  Week {week.weekNumber}: {week.raceName}
-                </option>
-              ))}
-            </select>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <label htmlFor="event-type-selector" className="text-sm font-medium text-gray-700">
+                Event type:
+              </label>
+              <select
+                id="event-type-selector"
+                value={selectedEventType}
+                onChange={(e) => handleEventTypeChange(e.target.value as 'all' | 'race' | 'sprint')}
+                className="block w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option value="all">All Races</option>
+                <option value="race">Grand Prix</option>
+                <option value="sprint">Sprint</option>
+              </select>
+            </div>
+            <div className="flex items-center space-x-3">
+              <label htmlFor="week-selector" className="text-sm font-medium text-gray-700">
+                Filter by week:
+              </label>
+              <select
+                id="week-selector"
+                value={selectedWeek || ''}
+                onChange={(e) => handleWeekChange(e.target.value ? parseInt(e.target.value) : null)}
+                className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option value="">All weeks (overall)</option>
+                {stats?.availableWeeks?.map((week) => (
+                  <option key={week.weekNumber} value={week.weekNumber}>
+                    Week {week.weekNumber}: {week.raceName}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -489,30 +618,41 @@ export default function AdminOverviewPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {positionBreakdown?.map((position) => (
-                <tr key={position.position}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    P{position.position}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {position.totalPicks}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {position.scoredPicks}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {position.correctPicks}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${position.accuracy >= 30 ? 'bg-green-100 text-green-800' :
-                      position.accuracy >= 15 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                      {position.accuracy}%
-                    </span>
+              {positionBreakdown && positionBreakdown.length > 0 ? (
+                positionBreakdown.map((position) => (
+                  <tr key={position.position}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      P{position.position}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {position.totalPicks}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {position.scoredPicks}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {position.correctPicks}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${position.accuracy >= 30 ? 'bg-green-100 text-green-800' :
+                        position.accuracy >= 15 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                        {position.accuracy}%
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">
+                    {selectedEventType !== 'all' && !selectedWeek ?
+                      'Please select a week to view event-specific data' :
+                      'No data available for the selected filters'
+                    }
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
