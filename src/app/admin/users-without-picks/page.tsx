@@ -14,6 +14,7 @@ interface UserWithoutPicks {
         leagueName: string;
         leagueMemberCount: number;
         requiredPositions: string[];
+        missingEventType: 'race' | 'sprint' | 'both';
     }>;
 }
 
@@ -242,8 +243,18 @@ function UsersWithoutPicksPageContent() {
                                                             </p>
                                                         </div>
                                                         <div className="flex-shrink-0">
-                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                                Missing Picks
+                                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${league.missingEventType === 'both'
+                                                                    ? 'bg-red-100 text-red-800'
+                                                                    : league.missingEventType === 'race'
+                                                                        ? 'bg-orange-100 text-orange-800'
+                                                                        : 'bg-blue-100 text-blue-800'
+                                                                }`}>
+                                                                {league.missingEventType === 'both'
+                                                                    ? 'Missing Both'
+                                                                    : league.missingEventType === 'race'
+                                                                        ? 'Missing Race'
+                                                                        : 'Missing Sprint'
+                                                                }
                                                             </span>
                                                         </div>
                                                     </div>
