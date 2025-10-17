@@ -14,7 +14,7 @@ interface UserWithoutPicks {
         leagueName: string;
         leagueMemberCount: number;
         requiredPositions: string[];
-        missingEventType: 'race' | 'sprint' | 'both';
+        missingEventType: 'race' | 'sprint' | 'both' | 'unknown';
     }>;
 }
 
@@ -230,8 +230,8 @@ function UsersWithoutPicksPageContent() {
 
                                         {/* Leagues List */}
                                         <div className="mt-3 space-y-2">
-                                            {user.leagues.map((league) => (
-                                                <div key={league.leagueId} className="bg-gray-50 rounded-lg p-3">
+                                            {user.leagues.map((league, index) => (
+                                                <div key={`${user.userId}-${league.leagueId}-${league.missingEventType}-${index}`} className="bg-gray-50 rounded-lg p-3">
                                                     <div className="flex items-center justify-between">
                                                         <div>
                                                             <h4 className="text-sm font-medium text-gray-900">
@@ -244,16 +244,20 @@ function UsersWithoutPicksPageContent() {
                                                         </div>
                                                         <div className="flex-shrink-0">
                                                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${league.missingEventType === 'both'
-                                                                    ? 'bg-red-100 text-red-800'
-                                                                    : league.missingEventType === 'race'
-                                                                        ? 'bg-orange-100 text-orange-800'
-                                                                        : 'bg-blue-100 text-blue-800'
+                                                                ? 'bg-red-100 text-red-800'
+                                                                : league.missingEventType === 'race'
+                                                                    ? 'bg-orange-100 text-orange-800'
+                                                                    : league.missingEventType === 'sprint'
+                                                                        ? 'bg-blue-100 text-blue-800'
+                                                                        : 'bg-gray-100 text-gray-800'
                                                                 }`}>
                                                                 {league.missingEventType === 'both'
                                                                     ? 'Missing Both'
                                                                     : league.missingEventType === 'race'
                                                                         ? 'Missing Race'
-                                                                        : 'Missing Sprint'
+                                                                        : league.missingEventType === 'sprint'
+                                                                            ? 'Missing Sprint'
+                                                                            : 'Missing Picks'
                                                                 }
                                                             </span>
                                                         </div>
