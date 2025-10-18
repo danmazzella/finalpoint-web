@@ -56,7 +56,7 @@ export default function PositionResultsPage() {
 
     // Update URL when selectedEventType changes
     useEffect(() => {
-        if (selectedEventType && selectedEventType !== 'null') {
+        if (selectedEventType) {
             const url = new URL(window.location.href);
             url.searchParams.set('eventType', selectedEventType);
             window.history.replaceState({}, '', url.toString());
@@ -77,7 +77,7 @@ export default function PositionResultsPage() {
     }, [selectedEventType, eventTypeInitialized]);
 
     const loadResults = async () => {
-        if (!selectedEventType || selectedEventType === 'null') {
+        if (!selectedEventType) {
             return;
         }
 
@@ -137,7 +137,7 @@ export default function PositionResultsPage() {
         // Preserve the eventType parameter when navigating
         const eventTypeParam = searchParams.get('eventType');
         // Use selectedEventType as fallback if URL param is null
-        const eventTypeToUse = eventTypeParam && eventTypeParam !== 'null' ? eventTypeParam : selectedEventType;
+        const eventTypeToUse = eventTypeParam || selectedEventType;
         const eventTypeQuery = eventTypeToUse ? `?eventType=${eventTypeToUse}` : '';
 
         // Use replace instead of push to avoid building up navigation stack
