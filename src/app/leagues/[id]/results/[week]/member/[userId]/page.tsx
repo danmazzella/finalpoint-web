@@ -58,7 +58,7 @@ export default function MemberPicksPage() {
   // Update URL when selectedEventType changes (but avoid infinite loops)
   useEffect(() => {
     // Don't update URL if selectedEventType is null or invalid
-    if (!selectedEventType || selectedEventType === 'null') {
+    if (!selectedEventType) {
       return;
     }
 
@@ -79,7 +79,7 @@ export default function MemberPicksPage() {
   }, [selectedEventType]);
 
   const loadMemberPicks = useCallback(async () => {
-    if (!selectedEventType || selectedEventType === 'null') {
+    if (!selectedEventType) {
       return;
     }
 
@@ -108,7 +108,7 @@ export default function MemberPicksPage() {
   }, [leagueId, weekNumber, userId, selectedEventType]);
 
   const loadLeagueMembers = useCallback(async () => {
-    if (!selectedEventType || selectedEventType === 'null') {
+    if (!selectedEventType) {
       return;
     }
 
@@ -159,7 +159,7 @@ export default function MemberPicksPage() {
     }
 
     // Preserve the current event type, but handle null values
-    const eventTypeToUse = selectedEventType && selectedEventType !== 'null' ? selectedEventType : 'race';
+    const eventTypeToUse = selectedEventType || 'race';
     params.set('eventType', eventTypeToUse);
 
     const finalUrl = `${url}?${params.toString()}`;
