@@ -19,7 +19,9 @@ export default function PositionResultsPage() {
     const [availablePositions, setAvailablePositions] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
+    const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint' | null>(null);
+    const [eventTypeInitialized, setEventTypeInitialized] = useState(false);
+
     const [currentRace, setCurrentRace] = useState<any>(null);
 
     const leagueId = params.id as string;
@@ -31,30 +33,54 @@ export default function PositionResultsPage() {
         const eventTypeParam = searchParams.get('eventType');
         if (eventTypeParam === 'sprint' || eventTypeParam === 'race') {
             setSelectedEventType(eventTypeParam);
+            setEventTypeInitialized(true);
+        } else if (eventTypeParam === 'null' || eventTypeParam === null) {
+            // Handle null eventType - don't change selectedEventType if it's already set
+            if (selectedEventType) {
+                setEventTypeInitialized(true);
+            }
+        } else {
+            // No eventType in URL, will be set by the race data useEffect
+            setEventTypeInitialized(true);
         }
-    }, [searchParams]);
+    }, [searchParams, selectedEventType]);
 
     // Set default event type based on whether the race has a sprint
     useEffect(() => {
         if (currentRace?.hasSprint && !searchParams.get('eventType')) {
             setSelectedEventType('sprint');
+        } else if (currentRace && !searchParams.get('eventType')) {
+            setSelectedEventType('race');
         }
     }, [currentRace, searchParams]);
 
     // Update URL when selectedEventType changes
     useEffect(() => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('eventType', selectedEventType);
-        window.history.replaceState({}, '', url.toString());
+        if (selectedEventType && selectedEventType !== 'null') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('eventType', selectedEventType);
+            window.history.replaceState({}, '', url.toString());
+        }
     }, [selectedEventType]);
 
+    // Load race data and positions on mount
     useEffect(() => {
-        loadResults();
         loadAvailablePositions();
         loadCurrentRace();
-    }, [leagueId, weekNumber, position, selectedEventType]);
+    }, [leagueId, weekNumber, position]);
+
+    // Load results only when eventType is determined
+    useEffect(() => {
+        if (eventTypeInitialized && selectedEventType) {
+            loadResults();
+        }
+    }, [selectedEventType, eventTypeInitialized]);
 
     const loadResults = async () => {
+        if (!selectedEventType || selectedEventType === 'null') {
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -108,8 +134,14 @@ export default function PositionResultsPage() {
     };
 
     const navigateToPosition = (newPosition: number) => {
+        // Preserve the eventType parameter when navigating
+        const eventTypeParam = searchParams.get('eventType');
+        // Use selectedEventType as fallback if URL param is null
+        const eventTypeToUse = eventTypeParam && eventTypeParam !== 'null' ? eventTypeParam : selectedEventType;
+        const eventTypeQuery = eventTypeToUse ? `?eventType=${eventTypeToUse}` : '';
+
         // Use replace instead of push to avoid building up navigation stack
-        router.replace(`/leagues/${leagueId}/results/${weekNumber}/position/${newPosition}`);
+        router.replace(`/leagues/${leagueId}/results/${weekNumber}/position/${newPosition}${eventTypeQuery}`);
     };
 
     const getCurrentPositionIndex = () => {

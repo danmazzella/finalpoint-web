@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { picksAPI, f1racesAPI, leaguesAPI, RaceResultV2 } from '@/lib/api';
@@ -31,6 +31,7 @@ interface League {
 export default function RaceResultsPage() {
     const params = useParams();
     const router = useRouter();
+    const pathname = usePathname();
     const { user } = useAuth();
     const { showToast } = useToast();
 
@@ -115,9 +116,16 @@ export default function RaceResultsPage() {
     };
 
     useEffect(() => {
+        // Check if we're on a position or member page
+        const isPositionPage = pathname.includes('/position/');
+        const isMemberPage = pathname.includes('/member/');
+        if (isPositionPage || isMemberPage) {
+            return;
+        }
+
         // Load required positions for both authenticated and unauthenticated users
         loadRequiredPositions();
-    }, [leagueId, selectedWeek]);
+    }, [leagueId, selectedWeek, pathname]);
 
     const handleWeekChange = (week: number) => {
         setSelectedWeek(week);
@@ -126,15 +134,29 @@ export default function RaceResultsPage() {
         router.push(`/leagues/${leagueId}/results/${week}`);
     };
 
-    // Load data when dependencies change
+    // Load data when dependencies change (but not when on position or member pages)
     useEffect(() => {
+        // Check if we're on a position or member page
+        const isPositionPage = pathname.includes('/position/');
+        const isMemberPage = pathname.includes('/member/');
+        if (isPositionPage || isMemberPage) {
+            return;
+        }
+
         loadLeague();
         loadRaces();
         loadRaceResults();
-    }, [leagueId, selectedWeek, selectedEventType]);
+    }, [leagueId, selectedWeek, selectedEventType, pathname]);
 
     // Set default event type based on whether it's a sprint weekend (only once when races are first loaded)
     useEffect(() => {
+        // Check if we're on a position or member page
+        const isPositionPage = pathname.includes('/position/');
+        const isMemberPage = pathname.includes('/member/');
+        if (isPositionPage || isMemberPage) {
+            return;
+        }
+
         if (races.length > 0 && !defaultEventTypeSet) {
             const currentRace = races.find(race => race.weekNumber === selectedWeek);
             if (currentRace?.hasSprint) {
@@ -144,7 +166,7 @@ export default function RaceResultsPage() {
             }
             setDefaultEventTypeSet(true);
         }
-    }, [races, selectedWeek, defaultEventTypeSet]);
+    }, [races, selectedWeek, defaultEventTypeSet, pathname]);
 
     // Auto-scroll to selected week when dropdown opens
     useEffect(() => {

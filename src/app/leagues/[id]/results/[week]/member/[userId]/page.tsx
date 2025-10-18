@@ -23,7 +23,8 @@ export default function MemberPicksPage() {
   const [leagueMembers, setLeagueMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
+  const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint' | null>(null);
+  const [eventTypeInitialized, setEventTypeInitialized] = useState(false);
   const [currentRace, setCurrentRace] = useState<any>(null);
 
   const leagueId = params.id as string;
@@ -35,11 +36,32 @@ export default function MemberPicksPage() {
     const eventTypeParam = searchParams.get('eventType');
     if (eventTypeParam === 'sprint' || eventTypeParam === 'race') {
       setSelectedEventType(eventTypeParam);
+      setEventTypeInitialized(true);
+    } else if (eventTypeParam === 'null' || eventTypeParam === null) {
+      // Handle null eventType - don't change selectedEventType if it's already set
+      setEventTypeInitialized(true);
+    } else {
+      // No eventType in URL, will be set by the race data useEffect
+      setEventTypeInitialized(true);
     }
-  }, [searchParams]);
+  }, [searchParams, selectedEventType]);
+
+  // Set default event type based on whether the race has a sprint
+  useEffect(() => {
+    if (currentRace?.hasSprint && !searchParams.get('eventType')) {
+      setSelectedEventType('sprint');
+    } else if (currentRace && !searchParams.get('eventType')) {
+      setSelectedEventType('race');
+    }
+  }, [currentRace, searchParams]);
 
   // Update URL when selectedEventType changes (but avoid infinite loops)
   useEffect(() => {
+    // Don't update URL if selectedEventType is null or invalid
+    if (!selectedEventType || selectedEventType === 'null') {
+      return;
+    }
+
     // Use a timeout to debounce the URL updates
     const timeoutId = setTimeout(() => {
       const currentUrl = new URL(window.location.href);
@@ -57,6 +79,10 @@ export default function MemberPicksPage() {
   }, [selectedEventType]);
 
   const loadMemberPicks = useCallback(async () => {
+    if (!selectedEventType || selectedEventType === 'null') {
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -82,9 +108,13 @@ export default function MemberPicksPage() {
   }, [leagueId, weekNumber, userId, selectedEventType]);
 
   const loadLeagueMembers = useCallback(async () => {
+    if (!selectedEventType || selectedEventType === 'null') {
+      return;
+    }
+
     try {
       // Get members from race results to maintain the same order as shown on results page
-      const response = await picksAPI.getRaceResultsV2(parseInt(leagueId), parseInt(weekNumber));
+      const response = await picksAPI.getRaceResultsV2(parseInt(leagueId), parseInt(weekNumber), selectedEventType);
       if (response.data.success) {
         // Convert results to member format and maintain the results ordering
         const membersFromResults = response.data.data.results.map((result: { userId: number; userName: string; userAvatar?: string }) => ({
@@ -106,7 +136,7 @@ export default function MemberPicksPage() {
         console.error('Error loading league members fallback:', fallbackError);
       }
     }
-  }, [leagueId, weekNumber]);
+  }, [leagueId, weekNumber, selectedEventType]);
 
   const loadCurrentRace = async () => {
     try {
@@ -128,8 +158,9 @@ export default function MemberPicksPage() {
       params.set('memberIndex', memberIndex.toString());
     }
 
-    // Preserve the current event type
-    params.set('eventType', selectedEventType);
+    // Preserve the current event type, but handle null values
+    const eventTypeToUse = selectedEventType && selectedEventType !== 'null' ? selectedEventType : 'race';
+    params.set('eventType', eventTypeToUse);
 
     const finalUrl = `${url}?${params.toString()}`;
     // Use replace instead of push to avoid building up navigation stack
@@ -183,11 +214,18 @@ export default function MemberPicksPage() {
     }
   };
 
+  // Load race data on mount
   useEffect(() => {
-    loadMemberPicks();
-    loadLeagueMembers();
     loadCurrentRace();
-  }, [loadMemberPicks, loadLeagueMembers, selectedEventType]);
+  }, [leagueId, weekNumber]);
+
+  // Load member data only when eventType is determined
+  useEffect(() => {
+    if (eventTypeInitialized && selectedEventType) {
+      loadMemberPicks();
+      loadLeagueMembers();
+    }
+  }, [selectedEventType, eventTypeInitialized, loadMemberPicks, loadLeagueMembers]);
 
   const getPositionLabel = (position: number) => {
     const labels: { [key: number]: string } = {
