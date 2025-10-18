@@ -38,11 +38,17 @@ export default function MemberPicksPage() {
         }
     }, [searchParams]);
 
-    // Update URL when selectedEventType changes
+    // Update URL when selectedEventType changes (but avoid infinite loops)
     useEffect(() => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('eventType', selectedEventType);
-        window.history.replaceState({}, '', url.toString());
+        const currentUrl = new URL(window.location.href);
+        const currentEventType = currentUrl.searchParams.get('eventType') || 'race';
+        
+        // Only update URL if the eventType has actually changed
+        if (currentEventType !== selectedEventType) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('eventType', selectedEventType);
+            window.history.replaceState({}, '', url.toString());
+        }
     }, [selectedEventType]);
 
     const loadMemberPicks = useCallback(async () => {
