@@ -253,7 +253,8 @@ export default function RaceResultsEntryPage() {
 
     // Check if form is ready to submit
     const isFormValid = (): boolean => {
-        const hasAllDrivers = results.every(result => result.driverId > 0);
+        const currentResults = selectedEventType === 'race' ? results : sprintResults;
+        const hasAllDrivers = currentResults.every(result => result.driverId > 0);
         const hasValidationErrors = Object.values(validationErrors).some(error => error.length > 0);
         return hasAllDrivers && !hasValidationErrors;
     };
