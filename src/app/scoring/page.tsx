@@ -131,26 +131,56 @@ export default function ScoringPage() {
                             </div>
 
                             <h3 className="text-xl font-semibold text-gray-800 mb-3">Scoring Logic</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                                <p className="text-gray-700 mb-2">For each position you predict:</p>
-                                <ul className="list-disc pl-6 text-sm text-gray-700">
-                                    <li>If positionDifference = 0 → 10 points (perfect)</li>
-                                    <li>If positionDifference = 1 → 7 points</li>
-                                    <li>If positionDifference = 2 → 5 points</li>
-                                    <li>If positionDifference = 3 → 3 points</li>
-                                    <li>If positionDifference = 4 → 2 points</li>
-                                    <li>If positionDifference = 5 → 1 point</li>
-                                    <li>If positionDifference &gt; 5 → 0 points</li>
-                                </ul>
+
+                            <div className="space-y-6">
+                                {/* Grand Prix Race Scoring */}
+                                <div className="bg-blue-50 p-4 rounded-lg">
+                                    <h4 className="text-lg font-semibold text-blue-900 mb-3">🏁 Grand Prix Race Scoring</h4>
+                                    <p className="text-blue-800 mb-2">For each position you predict in a Grand Prix race:</p>
+                                    <ul className="list-disc pl-6 text-sm text-blue-700">
+                                        <li>If positionDifference = 0 → 10 points (perfect)</li>
+                                        <li>If positionDifference = 1 → 7 points</li>
+                                        <li>If positionDifference = 2 → 5 points</li>
+                                        <li>If positionDifference = 3 → 3 points</li>
+                                        <li>If positionDifference = 4 → 2 points</li>
+                                        <li>If positionDifference = 5 → 1 point</li>
+                                        <li>If positionDifference &gt; 5 → 0 points</li>
+                                    </ul>
+                                </div>
+
+                                {/* Sprint Race Scoring */}
+                                <div className="bg-orange-50 p-4 rounded-lg">
+                                    <h4 className="text-lg font-semibold text-orange-900 mb-3">🏃 Sprint Race Scoring</h4>
+                                    <p className="text-orange-800 mb-2">For each position you predict in a Sprint race (reduced points):</p>
+                                    <ul className="list-disc pl-6 text-sm text-orange-700">
+                                        <li>If positionDifference = 0 → 5 points (perfect)</li>
+                                        <li>If positionDifference = 1 → 3 points</li>
+                                        <li>If positionDifference = 2 → 1 point</li>
+                                        <li>If positionDifference &gt; 2 → 0 points</li>
+                                    </ul>
+                                </div>
                             </div>
 
-                            <h3 className="text-xl font-semibold text-gray-800 mb-3">Total Score Calculation</h3>
-                            <p className="text-gray-700 mb-4">
-                                Your total score for a race is the sum of points earned for each position you predicted.
-                                If you predict 2 positions, you can earn up to 20 points per race.
-                            </p>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-3 mt-8">Total Score Calculation</h3>
+                            <div className="space-y-4">
+                                <p className="text-gray-700">
+                                    Your total score for a race is the sum of points earned for each position you predicted.
+                                </p>
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <p className="text-gray-700 mb-2"><strong>Grand Prix Races:</strong></p>
+                                    <p className="text-sm text-gray-600">
+                                        If you predict 2 positions, you can earn up to 20 points per race (10 points per position).
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <p className="text-gray-700 mb-2"><strong>Sprint Races:</strong></p>
+                                    <p className="text-sm text-gray-600">
+                                        If you predict 2 positions, you can earn up to 10 points per race (5 points per position).
+                                    </p>
+                                </div>
+                            </div>
 
-                            <h3 className="text-xl font-semibold text-gray-800 mb-3">Race Results</h3>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-3 mt-8">Race Results</h3>
                             <p className="text-gray-700 mb-4">
                                 Points are only calculated after official race results are entered into the system.
                                 If a driver doesn't finish the race or isn't in the race, they receive 0 points.

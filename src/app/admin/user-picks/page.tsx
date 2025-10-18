@@ -83,6 +83,14 @@ export default function AdminUserPicksPage() {
         }
     }, [races, selectedWeek]);
 
+    // Update form position when league is selected to use first available position
+    useEffect(() => {
+        if (selectedLeague && selectedLeague.requiredPositions && selectedLeague.requiredPositions.length > 0) {
+            const firstPosition = selectedLeague.requiredPositions[0];
+            setPickForm(prev => ({ ...prev, position: firstPosition }));
+        }
+    }, [selectedLeague]);
+
     const loadInitialData = async () => {
         try {
             setLoading(true);
@@ -217,6 +225,12 @@ export default function AdminUserPicksPage() {
             return;
         }
 
+        // Validate that the selected position is valid for this league
+        if (!selectedLeague.requiredPositions || !selectedLeague.requiredPositions.includes(pickForm.position)) {
+            setMessage({ type: 'error', text: `Position P${pickForm.position} is not valid for this league. Valid positions: ${selectedLeague.requiredPositions?.map(p => `P${p}`).join(', ') || 'None'}` });
+            return;
+        }
+
         try {
             const response = await adminAPI.createUserPick(
                 selectedUser.id,
@@ -229,7 +243,9 @@ export default function AdminUserPicksPage() {
 
             if (response.status === 200) {
                 setMessage({ type: 'success', text: 'Pick created successfully' });
-                setPickForm({ position: 1, driverId: 0, weekNumber: pickForm.weekNumber, eventType: pickForm.eventType });
+                // Reset form with first available position from selected league
+                const firstPosition = selectedLeague?.requiredPositions?.[0] || 1;
+                setPickForm({ position: firstPosition, driverId: 0, weekNumber: pickForm.weekNumber, eventType: pickForm.eventType });
                 // Update selectedEventType to match the pickForm.eventType used for creation
                 setSelectedEventType(pickForm.eventType);
                 loadUserPicks();
