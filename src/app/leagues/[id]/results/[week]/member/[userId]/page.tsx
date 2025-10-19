@@ -300,7 +300,7 @@ export default function MemberPicksPage() {
       <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <PageTitle
           title="Member Picks"
-          subtitle={`Week ${memberPicks.weekNumber} • ${memberPicks.totalPicks} positions`}
+          subtitle={`Week ${memberPicks.weekNumber} • ${selectedEventType === 'sprint' ? 'Sprint Results' : 'Race Results'} • ${memberPicks.totalPicks} positions`}
         >
           <Link
             href={`/leagues/${leagueId}/results/${weekNumber}`}
@@ -513,7 +513,7 @@ export default function MemberPicksPage() {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">
-              All Picks for Week {memberPicks.weekNumber}
+              All Picks for Week {memberPicks.weekNumber} - {selectedEventType === 'sprint' ? 'Sprint Results' : 'Race Results'}
             </h3>
             <p className="text-sm text-gray-600">
               {memberPicks.correctPicks} correct • {memberPicks.totalPoints} total points
@@ -529,7 +529,7 @@ export default function MemberPicksPage() {
                 </svg>
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No Picks Made</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  {memberPicks.userName} hasn&apos;t made any picks for Week {memberPicks.weekNumber} yet.
+                  {memberPicks.userName} hasn&apos;t made any picks for Week {memberPicks.weekNumber} {selectedEventType === 'sprint' ? 'Sprint' : 'Race'} yet.
                 </p>
               </div>
             ) : (
@@ -604,7 +604,7 @@ export default function MemberPicksPage() {
                 </svg>
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No Picks Made</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  {memberPicks.userName} hasn&apos;t made any picks for Week {memberPicks.weekNumber} yet.
+                  {memberPicks.userName} hasn&apos;t made any picks for Week {memberPicks.weekNumber} {selectedEventType === 'sprint' ? 'Sprint' : 'Race'} yet.
                 </p>
               </div>
             ) : (

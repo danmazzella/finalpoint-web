@@ -243,7 +243,7 @@ export default function PositionResultsPage() {
             <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
                     title="Picks By Position"
-                    subtitle={`Week ${results.weekNumber} • ${results.totalParticipants} participants`}
+                    subtitle={`Week ${results.weekNumber} • ${selectedEventType === 'sprint' ? 'Sprint Results' : 'Race Results'} • ${results.totalParticipants} participants`}
                 >
                     <Link
                         href={`/leagues/${leagueId}/results/${weekNumber}`}
@@ -418,7 +418,7 @@ export default function PositionResultsPage() {
                 <div className="space-y-6">
                     <div className="bg-white shadow-lg rounded-lg p-6">
                         <h3 className="text-lg font-medium text-gray-900 mb-4">
-                            All Picks for {getPositionLabel(results.position)}
+                            All Picks for {getPositionLabel(results.position)} - {selectedEventType === 'sprint' ? 'Sprint Results' : 'Race Results'}
                         </h3>
                         <p className="text-sm text-gray-600 mb-6">
                             {results.totalParticipants} participants • {results.correctPicks} correct predictions
