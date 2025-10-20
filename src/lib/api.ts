@@ -193,6 +193,7 @@ export const adminAPI = {
   getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
   getRacesWithResultStatus: () => apiService.get('/admin/races-with-result-status'),
   getExistingRaceResults: (weekNumber: number) => apiService.get(`/admin/existing-race-results/${weekNumber}`),
+  getExistingSprintResults: (weekNumber: number) => apiService.get(`/admin/existing-sprint-results/${weekNumber}`),
   getLeaguePicksOverview: (weekNumber: number) => apiService.get(`/admin/league-picks-overview?weekNumber=${weekNumber}`),
   getLeaguePicksOverviewForEvent: (weekNumber: number, eventType: 'race' | 'sprint') => apiService.get(`/admin/league-picks-overview/event?weekNumber=${weekNumber}&eventType=${eventType}`),
   getPicksByPositionOverview: (weekNumber: number) => apiService.get(`/admin/picks-by-position-overview?weekNumber=${weekNumber}`),

@@ -95,16 +95,6 @@ export default function RaceResultsEntryPage() {
         setResults(initialResults);
     }, []);
 
-    useEffect(() => {
-        // Initialize sprint results array with 20 positions when switching to sprint
-        if (selectedEventType === 'sprint') {
-            const initialSprintResults: RaceResult[] = Array.from({ length: 20 }, (_, i) => ({
-                driverId: 0,
-                finishingPosition: i + 1
-            }));
-            setSprintResults(initialSprintResults);
-        }
-    }, [selectedEventType]);
 
     const loadInitialData = useCallback(async () => {
         try {
@@ -142,26 +132,45 @@ export default function RaceResultsEntryPage() {
         }
     }, [searchParams]);
 
-    const loadExistingResults = async (weekNumber: number) => {
+    const loadExistingResults = async (weekNumber: number, eventType: 'race' | 'sprint') => {
         try {
             setLoading(true);
-            const response = await adminAPI.getExistingRaceResults(weekNumber);
+            const response = eventType === 'race'
+                ? await adminAPI.getExistingRaceResults(weekNumber)
+                : await adminAPI.getExistingSprintResults(weekNumber);
 
-            if (response.status === 200 && response.data.data) {
-                const existingResults = response.data.data;
-                const newResults = Array.from({ length: 20 }, (_, i) => {
-                    const existing = existingResults.find((r: RaceResult) => r.finishingPosition === i + 1);
-                    return {
-                        driverId: existing?.driverId || 0,
-                        finishingPosition: i + 1
-                    };
-                });
+            // Always create results array, even if no existing results
+            const existingResults = response.status === 200 && response.data.data ? response.data.data : [];
+            const newResults = Array.from({ length: 20 }, (_, i) => {
+                const existing = existingResults.find((r: RaceResult) => r.finishingPosition === i + 1);
+                return {
+                    driverId: existing?.driverId || 0,
+                    finishingPosition: i + 1
+                };
+            });
+
+            if (eventType === 'race') {
                 setResults(newResults);
-                setOriginalResults([...newResults]); // Store the original results
+                setOriginalResults([...newResults]);
+            } else {
+                setSprintResults(newResults);
             }
         } catch (error) {
             logger.forceError('Error loading existing results:', error);
-            setError('Failed to load existing race results');
+            setError(`Failed to load existing ${eventType} results`);
+
+            // Set empty results even on error
+            const emptyResults = Array.from({ length: 20 }, (_, i) => ({
+                driverId: 0,
+                finishingPosition: i + 1
+            }));
+
+            if (eventType === 'race') {
+                setResults(emptyResults);
+                setOriginalResults([...emptyResults]);
+            } else {
+                setSprintResults(emptyResults);
+            }
         } finally {
             setLoading(false);
         }
@@ -176,17 +185,40 @@ export default function RaceResultsEntryPage() {
         window.history.replaceState({}, '', url.toString());
 
         const race = allRaces.find(r => r.weekNumber === weekNumber);
-        setIsRescoring(race?.hasResults || false);
 
-        if (race?.hasResults) {
-            await loadExistingResults(weekNumber);
+        // Load existing results first to determine if rescoring is needed
+        await loadExistingResults(weekNumber, 'race');
+
+        let hasRaceResults = false;
+        let hasSprintResults = false;
+
+        // Check if race results exist
+        try {
+            const raceResponse = await adminAPI.getExistingRaceResults(weekNumber);
+            hasRaceResults = raceResponse.status === 200 && raceResponse.data.data && raceResponse.data.data.length > 0;
+        } catch (error) {
+            hasRaceResults = false;
+        }
+
+        // Check if sprint results exist (if race has sprint)
+        if (race?.hasSprint) {
+            await loadExistingResults(weekNumber, 'sprint');
+            try {
+                const sprintResponse = await adminAPI.getExistingSprintResults(weekNumber);
+                hasSprintResults = sprintResponse.status === 200 && sprintResponse.data.data && sprintResponse.data.data.length > 0;
+            } catch (error) {
+                hasSprintResults = false;
+            }
         } else {
-            // Reset to empty form for new results
-            setResults(Array.from({ length: 20 }, (_, i) => ({
+            // Reset sprint results if no sprint
+            setSprintResults(Array.from({ length: 20 }, (_, i) => ({
                 driverId: 0,
                 finishingPosition: i + 1
             })));
         }
+
+        // Set rescoring mode based on whether any results exist
+        setIsRescoring(hasRaceResults || hasSprintResults);
     };
 
     const handleRescoringModeChange = (mode: 'all' | 'specific') => {
@@ -195,6 +227,25 @@ export default function RaceResultsEntryPage() {
         // If switching to specific league mode and we have original results, reset to original
         if (mode === 'specific' && originalResults.length > 0) {
             setResults([...originalResults]);
+        }
+    };
+
+    const handleEventTypeChange = async (eventType: 'race' | 'sprint') => {
+        setSelectedEventType(eventType);
+
+        // Always try to load existing results for the selected event type
+        await loadExistingResults(selectedWeek, eventType);
+
+        // Check if results exist for the selected event type to determine rescoring mode
+        try {
+            const response = eventType === 'race'
+                ? await adminAPI.getExistingRaceResults(selectedWeek)
+                : await adminAPI.getExistingSprintResults(selectedWeek);
+
+            const hasResults = response.status === 200 && response.data.data && response.data.data.length > 0;
+            setIsRescoring(hasResults);
+        } catch (error) {
+            setIsRescoring(false);
         }
     };
 
@@ -428,7 +479,7 @@ export default function RaceResultsEntryPage() {
                                         </label>
                                         <div className="flex bg-gray-100 rounded-lg p-1">
                                             <button
-                                                onClick={() => setSelectedEventType('sprint')}
+                                                onClick={() => handleEventTypeChange('sprint')}
                                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'sprint'
                                                     ? 'bg-white text-blue-600 shadow-sm'
                                                     : 'text-gray-600 hover:text-gray-900'
@@ -437,7 +488,7 @@ export default function RaceResultsEntryPage() {
                                                 Sprint Results
                                             </button>
                                             <button
-                                                onClick={() => setSelectedEventType('race')}
+                                                onClick={() => handleEventTypeChange('race')}
                                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${selectedEventType === 'race'
                                                     ? 'bg-white text-blue-600 shadow-sm'
                                                     : 'text-gray-600 hover:text-gray-900'
