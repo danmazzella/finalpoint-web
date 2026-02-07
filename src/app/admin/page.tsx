@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, seasonsAPI } from '@/lib/api';
 import Link from 'next/link';
 
 interface AdminStats {
@@ -52,16 +52,30 @@ export default function AdminOverviewPage() {
     correctPicks: number;
     accuracy: number;
   }> | null>(null);
+  const [seasons, setSeasons] = useState<{ year: number; displayLabel: string }[]>([]);
+  const [adminSeason, setAdminSeason] = useState<number | null>(null);
 
   useEffect(() => {
-    loadAdminData();
+    const load = async () => {
+      try {
+        const res = await seasonsAPI.getSeasons();
+        if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+          setSeasons(res.data.data);
+          setAdminSeason((prev) => (prev === null ? res.data.data[0].year : prev));
+        }
+      } catch {
+        // ignore
+      }
+    };
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount to load seasons
   }, []);
 
   const loadAdminData = async () => {
     try {
       setLoading(true);
 
-      const statsResponse = await adminAPI.getAdminDashboardStats();
+      const statsResponse = await adminAPI.getAdminDashboardStats(adminSeason ?? undefined);
 
       if (statsResponse.status === 200) {
         const statsData = statsResponse.data;
@@ -76,6 +90,11 @@ export default function AdminOverviewPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadAdminData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when adminSeason changes
+  }, [adminSeason]);
 
   const loadPositionBreakdownByWeek = async (weekNumber: number | null, eventType: 'all' | 'race' | 'sprint' = 'all') => {
     try {
@@ -135,8 +154,7 @@ export default function AdminOverviewPage() {
             console.error('Error loading combined position breakdown:', raceResponse.data, sprintResponse.data);
           }
         } else {
-          // For overall stats, use the regular API
-          const response = await adminAPI.getPositionBreakdownByWeek(weekNumber);
+          const response = await adminAPI.getPositionBreakdownByWeek(weekNumber, adminSeason ?? undefined);
           if (response.status === 200) {
             setPositionBreakdown(response.data.data);
           } else {
@@ -287,6 +305,22 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="space-y-6">
+      {/* Season filter */}
+      {seasons.length > 0 && (
+        <div className="bg-white shadow rounded-lg p-4 flex flex-wrap items-center gap-4">
+          <span className="text-sm font-medium text-gray-700">Season:</span>
+          <select
+            value={adminSeason ?? ''}
+            onChange={(e) => setAdminSeason(e.target.value ? Number(e.target.value) : null)}
+            className="rounded-md border border-gray-300 text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+          >
+            {seasons.map((s) => (
+              <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Admin Tools Navigation */}
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Admin Tools</h2>

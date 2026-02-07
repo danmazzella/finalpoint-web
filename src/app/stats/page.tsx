@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PageTitle from '@/components/PageTitle';
-import { statsAPI } from '@/lib/api';
+import { statsAPI, seasonsAPI } from '@/lib/api';
 
 interface DriverPositionStats {
     driverId: number;
@@ -21,8 +21,23 @@ function StatsPageContent() {
     const [selectedPosition, setSelectedPosition] = useState<number>(1);
     const [driverStats, setDriverStats] = useState<DriverPositionStats[]>([]);
     const [loading, setLoading] = useState(false);
+    const [seasons, setSeasons] = useState<{ year: number; displayLabel: string }[]>([]);
+    const [seasonFilter, setSeasonFilter] = useState<number | 'all'>('all');
 
-    // Initialize position from query params
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await seasonsAPI.getSeasons();
+                if (res.data?.success && Array.isArray(res.data.data)) {
+                    setSeasons(res.data.data);
+                }
+            } catch {
+                // ignore
+            }
+        };
+        load();
+    }, []);
+
     useEffect(() => {
         const positionParam = searchParams.get('position');
         if (positionParam) {
@@ -39,12 +54,12 @@ function StatsPageContent() {
 
     useEffect(() => {
         loadDriverStats(selectedPosition);
-    }, [selectedPosition]);
+    }, [selectedPosition, seasonFilter]);
 
     const loadDriverStats = async (position: number) => {
         try {
             setLoading(true);
-            const response = await statsAPI.getDriverPositionStats(position);
+            const response = await statsAPI.getDriverPositionStats(position, seasonFilter === 'all' ? undefined : seasonFilter);
 
             if (response.status === 200) {
                 setDriverStats(response.data.data.drivers);
@@ -85,9 +100,23 @@ function StatsPageContent() {
                 </PageTitle>
                 {/* Position Selector */}
                 <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-                    <h2 className="text-lg font-medium text-gray-900 mb-3 sm:mb-4">Driver Finishing Positions</h2>
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-3 sm:mb-4">
+                        <h2 className="text-lg font-medium text-gray-900">Driver Finishing Positions</h2>
+                        {seasons.length > 0 && (
+                            <select
+                                value={seasonFilter}
+                                onChange={(e) => setSeasonFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                                className="rounded-md border border-gray-300 text-sm text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="all">All-Time</option>
+                                {seasons.map((s) => (
+                                    <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
                     <p className="text-sm text-gray-600 mb-4 sm:mb-6">
-                        Select a position to see how many times each driver has finished in that position this season.
+                        Select a position to see how many times each driver has finished in that position.
                     </p>
 
                     <div className="grid grid-cols-5 sm:flex sm:flex-wrap gap-1 sm:gap-2">

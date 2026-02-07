@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { leaguesAPI, authAPI, League, chatAPI } from '@/lib/api';
+import { leaguesAPI, authAPI, League, chatAPI, seasonsAPI } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
 import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
@@ -58,18 +58,38 @@ export default function DashboardPage() {
   });
   const [unreadCounts, setUnreadCounts] = useState<{ [leagueId: number]: number }>({});
   const [loading, setLoading] = useState(true);
+  const [seasons, setSeasons] = useState<{ year: number; displayLabel: string; isEnded: boolean }[]>([]);
+  const [leagueSeasonFilter, setLeagueSeasonFilter] = useState<number | 'all'>(() => 'all');
+  const [userStatsSeason, setUserStatsSeason] = useState<number | 'all'>(() => 'all');
+  const [globalStatsSeason, setGlobalStatsSeason] = useState<number | 'all'>(() => 'all');
+
+  useEffect(() => {
+    const loadSeasons = async () => {
+      try {
+        const res = await seasonsAPI.getSeasons();
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setSeasons(res.data.data);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    loadSeasons();
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
 
+        const userSeason = userStatsSeason === 'all' ? undefined : userStatsSeason;
+        const globalSeason = globalStatsSeason === 'all' ? undefined : globalStatsSeason;
+
         if (user) {
-          // Authenticated user - load user-specific data and global stats
           const [leaguesResponse, statsResponse, globalStatsResponse, unreadCountsResponse] = await Promise.all([
             leaguesAPI.getLeagues(),
-            authAPI.getUserStats(),
-            authAPI.getGlobalStats(), // Now works for both authenticated and unauthenticated users
+            authAPI.getUserStats(userSeason),
+            authAPI.getGlobalStats(globalSeason),
             chatAPI.getAllUnreadCounts()
           ]);
 
@@ -93,10 +113,9 @@ export default function DashboardPage() {
             setUnreadCounts(counts);
           }
         } else {
-          // Unauthenticated user - load public data
           const [leaguesResponse, globalStatsResponse] = await Promise.all([
-            leaguesAPI.getLeagues(), // Now returns public leagues for unauthenticated users
-            authAPI.getGlobalStats() // Now returns basic stats for unauthenticated users
+            leaguesAPI.getLeagues(),
+            authAPI.getGlobalStats(globalSeason)
           ]);
 
           if (leaguesResponse.data.success) {
@@ -134,7 +153,7 @@ export default function DashboardPage() {
     if (!authLoading) {
       loadData();
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, userStatsSeason, globalStatsSeason]);
 
   // Show loading spinner only while auth is loading or while loading user data
   if (authLoading || (loading && user)) {
@@ -177,9 +196,22 @@ export default function DashboardPage() {
         {/* Your Leagues Section */}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
           <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="text-lg font-medium text-gray-900">Your Leagues</h3>
-              {user ? (
+              <div className="flex items-center gap-2">
+                {seasons.length > 0 && (
+                  <select
+                    value={leagueSeasonFilter}
+                    onChange={(e) => setLeagueSeasonFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                    className="inline-flex items-center px-2.5 py-1.5 rounded border border-blue-200 bg-blue-50 text-xs font-medium text-gray-900 shadow-sm hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0 cursor-pointer dark:border-blue-600 dark:bg-blue-900/40 dark:text-gray-100 dark:hover:bg-blue-900/60 dark:focus:ring-blue-400 dark:focus:border-blue-400 sm:px-4 sm:py-2 sm:rounded-md sm:text-sm sm:min-w-[140px]"
+                  >
+                    <option value="all">All seasons</option>
+                    {seasons.map((s) => (
+                      <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
+                    ))}
+                  </select>
+                )}
+                {user ? (
                 <Link
                   href="/leagues"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm"
@@ -194,6 +226,7 @@ export default function DashboardPage() {
                   View Public Leagues
                 </Link>
               )}
+              </div>
             </div>
           </div>
 
@@ -247,12 +280,18 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {leagues.map((league) => (
+              {(leagueSeasonFilter === 'all'
+                ? leagues
+                : leagues.filter((l) => l.seasonYear === leagueSeasonFilter)
+              ).map((league) => (
                 <div key={league.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h4 className="text-sm font-medium text-gray-900">{league.name}</h4>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                          {league.seasonYear}
+                        </span>
                         {unreadCounts[league.id] > 0 && (
                           <div className="relative">
                             <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
@@ -281,7 +320,21 @@ export default function DashboardPage() {
 
         {/* User Stats Section */}
         <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-medium text-gray-900 mb-6">Your Statistics</h2>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <h2 className="text-lg font-medium text-gray-900">Your Statistics</h2>
+            {user && seasons.length > 0 && (
+              <select
+                value={userStatsSeason}
+                onChange={(e) => setUserStatsSeason(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                className="inline-flex items-center px-2.5 py-1.5 rounded border border-blue-200 bg-blue-50 text-xs font-medium text-gray-900 shadow-sm hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0 cursor-pointer dark:border-blue-600 dark:bg-blue-900/40 dark:text-gray-100 dark:hover:bg-blue-900/60 dark:focus:ring-blue-400 dark:focus:border-blue-400 sm:px-4 sm:py-2 sm:rounded-md sm:text-sm sm:min-w-[140px]"
+              >
+                <option value="all">All-Time</option>
+                {seasons.map((s) => (
+                  <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
+                ))}
+              </select>
+            )}
+          </div>
           {!user ? (
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">Log in to see your personal statistics</p>
@@ -344,9 +397,22 @@ export default function DashboardPage() {
 
         {/* Global Stats Section */}
         <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
             <h2 className="text-lg font-medium text-gray-900">Platform Statistics</h2>
-            <Link
+            <div className="flex items-center gap-2">
+              {seasons.length > 0 && (
+                <select
+                  value={globalStatsSeason}
+                  onChange={(e) => setGlobalStatsSeason(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                  className="inline-flex items-center px-2.5 py-1.5 rounded border border-blue-200 bg-blue-50 text-xs font-medium text-gray-900 shadow-sm hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0 cursor-pointer dark:border-blue-600 dark:bg-blue-900/40 dark:text-gray-100 dark:hover:bg-blue-900/60 dark:focus:ring-blue-400 dark:focus:border-blue-400 sm:px-4 sm:py-2 sm:rounded-md sm:text-sm sm:min-w-[140px]"
+                >
+                  <option value="all">All-Time</option>
+                  {seasons.map((s) => (
+                    <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
+                  ))}
+                </select>
+              )}
+              <Link
               href="/stats"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
             >
@@ -355,6 +421,7 @@ export default function DashboardPage() {
               </svg>
               Driver Position Stats
             </Link>
+            </div>
           </div>
 
 

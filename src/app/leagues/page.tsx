@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChatFeature } from '@/contexts/FeatureFlagContext';
-import { leaguesAPI, League, chatAPI } from '@/lib/api';
+import { leaguesAPI, League, chatAPI, seasonsAPI } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
 import { useSearchParams } from 'next/navigation';
@@ -22,6 +22,32 @@ export default function LeaguesPage() {
   const [selectedPositions, setSelectedPositions] = useState<number[]>([]);
   const [isPublic, setIsPublic] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [seasons, setSeasons] = useState<{ year: number; displayLabel: string }[]>([]);
+  const [seasonFilter, setSeasonFilter] = useState<number | null>(null);
+
+  useEffect(() => {
+    const loadSeasons = async () => {
+      try {
+        const [seasonsRes, currentRes] = await Promise.all([
+          seasonsAPI.getSeasons(),
+          seasonsAPI.getCurrentSeason()
+        ]);
+        if (seasonsRes.data?.success && Array.isArray(seasonsRes.data.data)) {
+          const list = seasonsRes.data.data as { year: number; displayLabel: string }[];
+          setSeasons(list);
+          const currentYear = currentRes.data?.success && currentRes.data?.data?.year != null
+            ? currentRes.data.data.year
+            : list.length > 0 ? list[0].year : null;
+          if (currentYear != null) {
+            setSeasonFilter((prev) => (prev === null ? currentYear : prev));
+          }
+        }
+      } catch {
+        // leave seasonFilter null so we show all leagues
+      }
+    };
+    loadSeasons();
+  }, []);
 
   useEffect(() => {
     // Only load data if auth is not loading
@@ -160,7 +186,21 @@ export default function LeaguesPage() {
           title="Leagues"
           subtitle="Manage your F1 prediction game"
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {seasons.length > 0 && seasonFilter != null && (
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <span>Season:</span>
+                <select
+                  value={seasonFilter}
+                  onChange={(e) => setSeasonFilter(Number(e.target.value))}
+                  className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {seasons.map((s) => (
+                    <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
+                  ))}
+                </select>
+              </label>
+            )}
             {user ? (
               <Link
                 href={`/join?redirect=${encodeURIComponent(redirectTo)}`}
@@ -200,7 +240,7 @@ export default function LeaguesPage() {
             <h2 className="text-xl font-semibold text-gray-900">My Leagues</h2>
             {user && (
               <div className="text-sm text-gray-500">
-                {myLeagues.length} league{myLeagues.length !== 1 ? 's' : ''}
+                {(seasonFilter != null ? myLeagues.filter((l) => l.seasonYear === seasonFilter) : myLeagues).length} league{(seasonFilter != null ? myLeagues.filter((l) => l.seasonYear === seasonFilter) : myLeagues).length !== 1 ? 's' : ''}
               </div>
             )}
           </div>
@@ -229,29 +269,35 @@ export default function LeaguesPage() {
                 </div>
               </div>
             </div>
-          ) : myLeagues.length === 0 ? (
+          ) : (() => {
+              const filteredMy = seasonFilter != null ? myLeagues.filter((l) => l.seasonYear === seasonFilter) : myLeagues;
+              return filteredMy.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">You haven&apos;t joined any leagues yet.</p>
+              <p className="text-gray-500 mb-4">
+                {seasonFilter != null ? `No leagues for ${seasonFilter}. Try another season.` : "You haven't joined any leagues yet."}
+              </p>
+              {seasonFilter != null ? null : (
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
                 Create Your First League
               </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {myLeagues.map((league) => (
+              {filteredMy.map((league) => (
                 <div
                   key={league.id}
                   className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200"
                 >
                   <div className="px-4 py-5 sm:p-6">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-medium text-gray-900">{league.name}</h3>
+                      <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+                        <h3 className="text-lg font-medium text-gray-900 truncate">{league.name}</h3>
                         {user && isChatFeatureEnabled && unreadCounts[league.id] > 0 && (
-                          <div className="relative">
+                          <div className="relative flex-shrink-0">
                             <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
                             </svg>
@@ -261,10 +307,14 @@ export default function LeaguesPage() {
                           </div>
                         )}
                       </div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${league.isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                        {league.isPublic ? 'Public' : 'Private'}
-                      </span>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          {league.seasonYear}
+                        </span>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${league.isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {league.isPublic ? 'Public' : 'Private'}
+                        </span>
+                      </div>
                     </div>
                     <p className="mt-1 text-sm text-gray-500">
                       {league.memberCount} member{league.memberCount !== 1 ? 's' : ''} • {league.userRole}
@@ -323,7 +373,8 @@ export default function LeaguesPage() {
                 </div>
               ))}
             </div>
-          )}
+          );
+          })()}
         </div>
 
         {/* Public Leagues Section */}
@@ -335,13 +386,17 @@ export default function LeaguesPage() {
             </div>
           </div>
 
-          {publicLeagues.length === 0 ? (
+          {(() => {
+            const filteredPublic = seasonFilter != null ? publicLeagues.filter((l) => l.seasonYear === seasonFilter) : publicLeagues;
+            return filteredPublic.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">No public leagues available to join.</p>
+              <p className="text-gray-500">
+                {seasonFilter != null ? `No public leagues for ${seasonFilter}.` : 'No public leagues available to join.'}
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {publicLeagues.map((league) => (
+              {filteredPublic.map((league) => (
                 <div
                   key={league.id}
                   className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200"
@@ -361,9 +416,14 @@ export default function LeaguesPage() {
                           </div>
                         )}
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Public
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          {league.seasonYear}
+                        </span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Public
+                        </span>
+                      </div>
                     </div>
 
                     {/* Limited League Info for Public Leagues */}
@@ -425,15 +485,20 @@ export default function LeaguesPage() {
                     {/* Action Button */}
                     <div className="mt-4">
                       {user ? (
-                        <button
-                          onClick={() => {
-                            // Handle joining the league
-                            window.location.href = `/joinleague/${league.joinCode}`;
-                          }}
-                          className="w-full inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200"
-                        >
-                          Join League
-                        </button>
+                        league.seasonEnded ? (
+                          <div className="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-200 text-sm leading-4 font-medium rounded-md text-gray-500 bg-gray-100 cursor-not-allowed">
+                            Season ended
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              window.location.href = `/joinleague/${league.joinCode}`;
+                            }}
+                            className="w-full inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200"
+                          >
+                            Join League
+                          </button>
+                        )
                       ) : (
                         <Link
                           href={`/leagues/${league.id}`}
@@ -447,7 +512,8 @@ export default function LeaguesPage() {
                 </div>
               ))}
             </div>
-          )}
+          );
+          })()}
         </div>
       </main>
 

@@ -36,7 +36,7 @@ interface CurrentRace {
 }
 
 function PicksV2Form() {
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
     const { showToast } = useToast();
     const searchParams = useSearchParams();
     const leagueId = searchParams.get('league');
@@ -56,29 +56,45 @@ function PicksV2Form() {
     const [modalEventType, setModalEventType] = useState<'race' | 'sprint'>('race');
 
     useEffect(() => {
+        if (authLoading) return;
+        if (!user) {
+            setLoading(false);
+            setLeagues([]);
+            return;
+        }
         loadData();
-    }, []);
+    }, [user, authLoading]);
 
     const loadData = async () => {
+        if (!user) return;
         try {
             setLoading(true);
-            const [driversResponse, leaguesResponse, currentRaceResponse] = await Promise.all([
+            const [driversResult, leaguesResult, currentRaceResult] = await Promise.allSettled([
                 driversAPI.getDrivers(),
                 leaguesAPI.getLeagues(),
                 f1racesAPI.getCurrentRace()
             ]);
 
-            if (driversResponse.data.success) {
-                setDrivers(driversResponse.data.data);
+            if (driversResult.status === 'fulfilled' && driversResult.value?.data?.success) {
+                setDrivers(driversResult.value.data.data);
             }
 
-            if (leaguesResponse.data.success) {
-                setLeagues(leaguesResponse.data.data);
+            if (leaguesResult.status === 'fulfilled' && leaguesResult.value?.data?.success) {
+                const leagueList = leaguesResult.value.data.data;
+                const all = Array.isArray(leagueList) ? leagueList : [];
+                const activeSeasonOnly = all.filter((l: League) => l.seasonEnded !== true);
+                setLeagues(activeSeasonOnly);
+                setSelectedLeague(prev => {
+                    if (!prev) return prev;
+                    return activeSeasonOnly.some((l: League) => String(l.id) === prev) ? prev : '';
+                });
             }
 
-            if (currentRaceResponse.data.success) {
-                setCurrentRace(currentRaceResponse.data.data);
-                setCurrentWeek(currentRaceResponse.data.data.weekNumber);
+            if (currentRaceResult.status === 'fulfilled' && currentRaceResult.value?.data?.success) {
+                setCurrentRace(currentRaceResult.value.data.data);
+                setCurrentWeek(currentRaceResult.value.data.data.weekNumber);
+            } else if (currentRaceResult.status === 'rejected') {
+                console.warn('Could not load current race (e.g. 404):', currentRaceResult.reason?.message ?? currentRaceResult.reason);
             }
         } catch (error) {
             console.error('Error loading data:', error);

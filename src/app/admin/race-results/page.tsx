@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { adminAPI, driversAPI, f1racesAPI } from '@/lib/api';
+import { adminAPI, driversAPI, seasonsAPI } from '@/lib/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import logger from '@/utils/logger';
 
@@ -48,10 +48,27 @@ export default function RaceResultsEntryPage() {
     const [logActivity, setLogActivity] = useState<boolean>(true);
     const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
     const [sprintResults, setSprintResults] = useState<RaceResult[]>([]);
+    const [seasons, setSeasons] = useState<{ year: number; displayLabel: string }[]>([]);
+    const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await seasonsAPI.getSeasons();
+                if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+                    setSeasons(res.data.data);
+                    setSelectedSeason((prev) => prev ?? res.data.data[0].year);
+                }
+            } catch {
+                // ignore
+            }
+        };
+        load();
+    }, []);
 
     useEffect(() => {
         loadInitialData();
-    }, []);
+    }, [selectedSeason]);
 
     useEffect(() => {
         if (allRaces.length > 0) {
@@ -101,9 +118,10 @@ export default function RaceResultsEntryPage() {
             setLoading(true);
             setError(null);
 
+            const season = selectedSeason ?? undefined;
             const [driversResponse, allRacesResponse, leaguesResponse] = await Promise.all([
                 driversAPI.getAllDriversAdmin(),
-                adminAPI.getRacesWithResultStatus(),
+                adminAPI.getRacesWithResultStatus(season),
                 adminAPI.getAllLeagues()
             ]);
 
@@ -130,14 +148,15 @@ export default function RaceResultsEntryPage() {
         } finally {
             setLoading(false);
         }
-    }, [searchParams]);
+    }, [searchParams, selectedSeason]);
 
     const loadExistingResults = async (weekNumber: number, eventType: 'race' | 'sprint') => {
         try {
             setLoading(true);
+            const season = selectedSeason ?? undefined;
             const response = eventType === 'race'
-                ? await adminAPI.getExistingRaceResults(weekNumber)
-                : await adminAPI.getExistingSprintResults(weekNumber);
+                ? await adminAPI.getExistingRaceResults(weekNumber, season)
+                : await adminAPI.getExistingSprintResults(weekNumber, season);
 
             // Always create results array, even if no existing results
             const existingResults = response.status === 200 && response.data.data ? response.data.data : [];
@@ -192,19 +211,18 @@ export default function RaceResultsEntryPage() {
         let hasRaceResults = false;
         let hasSprintResults = false;
 
-        // Check if race results exist
+        const season = selectedSeason ?? undefined;
         try {
-            const raceResponse = await adminAPI.getExistingRaceResults(weekNumber);
+            const raceResponse = await adminAPI.getExistingRaceResults(weekNumber, season);
             hasRaceResults = raceResponse.status === 200 && raceResponse.data.data && raceResponse.data.data.length > 0;
         } catch (error) {
             hasRaceResults = false;
         }
 
-        // Check if sprint results exist (if race has sprint)
         if (race?.hasSprint) {
             await loadExistingResults(weekNumber, 'sprint');
             try {
-                const sprintResponse = await adminAPI.getExistingSprintResults(weekNumber);
+                const sprintResponse = await adminAPI.getExistingSprintResults(weekNumber, season);
                 hasSprintResults = sprintResponse.status === 200 && sprintResponse.data.data && sprintResponse.data.data.length > 0;
             } catch (error) {
                 hasSprintResults = false;
@@ -236,11 +254,11 @@ export default function RaceResultsEntryPage() {
         // Always try to load existing results for the selected event type
         await loadExistingResults(selectedWeek, eventType);
 
-        // Check if results exist for the selected event type to determine rescoring mode
+        const season = selectedSeason ?? undefined;
         try {
             const response = eventType === 'race'
-                ? await adminAPI.getExistingRaceResults(selectedWeek)
-                : await adminAPI.getExistingSprintResults(selectedWeek);
+                ? await adminAPI.getExistingRaceResults(selectedWeek, season)
+                : await adminAPI.getExistingSprintResults(selectedWeek, season);
 
             const hasResults = response.status === 200 && response.data.data && response.data.data.length > 0;
             setIsRescoring(hasResults);
@@ -429,6 +447,24 @@ export default function RaceResultsEntryPage() {
             <div className="bg-white shadow-lg rounded-lg p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Select Race</h2>
 
+                {seasons.length > 0 && (
+                    <div className="mb-4">
+                        <label htmlFor="season-select" className="block text-sm font-medium text-gray-700 mb-2">
+                            Season
+                        </label>
+                        <select
+                            id="season-select"
+                            value={selectedSeason ?? ''}
+                            onChange={(e) => setSelectedSeason(e.target.value ? Number(e.target.value) : null)}
+                            className="rounded-md border border-gray-300 text-sm text-gray-900 focus:ring-green-500 focus:border-green-500"
+                        >
+                            {seasons.map((s) => (
+                                <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 {allRaces.length === 0 ? (
                     <div className="bg-green-50 border border-green-200 rounded-md p-4">
                         <div className="flex">
@@ -440,7 +476,7 @@ export default function RaceResultsEntryPage() {
                             <div className="ml-3">
                                 <h3 className="text-sm font-medium text-green-800">All Races Completed!</h3>
                                 <p className="text-sm text-green-700 mt-1">
-                                    All races in the 2025 season have already had their results entered. No further action is needed.
+                                    All races in the {selectedSeason ?? 'selected'} season have already had their results entered. No further action is needed.
                                 </p>
                             </div>
                         </div>

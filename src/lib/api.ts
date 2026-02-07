@@ -174,7 +174,16 @@ apiService.interceptors.response.use(
 // API methods
 // Public stats API
 export const statsAPI = {
-  getDriverPositionStats: (position: number) => apiService.get(`/stats/driver-positions?position=${position}`),
+  getDriverPositionStats: (position: number, seasonYear?: number | 'all' | null) => {
+    const params: { position: number; seasonYear?: number | string } = { position };
+    if (seasonYear != null && seasonYear !== 'all') params.seasonYear = seasonYear;
+    return apiService.get('/stats/driver-positions', { params });
+  },
+};
+
+export const seasonsAPI = {
+  getSeasons: () => apiService.get('/seasons'),
+  getCurrentSeason: () => apiService.get('/seasons/current'),
 };
 
 export const adminAPI = {
@@ -184,16 +193,26 @@ export const adminAPI = {
   getUserLeagues: (userId: number) => apiService.get(`/admin/users/${userId}/leagues`),
   updateUserRole: (userId: number, role: string) =>
     apiService.put(`/admin/users/${userId}/role`, { role }),
-  getAdminDashboardStats: () => apiService.get('/admin/dashboard-stats'),
-  getPositionBreakdownByWeek: (weekNumber: number | null) =>
-    apiService.get(`/admin/position-breakdown${weekNumber ? `?weekNumber=${weekNumber}` : ''}`),
+  getAdminDashboardStats: (seasonYear?: number | null) =>
+    apiService.get('/admin/dashboard-stats', { params: seasonYear != null ? { seasonYear } : {} }),
+  getPositionBreakdownByWeek: (weekNumber: number | null, seasonYear?: number | null) => {
+    const params: { weekNumber?: number; seasonYear?: number } = {};
+    if (weekNumber != null) params.weekNumber = weekNumber;
+    if (seasonYear != null) params.seasonYear = seasonYear;
+    return apiService.get('/admin/position-breakdown', { params });
+  },
+  getPickStatsByWeek: (seasonYear?: number | null) =>
+    apiService.get('/admin/pick-stats-by-week', { params: seasonYear != null ? { seasonYear } : {} }),
   getAvailableRaces: () => apiService.get('/admin/available-races'),
   getAvailableRacesForResults: () => apiService.get('/admin/available-races-for-results'),
   getRaceInfoByWeek: (weekNumber: number) => apiService.get(`/admin/race-info/${weekNumber}`),
   getAvailableLeagues: () => apiService.get('/admin/available-leagues'),
-  getRacesWithResultStatus: () => apiService.get('/admin/races-with-result-status'),
-  getExistingRaceResults: (weekNumber: number) => apiService.get(`/admin/existing-race-results/${weekNumber}`),
-  getExistingSprintResults: (weekNumber: number) => apiService.get(`/admin/existing-sprint-results/${weekNumber}`),
+  getRacesWithResultStatus: (seasonYear?: number | null) =>
+    apiService.get('/admin/races-with-result-status', { params: seasonYear != null ? { seasonYear } : {} }),
+  getExistingRaceResults: (weekNumber: number, seasonYear?: number | null) =>
+    apiService.get(`/admin/existing-race-results/${weekNumber}`, { params: seasonYear != null ? { seasonYear } : {} }),
+  getExistingSprintResults: (weekNumber: number, seasonYear?: number | null) =>
+    apiService.get(`/admin/existing-sprint-results/${weekNumber}`, { params: seasonYear != null ? { seasonYear } : {} }),
   getLeaguePicksOverview: (weekNumber: number) => apiService.get(`/admin/league-picks-overview?weekNumber=${weekNumber}`),
   getLeaguePicksOverviewForEvent: (weekNumber: number, eventType: 'race' | 'sprint') => apiService.get(`/admin/league-picks-overview/event?weekNumber=${weekNumber}&eventType=${eventType}`),
   getPicksByPositionOverview: (weekNumber: number) => apiService.get(`/admin/picks-by-position-overview?weekNumber=${weekNumber}`),
@@ -267,8 +286,10 @@ export const authAPI = {
   forgotPassword: (data: { email: string }) => apiService.post('/users/forgot-password', data),
   resetPassword: (data: { token: string; newPassword: string }) => apiService.post('/users/reset-password', data),
   getProfile: () => apiService.get('/users/profile'),
-  getUserStats: () => apiService.get('/users/stats'),
-  getGlobalStats: () => apiService.get('/users/global-stats'),
+  getUserStats: (seasonYear?: number | 'all' | null) =>
+    apiService.get('/users/stats', { params: seasonYear != null && seasonYear !== 'all' ? { seasonYear } : {} }),
+  getGlobalStats: (seasonYear?: number | 'all' | null) =>
+    apiService.get('/users/global-stats', { params: seasonYear != null && seasonYear !== 'all' ? { seasonYear } : {} }),
   getMonthlyStats: () => apiService.get('/users/monthly-stats'),
   updateProfile: (data: { name: string }) => apiService.put('/users/profile', data),
   updateAvatar: (data: FormData) => apiService.put('/users/avatar', data, {
@@ -461,6 +482,8 @@ export interface League {
   totalActivity?: number;
   activityScore?: number;
   positionStatus?: PositionStatus;
+  /** Set for public leagues; true if that season has ended (no joining). */
+  seasonEnded?: boolean;
 }
 
 // Position status types for efficient pick status

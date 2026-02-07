@@ -163,9 +163,15 @@ export default function LeagueDetailPage() {
       const response = await f1racesAPI.getCurrentRace();
       if (response.data.success) {
         setCurrentRace(response.data.data);
+      } else {
+        setCurrentRace(null);
       }
     } catch (error) {
-      console.error('Error loading current race:', error);
+      setCurrentRace(null);
+      // 404 is expected when there are no upcoming races (e.g. off-season)
+      if (error && typeof error === 'object' && 'response' in error && (error as { response?: { status?: number } }).response?.status !== 404) {
+        console.error('Error loading current race:', error);
+      }
     } finally {
       setLoadingCurrentRace(false);
     }

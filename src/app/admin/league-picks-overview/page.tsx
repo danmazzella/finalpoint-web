@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { adminAPI, LeaguePicksOverview, f1racesAPI } from '@/lib/api';
+import { adminAPI, LeaguePicksOverview, f1racesAPI, seasonsAPI } from '@/lib/api';
 import Link from 'next/link';
 import logger from '@/utils/logger';
 
@@ -16,11 +16,28 @@ function LeaguePicksOverviewPageContent() {
     const [selectedEventType, setSelectedEventType] = useState<'race' | 'sprint'>('race');
     const [availableWeeks, setAvailableWeeks] = useState<number[]>([]);
     const [races, setRaces] = useState<any[]>([]);
+    const [seasons, setSeasons] = useState<{ year: number; displayLabel: string }[]>([]);
+    const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await seasonsAPI.getSeasons();
+                if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+                    setSeasons(res.data.data);
+                    setSelectedSeason((prev) => prev ?? res.data.data[0].year);
+                }
+            } catch {
+                // ignore
+            }
+        };
+        load();
+    }, []);
 
     useEffect(() => {
         loadAvailableWeeks();
         loadRaces();
-    }, []);
+    }, [selectedSeason]);
 
     // Initialize week number from query params after available weeks are loaded
     useEffect(() => {
@@ -52,7 +69,8 @@ function LeaguePicksOverviewPageContent() {
 
     const loadRaces = async () => {
         try {
-            const response = await f1racesAPI.getAllRaces();
+            const season = selectedSeason ?? undefined;
+            const response = await f1racesAPI.getAllRaces(season);
             if (response.data.success) {
                 setRaces(response.data.data);
             }
@@ -181,6 +199,21 @@ function LeaguePicksOverviewPageContent() {
             {/* Week and Event Type Selector */}
             <div className="bg-white shadow-lg rounded-lg p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-4 sm:space-y-0">
+                    {seasons.length > 0 && (
+                        <div className="flex items-center space-x-4">
+                            <label htmlFor="season-select" className="text-sm font-medium text-gray-700">Season:</label>
+                            <select
+                                id="season-select"
+                                value={selectedSeason ?? ''}
+                                onChange={(e) => setSelectedSeason(e.target.value ? Number(e.target.value) : null)}
+                                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                {seasons.map((s) => (
+                                    <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                     <div className="flex items-center space-x-4">
                         <label htmlFor="week-select" className="text-sm font-medium text-gray-700">
                             Select Week:
