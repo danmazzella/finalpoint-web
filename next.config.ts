@@ -87,7 +87,7 @@ const nextConfig: NextConfig = {
 
   // Environment-specific configuration
   env: {
-    CUSTOM_KEY: process.env.NEXT_PUBLIC_API_URL,
+    CUSTOM_KEY: process.env.NEXT_PUBLIC_API_URL || '',
   },
 
   // Enable experimental features if needed

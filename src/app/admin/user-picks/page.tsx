@@ -22,6 +22,7 @@ interface Driver {
     name: string;
     team: string;
     isActive?: boolean;
+    seasonYear?: number;
 }
 
 interface Race {
@@ -309,6 +310,12 @@ export default function AdminUserPicksPage() {
 
 
 
+    const selectedRace = races.find(r => r.weekNumber === pickForm.weekNumber);
+    const selectedRaceYear = selectedRace ? new Date(selectedRace.raceDate).getFullYear() : null;
+    const filteredDrivers = selectedRaceYear != null
+        ? drivers.filter(d => d.seasonYear === selectedRaceYear)
+        : drivers;
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -469,7 +476,7 @@ export default function AdminUserPicksPage() {
                                         onChange={(e) => setPickForm(prev => ({ ...prev, driverId: parseInt(e.target.value) }))}
                                     >
                                         <option value={0}>Choose a driver...</option>
-                                        {drivers.map(driver => (
+                                        {filteredDrivers.map(driver => (
                                             <option key={driver.id} value={driver.id}>
                                                 {driver.name} ({driver.team})
                                             </option>
@@ -583,7 +590,7 @@ export default function AdminUserPicksPage() {
                                                             onChange={(e) => handleUpdatePick(pick, parseInt(e.target.value))}
                                                             defaultValue={pick.driverId}
                                                         >
-                                                            {drivers.map(driver => (
+                                                            {filteredDrivers.map(driver => (
                                                                 <option key={driver.id} value={driver.id}>
                                                                     {driver.name} ({driver.team})
                                                                 </option>

@@ -33,8 +33,10 @@ export class SecureWebSocketService {
     private offlineMessageQueue: Array<{ leagueId: string, message: { text: string; channelId?: string } }> = []; // Queue messages when offline
 
     constructor() {
-        // Get token from localStorage or auth context
-        this.token = localStorage.getItem('token');
+        // Get token from localStorage or auth context (only in browser)
+        if (typeof window !== 'undefined') {
+            this.token = localStorage.getItem('token');
+        }
     }
 
     /**
@@ -232,7 +234,9 @@ export class SecureWebSocketService {
             case 'authenticated':
                 // Handle token migration if new token is provided
                 if (data.newToken && data.tokenMigration && typeof data.newToken === 'string') {
-                    localStorage.setItem('token', data.newToken);
+                    if (typeof window !== 'undefined') {
+                        localStorage.setItem('token', data.newToken);
+                    }
                     this.token = data.newToken;
                 }
                 break;
