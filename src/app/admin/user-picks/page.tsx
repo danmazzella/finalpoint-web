@@ -100,7 +100,7 @@ export default function AdminUserPicksPage() {
                 adminAPI.getAllUsers(),
                 adminAPI.getAllLeagues(),
                 driversAPI.getAllDriversAdmin(),
-                f1racesAPI.getAllRaces()
+                f1racesAPI.getAllRaces(new Date().getFullYear())
             ]);
 
             if (usersResponse.status === 200) {
