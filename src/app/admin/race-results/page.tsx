@@ -105,13 +105,17 @@ export default function RaceResultsEntryPage() {
     }, [allRaces, searchParams]);
 
     useEffect(() => {
-        // Initialize results array with 20 positions
-        const initialResults: RaceResult[] = Array.from({ length: 20 }, (_, i) => ({
+        const count = (selectedSeason ?? 0) >= 2026 ? 22 : 20;
+        const initialResults: RaceResult[] = Array.from({ length: count }, (_, i) => ({
             driverId: 0,
             finishingPosition: i + 1
         }));
         setResults(initialResults);
-    }, []);
+        setSprintResults(Array.from({ length: count }, (_, i) => ({
+            driverId: 0,
+            finishingPosition: i + 1
+        })));
+    }, [selectedSeason]);
 
 
     const loadInitialData = useCallback(async () => {
@@ -160,8 +164,9 @@ export default function RaceResultsEntryPage() {
                 : await adminAPI.getExistingSprintResults(weekNumber, season);
 
             // Always create results array, even if no existing results
+            const count = (selectedSeason ?? 0) >= 2026 ? 22 : 20;
             const existingResults = response.status === 200 && response.data.data ? response.data.data : [];
-            const newResults = Array.from({ length: 20 }, (_, i) => {
+            const newResults = Array.from({ length: count }, (_, i) => {
                 const existing = existingResults.find((r: RaceResult) => r.finishingPosition === i + 1);
                 return {
                     driverId: existing?.driverId || 0,
@@ -180,7 +185,8 @@ export default function RaceResultsEntryPage() {
             setError(`Failed to load existing ${eventType} results`);
 
             // Set empty results even on error
-            const emptyResults = Array.from({ length: 20 }, (_, i) => ({
+            const count = (selectedSeason ?? 0) >= 2026 ? 22 : 20;
+            const emptyResults = Array.from({ length: count }, (_, i) => ({
                 driverId: 0,
                 finishingPosition: i + 1
             }));
@@ -230,7 +236,8 @@ export default function RaceResultsEntryPage() {
             }
         } else {
             // Reset sprint results if no sprint
-            setSprintResults(Array.from({ length: 20 }, (_, i) => ({
+            const count = (selectedSeason ?? 0) >= 2026 ? 22 : 20;
+            setSprintResults(Array.from({ length: count }, (_, i) => ({
                 driverId: 0,
                 finishingPosition: i + 1
             })));
@@ -296,17 +303,19 @@ export default function RaceResultsEntryPage() {
     };
 
     const validateResults = (resultsToValidate: RaceResult[] = results): boolean => {
+        const driverCount = (selectedSeason ?? 0) >= 2026 ? 22 : 20;
+
         // Check if all positions have drivers selected
         const hasAllDrivers = resultsToValidate.every(result => result.driverId > 0);
         if (!hasAllDrivers) {
-            setError('All 20 positions must have drivers selected');
+            setError(`All ${driverCount} positions must have drivers selected`);
             return false;
         }
 
         // Check for duplicate drivers
         const driverIds = resultsToValidate.map(result => result.driverId);
         const uniqueDriverIds = new Set(driverIds);
-        if (uniqueDriverIds.size !== 20) {
+        if (uniqueDriverIds.size !== driverCount) {
             setError('Each driver can only finish in one position');
             return false;
         }
@@ -392,7 +401,8 @@ export default function RaceResultsEntryPage() {
 
                 // Reset form after successful submission
                 setTimeout(() => {
-                    const resetResults = Array.from({ length: 20 }, (_, i) => ({
+                    const count = (selectedSeason ?? 0) >= 2026 ? 22 : 20;
+                    const resetResults = Array.from({ length: count }, (_, i) => ({
                         driverId: 0,
                         finishingPosition: i + 1
                     }));
@@ -416,6 +426,8 @@ export default function RaceResultsEntryPage() {
     const filteredDrivers = selectedSeason != null
         ? drivers.filter(d => d.seasonYear === selectedSeason)
         : drivers;
+
+    const driverCount = (selectedSeason ?? 0) >= 2026 ? 22 : 20;
 
     const getDriverName = (driverId: number): string => {
         const driver = filteredDrivers.find(d => d.id === driverId);
@@ -630,7 +642,7 @@ export default function RaceResultsEntryPage() {
                     <p className="text-sm text-gray-600 mb-6">
                         {isRescoring && rescoringMode === 'specific'
                             ? 'Current race results are displayed below. Only the selected league will be rescored.'
-                            : 'Select the driver who finished in each position. All 20 positions must be filled.'
+                            : `Select the driver who finished in each position. All ${driverCount} positions must be filled.`
                         }
                     </p>
 
