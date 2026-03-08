@@ -9,6 +9,7 @@ interface Driver {
     id: number;
     name: string;
     team: string;
+    seasonYear?: number;
 }
 
 interface Race {
@@ -412,8 +413,12 @@ export default function RaceResultsEntryPage() {
         }
     };
 
+    const filteredDrivers = selectedSeason != null
+        ? drivers.filter(d => d.seasonYear === selectedSeason)
+        : drivers;
+
     const getDriverName = (driverId: number): string => {
-        const driver = drivers.find(d => d.id === driverId);
+        const driver = filteredDrivers.find(d => d.id === driverId);
         return driver ? driver.name : 'Select Driver';
     };
 
@@ -643,7 +648,7 @@ export default function RaceResultsEntryPage() {
                                         }`}
                                 >
                                     <option value={0}>Select Driver</option>
-                                    {drivers
+                                    {filteredDrivers
                                         .sort((a, b) => a.name.localeCompare(b.name))
                                         .map((driver) => {
                                             const isAvailable = isDriverAvailable(driver.id, result.finishingPosition);
