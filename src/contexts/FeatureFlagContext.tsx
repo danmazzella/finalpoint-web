@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 interface FeatureFlagContextType {
     isChatFeatureEnabled: boolean;
     isPositionChangesEnabled: boolean;
+    isMultiPositionPicksEnabled: boolean;
     isLoading: boolean;
     refreshFlags: () => Promise<void>;
     getAllFlags: () => Record<string, any>;
@@ -21,17 +22,19 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({ childr
     const [isLoading, setIsLoading] = useState(true);
     const [isChatFeatureEnabled, setIsChatFeatureEnabled] = useState(false);
     const [isPositionChangesEnabled, setIsPositionChangesEnabled] = useState(false);
+    const [isMultiPositionPicksEnabled, setIsMultiPositionPicksEnabled] = useState(false);
     const { user } = useAuth();
 
     const refreshFlags = useCallback(async () => {
         try {
-            // The user profile data is already loaded in AuthContext
-            // We just need to update our local state based on the current user data
             if (user?.chatFeatureEnabled !== undefined) {
                 setIsChatFeatureEnabled(user.chatFeatureEnabled);
             }
             if (user?.positionChangesEnabled !== undefined) {
                 setIsPositionChangesEnabled(user.positionChangesEnabled);
+            }
+            if (user?.multiPositionPicksEnabled !== undefined) {
+                setIsMultiPositionPicksEnabled(user.multiPositionPicksEnabled);
             }
         } catch (error) {
             console.error('❌ Failed to refresh web feature flags:', error);
@@ -41,19 +44,19 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({ childr
     const getAllFlags = () => {
         return {
             chat_feature_enabled: isChatFeatureEnabled,
-            position_changes_enabled: isPositionChangesEnabled
+            position_changes_enabled: isPositionChangesEnabled,
+            multi_position_picks_enabled: isMultiPositionPicksEnabled,
         };
     };
 
     // Update feature flags when user changes
     useEffect(() => {
         if (user === null) {
-            // User is not logged in
             setIsChatFeatureEnabled(false);
             setIsPositionChangesEnabled(false);
+            setIsMultiPositionPicksEnabled(false);
             setIsLoading(false);
         } else if (user) {
-            // User is logged in - handle each flag independently
             let flagsSet = 0;
 
             if (user.chatFeatureEnabled !== undefined) {
@@ -66,17 +69,21 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({ childr
                 flagsSet++;
             }
 
-            // If we got at least one flag or user is defined, we can stop loading
+            if (user.multiPositionPicksEnabled !== undefined) {
+                setIsMultiPositionPicksEnabled(user.multiPositionPicksEnabled);
+                flagsSet++;
+            }
+
             if (flagsSet > 0 || user.id) {
                 setIsLoading(false);
             }
         }
-        // If user is undefined, we're still loading, so keep isLoading true
     }, [user]);
 
     const value: FeatureFlagContextType = {
         isChatFeatureEnabled,
         isPositionChangesEnabled,
+        isMultiPositionPicksEnabled,
         isLoading,
         refreshFlags,
         getAllFlags,
@@ -107,4 +114,10 @@ export const useChatFeature = () => {
 export const usePositionChanges = () => {
     const { isPositionChangesEnabled, isLoading } = useFeatureFlags();
     return { isPositionChangesEnabled, isLoading };
+};
+
+// Convenience hook for multi-position picks feature
+export const useMultiPositionPicks = () => {
+    const { isMultiPositionPicksEnabled, isLoading } = useFeatureFlags();
+    return { isMultiPositionPicksEnabled, isLoading };
 };

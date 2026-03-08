@@ -394,8 +394,8 @@ function PicksV2Form() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+            <div className="page-bg min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
             </div>
         );
     }
@@ -403,85 +403,53 @@ function PicksV2Form() {
     // Show limited view for logged-out users
     if (!user) {
         return (
-            <div className="min-h-screen bg-gray-50">
-                <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
-                        <div className="text-center">
-                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <h2 className="mt-2 text-lg font-medium text-gray-900">Picks Page Preview</h2>
-                            <p className="mt-1 text-sm text-gray-500 mb-6">This is what the picks page looks like. Log in to make your own picks!</p>
-                            <div className="flex space-x-2 justify-center">
-                                <Link
-                                    href="/login"
-                                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                                >
-                                    Log In
-                                </Link>
-                                <Link
-                                    href="/signup"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                                >
-                                    Sign Up
-                                </Link>
-                            </div>
+            <div className="page-bg min-h-screen">
+                <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <div className="glass-card p-6 mb-6 text-center">
+                        <svg className="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <h2 className="text-lg font-bold text-gray-900 mb-1">Picks Page</h2>
+                        <p className="text-sm text-gray-500 mb-5">Log in to make your own F1 position picks!</p>
+                        <div className="flex gap-3 justify-center">
+                            <Link href="/login" className="btn-ghost text-sm py-2 px-5">Log In</Link>
+                            <Link href="/signup" className="btn-primary text-sm py-2 px-5">Sign Up</Link>
                         </div>
                     </div>
 
-                    {/* Current Race Information - Show for logged-out users */}
+                    {/* Current Race Preview */}
                     {currentRace && (
-                        <div className="bg-white shadow rounded-lg p-6 mb-6">
-                            <h2 className="text-lg font-medium text-gray-900 mb-4">Current Race</h2>
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-blue-900">{currentRace.raceName}</h3>
-                                        <p className="text-sm text-blue-700">{currentRace.circuitName}, {currentRace.country}</p>
-                                        <p className="text-sm text-blue-600">Week {currentRace.weekNumber} • {new Date(currentRace.raceDate).toLocaleDateString()}</p>
-                                        {currentRace.qualifyingDate && (
-                                            <p className="text-sm text-blue-600">Qualifying: {new Date(currentRace.qualifyingDate).toLocaleDateString()}</p>
-                                        )}
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            {currentRace.status}
-                                        </span>
-                                    </div>
+                        <div className="glass-card p-5 mb-6">
+                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Current Race</h2>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">{currentRace.raceName}</h3>
+                                    <p className="text-sm text-gray-500">{currentRace.circuitName}, {currentRace.country}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">Week {currentRace.weekNumber} · {new Date(currentRace.raceDate).toLocaleDateString()}</p>
                                 </div>
+                                <span className="badge badge-blue">{currentRace.status}</span>
                             </div>
                         </div>
                     )}
 
-                    {/* Sample League Selection Preview */}
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">League Selection</h2>
-                        <div className="text-center py-8">
-                            <p className="text-gray-500 mb-4">Log in to see your leagues and make picks</p>
-                            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8">
-                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                <h3 className="mt-2 text-sm font-medium text-gray-900">League Selection</h3>
-                                <p className="mt-1 text-sm text-gray-500">Choose from your leagues to make position predictions</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Sample Position Selection Preview */}
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Position Selection Preview</h2>
-                        <div className="text-center py-8">
-                            <p className="text-gray-500 mb-4">See how position predictions work</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {[1, 3, 10].map((position) => (
-                                    <div key={position} className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                                        <div className="text-2xl font-bold text-gray-400 mb-2">P{position}</div>
-                                        <div className="text-sm text-gray-500">Position {position}</div>
-                                        <div className="mt-2 text-xs text-gray-400">Select driver</div>
+                    {/* Sample Position Preview */}
+                    <div className="glass-card p-5 mb-6">
+                        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Position Selection Preview</h2>
+                        <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
+                            {[1, 3, 10].map((position) => (
+                                <div key={position} className="flex items-center gap-4 px-4 py-3.5 bg-gray-50/60">
+                                    <div className="flex-shrink-0 w-11 h-11 rounded-full bg-gray-200 flex items-center justify-center font-extrabold text-sm text-gray-400 tracking-wide">
+                                        P{position}
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-400">No pick made yet</p>
+                                        <p className="text-xs text-gray-300">Log in to select a driver</p>
+                                    </div>
+                                    <svg className="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </main>
@@ -490,19 +458,16 @@ function PicksV2Form() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="page-bg min-h-screen">
+            <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 {/* League Selection */}
-                <div className="bg-white shadow rounded-lg p-6 mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-medium text-gray-900">Select League</h2>
+                <div className="glass-card p-5 mb-5">
+                    <div className="flex justify-between items-center mb-3">
+                        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Select League</h2>
                         {selectedLeague && (
-                            <Link
-                                href={`/leagues/${selectedLeague}`}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                            >
-                                <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            <Link href={`/leagues/${selectedLeague}`} className="btn-ghost text-sm py-1.5 px-3">
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                                 Back to League
                             </Link>
@@ -511,11 +476,11 @@ function PicksV2Form() {
                     <select
                         value={selectedLeague}
                         onChange={(e) => handleLeagueChange(e.target.value)}
-                        className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                        className="input-field"
                     >
-                        <option value="" className="text-gray-500">Choose a league</option>
+                        <option value="">Choose a league</option>
                         {leagues.map((league) => (
-                            <option key={league.id} value={league.id} className="text-gray-900">
+                            <option key={league.id} value={league.id}>
                                 {league.name}
                             </option>
                         ))}
@@ -530,66 +495,53 @@ function PicksV2Form() {
 
                 {/* Current Race Information */}
                 {currentRace && (
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Current Race</h2>
+                    <div className="glass-card p-5 mb-5">
+                        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Current Race</h2>
 
                         {/* Pick Locking Status Banner */}
                         {currentRace.picksLocked && (
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                                <div className="flex">
-                                    <div className="flex-shrink-0">
-                                        <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div className="ml-3">
-                                        <h3 className="text-sm font-medium text-red-800">
-                                            Picks are Locked
-                                        </h3>
-                                        <div className="mt-2 text-sm text-red-700">
-                                            <p>{currentRace.lockMessage}</p>
-                                        </div>
-                                    </div>
+                            <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                                <svg className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm font-semibold text-red-800">Picks are Locked</p>
+                                    <p className="text-sm text-red-700 mt-0.5">{currentRace.lockMessage}</p>
                                 </div>
                             </div>
                         )}
 
                         {/* Pick Locking Countdown */}
                         {!currentRace.picksLocked && (
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                                <div className="flex">
-                                    <div className="flex-shrink-0">
-                                        <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div className="ml-3">
-                                        <h3 className="text-sm font-medium text-yellow-800">
-                                            Pick Locking Status
-                                        </h3>
-                                        <div className="mt-2 text-sm text-yellow-700">
-                                            <p>
-                                                {currentRace.lockTime ? (
-                                                    (() => {
-                                                        const timeRemaining = formatTimeRemainingLocal(currentRace.lockTime);
-                                                        if (timeRemaining === 'Locked') {
-                                                            return (
-                                                                <>
-                                                                    Picks are now locked for {currentRace.raceName}
-                                                                    <br />
-                                                                    <span className="text-xs text-yellow-600">
-                                                                        Lock time: {new Date(currentRace.lockTime).toLocaleString()}
-                                                                    </span>
-                                                                </>
-                                                            );
-                                                        } else {
-                                                            return (
-                                                                <>
-                                                                    Picks will lock in {timeRemaining} for {currentRace.raceName}
-                                                                    <br />
-                                                                    <span className="text-xs text-yellow-600">
-                                                                        Lock time: {new Date(currentRace.lockTime).toLocaleString()}
-                                                                    </span>
+                            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
+                                <svg className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                </svg>
+                                <div>
+                                    <p className="text-sm font-semibold text-amber-800">Pick Locking Status</p>
+                                    <div className="mt-0.5 text-sm text-amber-700">
+                                        <p>
+                                            {currentRace.lockTime ? (
+                                                (() => {
+                                                    const timeRemaining = formatTimeRemainingLocal(currentRace.lockTime);
+                                                    if (timeRemaining === 'Locked') {
+                                                        return (
+                                                            <>
+                                                                Picks are now locked for {currentRace.raceName}
+                                                                <br />
+                                                                <span className="text-xs text-amber-600">
+                                                                    Lock time: {new Date(currentRace.lockTime).toLocaleString()}
+                                                                </span>
+                                                            </>
+                                                        );
+                                                    } else {
+                                                        return (
+                                                            <>
+                                                                Picks will lock in {timeRemaining} for {currentRace.raceName}
+                                                                <br />
+                                                                <span className="text-xs text-amber-600">
+                                                                    Lock time: {new Date(currentRace.lockTime).toLocaleString()}
+                                                                </span>
                                                                 </>
                                                             );
                                                         }
@@ -597,62 +549,49 @@ function PicksV2Form() {
                                                 ) : (
                                                     currentRace.lockMessage
                                                 )}
-                                            </p>
-                                        </div>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-blue-900">{currentRace.raceName}</h3>
-                                    <p className="text-sm text-blue-700">{currentRace.circuitName}, {currentRace.country}</p>
-                                    <p className="text-sm text-blue-600">Week {currentRace.weekNumber} • {new Date(currentRace.raceDate).toLocaleDateString()}</p>
-                                    {currentRace.qualifyingDate && (
-                                        <p className="text-sm text-blue-600">Qualifying: {new Date(currentRace.qualifyingDate).toLocaleDateString()}</p>
-                                    )}
-                                </div>
-                                <div className="text-right">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {currentRace.status}
-                                    </span>
-                                </div>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">{currentRace.raceName}</h3>
+                                <p className="text-sm text-gray-500">{currentRace.circuitName}, {currentRace.country}</p>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    Week {currentRace.weekNumber} · {new Date(currentRace.raceDate).toLocaleDateString()}
+                                    {currentRace.qualifyingDate && ` · Qualifying: ${new Date(currentRace.qualifyingDate).toLocaleDateString()}`}
+                                </p>
                             </div>
+                            <span className="badge badge-blue">{currentRace.status}</span>
                         </div>
                     </div>
                 )}
 
                 {!selectedLeague ? (
-                    <div className="bg-white shadow rounded-lg p-6 text-center">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div className="glass-card p-6 text-center">
+                        <svg className="mx-auto h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">Select a league</h3>
-                        <p className="mt-1 text-sm text-gray-500">Choose a league to make your position predictions.</p>
+                        <h3 className="text-base font-semibold text-gray-900 mb-1">Select a league</h3>
+                        <p className="text-sm text-gray-500">Choose a league to make your position predictions.</p>
                     </div>
                 ) : (
                     <>
                         {/* Sprint Race Picks Section */}
                         {currentRace?.hasSprint && (
-                            <div className="bg-white shadow rounded-lg p-6 mb-6">
+                            <div className="glass-card p-5 mb-5">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-lg font-medium text-gray-900">
-                                        Sprint Race Picks
-                                        <span className="text-sm font-normal text-gray-500 ml-2">
-                                            (Week {currentWeek} - {currentRace?.raceName})
-                                        </span>
-                                    </h2>
-                                    {currentRace?.picksLocked && (
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                            Picks Locked
-                                        </span>
-                                    )}
+                                    <div>
+                                        <h2 className="text-base font-semibold text-gray-900">Sprint Race Picks</h2>
+                                        <p className="text-xs text-gray-500">Week {currentWeek} · {currentRace?.raceName}</p>
+                                    </div>
+                                    {currentRace?.picksLocked && <span className="badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#dc2626' }}>Picks Locked</span>}
                                 </div>
 
                                 {/* Position Cards */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
                                     {requiredPositions.map((position) => {
                                         const pickedDriverId = sprintPicks.get(position);
                                         const pickedDriver = drivers.find(d => d.id === pickedDriverId);
@@ -661,10 +600,13 @@ function PicksV2Form() {
                                         return (
                                             <div
                                                 key={position}
-                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${pickedDriver
-                                                    ? 'border-green-500 bg-green-50'
-                                                    : 'border-gray-200 bg-gray-50 hover:border-gray-300'
-                                                    } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                className={`flex items-center gap-4 px-4 py-3.5 transition-colors ${
+                                                    pickedDriver
+                                                        ? 'bg-green-50'
+                                                        : isLocked
+                                                        ? 'bg-gray-50 cursor-not-allowed opacity-60'
+                                                        : 'hover:bg-gray-50 cursor-pointer'
+                                                }`}
                                                 onClick={() => {
                                                     if (!isLocked) {
                                                         setModalPosition(position);
@@ -673,33 +615,48 @@ function PicksV2Form() {
                                                     }
                                                 }}
                                             >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <h3 className="font-medium text-gray-900">{getPositionLabel(position)}</h3>
-                                                    {pickedDriver && (
+                                                <div className={`flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-sm text-white tracking-wide ${
+                                                    pickedDriver ? 'bg-green-500' : 'bg-blue-600'
+                                                }`}>
+                                                    P{position}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    {pickedDriver ? (
+                                                        <>
+                                                            <p className="font-semibold text-gray-900 truncate">{pickedDriver.name}</p>
+                                                            <p className="text-sm text-gray-500 truncate">{pickedDriver.team}</p>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <p className="text-sm font-medium text-gray-500">No pick made yet</p>
+                                                            {!isLocked && <p className="text-xs text-gray-400">Click to select a driver</p>}
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="flex-shrink-0">
+                                                    {pickedDriver && !isLocked ? (
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 unselectPick(position, 'sprint');
                                                             }}
-                                                            className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                                                            className="w-7 h-7 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
                                                             title="Remove pick"
                                                         >
-                                                            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                            <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                                                             </svg>
                                                         </button>
-                                                    )}
+                                                    ) : pickedDriver ? (
+                                                        <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                        </svg>
+                                                    ) : !isLocked ? (
+                                                        <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    ) : null}
                                                 </div>
-                                                {pickedDriver ? (
-                                                    <div className="text-sm">
-                                                        <p className="font-medium text-gray-900">{pickedDriver.name}</p>
-                                                        <p className="text-gray-500">{pickedDriver.team}</p>
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-sm">
-                                                        <p className="text-gray-500">Click to select driver</p>
-                                                    </div>
-                                                )}
                                             </div>
                                         );
                                     })}
@@ -707,42 +664,30 @@ function PicksV2Form() {
 
                                 {/* Sprint Progress Status */}
                                 {sprintPicks.size > 0 && (
-                                    <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
-                                        <div className="flex">
-                                            <div className="flex-shrink-0">
-                                                <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                </svg>
-                                            </div>
-                                            <div className="ml-3">
-                                                <p className="text-sm font-medium text-green-800">
-                                                    {sprintPicks.size} of {requiredPositions.length} sprint positions selected
-                                                </p>
-                                            </div>
-                                        </div>
+                                    <div className="mt-3 flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
+                                        <svg className="h-4 w-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        <p className="text-sm font-medium text-green-800">
+                                            {sprintPicks.size} of {requiredPositions.length} sprint positions selected
+                                        </p>
                                     </div>
                                 )}
                             </div>
                         )}
 
                         {/* Main Race Picks Section */}
-                        <div className="bg-white shadow rounded-lg p-6 mb-6">
+                        <div className="glass-card p-5 mb-5">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-medium text-gray-900">
-                                    Grand Prix Picks
-                                    <span className="text-sm font-normal text-gray-500 ml-2">
-                                        (Week {currentWeek} - {currentRace?.raceName})
-                                    </span>
-                                </h2>
-                                {currentRace?.picksLocked && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        Picks Locked
-                                    </span>
-                                )}
+                                <div>
+                                    <h2 className="text-base font-semibold text-gray-900">Grand Prix Picks</h2>
+                                    <p className="text-xs text-gray-500">Week {currentWeek} · {currentRace?.raceName}</p>
+                                </div>
+                                {currentRace?.picksLocked && <span className="badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#dc2626' }}>Picks Locked</span>}
                             </div>
 
                             {/* Position Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
                                 {requiredPositions.map((position) => {
                                     const pickedDriverId = userPicks.get(position);
                                     const pickedDriver = drivers.find(d => d.id === pickedDriverId);
@@ -751,10 +696,13 @@ function PicksV2Form() {
                                     return (
                                         <div
                                             key={position}
-                                            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${pickedDriver
-                                                ? 'border-green-500 bg-green-50'
-                                                : 'border-gray-200 bg-gray-50 hover:border-gray-300'
-                                                } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            className={`flex items-center gap-4 px-4 py-3.5 transition-colors ${
+                                                pickedDriver
+                                                    ? 'bg-green-50'
+                                                    : isLocked
+                                                    ? 'bg-gray-50 cursor-not-allowed opacity-60'
+                                                    : 'hover:bg-gray-50 cursor-pointer'
+                                            }`}
                                             onClick={() => {
                                                 if (!isLocked) {
                                                     setModalPosition(position);
@@ -763,33 +711,48 @@ function PicksV2Form() {
                                                 }
                                             }}
                                         >
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="font-medium text-gray-900">{getPositionLabel(position)}</h3>
-                                                {pickedDriver && (
+                                            <div className={`flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-sm text-white tracking-wide ${
+                                                pickedDriver ? 'bg-green-500' : 'bg-blue-600'
+                                            }`}>
+                                                P{position}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                {pickedDriver ? (
+                                                    <>
+                                                        <p className="font-semibold text-gray-900 truncate">{pickedDriver.name}</p>
+                                                        <p className="text-sm text-gray-500 truncate">{pickedDriver.team}</p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <p className="text-sm font-medium text-gray-500">No pick made yet</p>
+                                                        {!isLocked && <p className="text-xs text-gray-400">Click to select a driver</p>}
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div className="flex-shrink-0">
+                                                {pickedDriver && !isLocked ? (
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             unselectPick(position, 'race');
                                                         }}
-                                                        className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                                                        className="w-7 h-7 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
                                                         title="Remove pick"
                                                     >
-                                                        <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                        <svg className="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
                                                     </button>
-                                                )}
+                                                ) : pickedDriver ? (
+                                                    <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                    </svg>
+                                                ) : !isLocked ? (
+                                                    <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                ) : null}
                                             </div>
-                                            {pickedDriver ? (
-                                                <div className="text-sm">
-                                                    <p className="font-medium text-gray-900">{pickedDriver.name}</p>
-                                                    <p className="text-gray-500">{pickedDriver.team}</p>
-                                                </div>
-                                            ) : (
-                                                <div className="text-sm">
-                                                    <p className="text-gray-500">Click to select driver</p>
-                                                </div>
-                                            )}
                                         </div>
                                     );
                                 })}
@@ -797,19 +760,13 @@ function PicksV2Form() {
 
                             {/* Race Progress Status */}
                             {userPicks.size > 0 && (
-                                <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
-                                    <div className="flex">
-                                        <div className="flex-shrink-0">
-                                            <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                            </svg>
-                                        </div>
-                                        <div className="ml-3">
-                                            <p className="text-sm font-medium text-green-800">
-                                                {userPicks.size} of {requiredPositions.length} main race positions selected
-                                            </p>
-                                        </div>
-                                    </div>
+                                <div className="mt-3 flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">
+                                    <svg className="h-4 w-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    <p className="text-sm font-medium text-green-800">
+                                        {userPicks.size} of {requiredPositions.length} main race positions selected
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -840,12 +797,10 @@ function PicksV2Form() {
 export default function PicksV2Page() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                        <p className="mt-4 text-gray-600">Loading picks...</p>
-                    </div>
+            <div className="page-bg min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent" />
+                    <p className="text-sm text-gray-500">Loading picks…</p>
                 </div>
             </div>
         }>

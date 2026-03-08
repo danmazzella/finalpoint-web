@@ -99,33 +99,35 @@ function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <Logo className="w-32 h-32" />
+    <div className="page-bg min-h-screen flex flex-col justify-center py-10 px-4 sm:px-6">
+      <div className="w-full max-w-[420px] mx-auto animate-fade-in-up">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <Logo className="w-20 h-20 drop-shadow-lg" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <h2 className="text-xl text-gray-600">Join the F1 Prediction Game</h2>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-1">FinalPoint</h1>
+          <p className="text-sm text-gray-500">F1 Prediction Game</p>
         </div>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* Card */}
+        <div className="glass-card px-8 py-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Create your account</h2>
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Avatar Upload Section */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Profile Picture (Optional)
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Profile Picture <span className="normal-case font-normal">(optional)</span>
               </label>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-4">
                 <Avatar
                   src={avatarPreview}
                   alt="Avatar preview"
                   size="lg"
                   className="flex-shrink-0"
                 />
-                <div className="flex-1">
+                <div className="flex-1 flex items-center gap-2">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -136,7 +138,7 @@ function SignupForm() {
                   />
                   <label
                     htmlFor="avatar-upload"
-                    className="cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="btn-ghost text-sm py-1.5 px-3 cursor-pointer"
                   >
                     Choose Image
                   </label>
@@ -144,153 +146,137 @@ function SignupForm() {
                     <button
                       type="button"
                       onClick={handleRemoveAvatar}
-                      className="ml-2 inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      className="btn-danger text-sm py-1.5 px-3"
                     >
                       Remove
                     </button>
                   )}
                 </div>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                JPEG, PNG, GIF, or WebP. Max 5MB.
-              </p>
+              <p className="mt-1.5 text-xs text-gray-400">JPEG, PNG, GIF, or WebP. Max 5MB.</p>
             </div>
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 Username
               </label>
-              <div className="mt-1">
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  value={name}
-                  onChange={(e) => setSignupFormData({ ...signupFormData, name: e.target.value })}
-                  placeholder="Enter your username (no spaces)"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-                />
-              </div>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(e) => setSignupFormData({ ...signupFormData, name: e.target.value })}
+                placeholder="No spaces"
+                className="input-field"
+              />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 Email address
               </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setSignupFormData({ ...signupFormData, email: e.target.value })}
-                  placeholder="Enter your email address"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-                />
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setSignupFormData({ ...signupFormData, email: e.target.value })}
+                placeholder="you@example.com"
+                className="input-field"
+              />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 Password
               </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={password}
-                  onChange={(e) => setSignupFormData({ ...signupFormData, password: e.target.value })}
-                  placeholder="Enter your password"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-                />
-                <PasswordStrengthIndicator password={password} />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setSignupFormData({ ...signupFormData, password: e.target.value })}
+                placeholder="••••••••"
+                className="input-field"
+              />
+              <PasswordStrengthIndicator password={password} />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 Confirm Password
               </label>
-              <div className="mt-1">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setSignupFormData({ ...signupFormData, confirmPassword: e.target.value })}
-                  placeholder="Confirm your password"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-                />
-              </div>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setSignupFormData({ ...signupFormData, confirmPassword: e.target.value })}
+                placeholder="••••••••"
+                className="input-field"
+              />
             </div>
 
             {(signupError || validationError) && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm text-center font-medium">
-                {signupError || validationError}
+              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 animate-scale-in">
+                <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-red-700 font-medium">{signupError || validationError}</p>
               </div>
             )}
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {isLoading ? 'Creating account...' : 'Create account'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn-primary w-full py-2.5 text-sm"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Creating account…
+                </>
+              ) : 'Create account'}
+            </button>
           </form>
 
           <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Already have an account?</span>
-              </div>
-            </div>
+            <div className="divider-text my-5">already have an account?</div>
+            <Link
+              href={`/login?redirect=${encodeURIComponent(redirectTo)}`}
+              className="btn-secondary w-full py-2.5 text-sm"
+            >
+              Sign in instead
+            </Link>
+          </div>
 
-            <div className="mt-6">
-              <Link
-                href={`/login?redirect=${encodeURIComponent(redirectTo)}`}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Sign in instead
-              </Link>
-            </div>
+          {/* Legal Links */}
+          <div className="mt-5 pt-5 border-t border-gray-100 text-center text-xs text-gray-400">
+            By creating an account, you agree to our{' '}
+            <Link href="/terms" className="text-blue-600 hover:text-blue-500 font-medium">
+              Terms & Conditions
+            </Link>
+            {' '}and{' '}
+            <Link href="/privacy" className="text-blue-600 hover:text-blue-500 font-medium">
+              Privacy Policy
+            </Link>
+          </div>
 
-            {/* Legal Links */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="text-center text-xs text-gray-500">
-                By creating an account, you agree to our{' '}
-                <Link href="/terms" className="text-blue-600 hover:text-blue-800 underline">
-                  Terms & Conditions
-                </Link>
-                {' '}and{' '}
-                <Link href="/privacy" className="text-blue-600 hover:text-blue-800 underline">
-                  Privacy Policy
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-4 text-center">
-              <Link
-                href="/info"
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Learn more about FinalPoint
-              </Link>
-            </div>
+          <div className="mt-4 text-center">
+            <Link href="/info" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              Learn more about FinalPoint
+            </Link>
           </div>
         </div>
       </div>
@@ -301,23 +287,11 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="text-center">
-            <div className="flex justify-center mb-4">
-              <Logo size="lg" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-            <h2 className="text-xl text-gray-600">Join the F1 Prediction Game</h2>
-          </div>
-        </div>
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading...</p>
-            </div>
-          </div>
+      <div className="page-bg min-h-screen flex flex-col justify-center items-center">
+        <div className="glass-card px-10 py-10 flex flex-col items-center gap-4">
+          <Logo size="lg" />
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent" />
+          <p className="text-sm text-gray-500">Loading…</p>
         </div>
       </div>
     }>

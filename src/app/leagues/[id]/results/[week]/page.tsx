@@ -231,9 +231,9 @@ export default function RaceResultsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="page-bg min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent mx-auto"></div>
                     <p className="mt-4 text-lg text-gray-600">Loading race results...</p>
                     <p className="mt-2 text-sm text-gray-500">League: {leagueId}, Week: {selectedWeek}</p>
                     <p className="mt-1 text-sm text-gray-500">User: {user ? 'Authenticated' : 'Unauthenticated'}</p>
@@ -254,9 +254,9 @@ export default function RaceResultsPage() {
             user: !!user
         });
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center max-w-md mx-auto">
-                    <div className="bg-white shadow rounded-lg p-8">
+            <div className="page-bg min-h-screen flex items-center justify-center">
+                <div className="text-center max-w-md mx-4">
+                    <div className="glass-card p-8">
                         <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -277,16 +277,10 @@ export default function RaceResultsPage() {
                             Debug: Results length: {results?.length || 0}, League: {league?.name || 'None'}, User: {user ? 'Authenticated' : 'Unauthenticated'}
                         </p>
                         <div className="flex space-x-3 justify-center">
-                            <Link
-                                href={`/leagues/${leagueId}`}
-                                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                            >
+                            <Link href={`/leagues/${leagueId}`} className="btn-ghost text-sm py-2 px-4">
                                 Back to League
                             </Link>
-                            <button
-                                onClick={() => handleWeekChange(1)}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                            >
+                            <button onClick={() => handleWeekChange(1)} className="btn-primary text-sm py-2 px-4">
                                 View Week 1
                             </button>
                         </div>
@@ -308,7 +302,7 @@ export default function RaceResultsPage() {
     const hasScoredResults = results.some(result => result.picks.some(pick => pick.actualDriverName));
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="page-bg min-h-screen">
             <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
                     title="Race Results"
@@ -329,17 +323,14 @@ export default function RaceResultsPage() {
 
 
                 {/* Week Navigation */}
-                <div className="bg-white shadow rounded-lg p-4 mb-6">
+                <div className="glass-card p-4 mb-5">
                     {/* Mobile Week Navigation */}
                     <div className="md:hidden">
                         <div className="flex items-center justify-between mb-3">
                             <button
                                 onClick={goToPreviousWeek}
                                 disabled={!canGoPrevious}
-                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoPrevious
-                                    ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                    : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
-                                    }`}
+                                className={`btn-ghost text-sm py-2 px-3 flex items-center ${!canGoPrevious ? 'opacity-40 cursor-not-allowed' : ''}`}
                             >
                                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -349,10 +340,7 @@ export default function RaceResultsPage() {
                             <button
                                 onClick={goToNextWeek}
                                 disabled={!canGoNext}
-                                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoNext
-                                    ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                    : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
-                                    }`}
+                                className={`btn-ghost text-sm py-2 px-3 flex items-center ${!canGoNext ? 'opacity-40 cursor-not-allowed' : ''}`}
                             >
                                 Next
                                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -364,27 +352,26 @@ export default function RaceResultsPage() {
                         <div className="relative">
                             <button
                                 onClick={() => setShowWeekSelector(!showWeekSelector)}
-                                className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="input-field w-full flex items-center justify-between text-sm cursor-pointer"
                             >
                                 <div className="flex items-center">
-                                    <span className="text-lg font-bold text-blue-600 mr-2">Week {selectedWeek}</span>
+                                    <span className="text-base font-bold text-blue-600 mr-2">Week {selectedWeek}</span>
                                     <span className="text-gray-600 truncate">{currentRaceData?.raceName}</span>
                                 </div>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
 
                             {/* Week Selector Dropdown */}
                             {showWeekSelector && (
-                                <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                                     {races.map((race) => (
                                         <button
                                             key={race.weekNumber}
                                             ref={race.weekNumber === selectedWeek ? selectedWeekRef : null}
                                             onClick={() => handleWeekChange(race.weekNumber)}
-                                            className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                                                }`}
+                                            className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors ${race.weekNumber === selectedWeek ? 'bg-blue-50 text-blue-700' : 'text-gray-700'}`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div>
@@ -409,25 +396,21 @@ export default function RaceResultsPage() {
                                 <span>Week {selectedWeek} of {races.length}</span>
                                 <span>{Math.round((selectedWeek / races.length) * 100)}%</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
                                 <div
-                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
                                     style={{ width: `${(selectedWeek / races.length) * 100}%` }}
-                                ></div>
+                                />
                             </div>
                         </div>
                     </div>
 
                     {/* Desktop Week Navigation */}
                     <div className="hidden md:flex items-center justify-between">
-                        {/* Previous Button */}
                         <button
                             onClick={goToPreviousWeek}
                             disabled={!canGoPrevious}
-                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoPrevious
-                                ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
-                                }`}
+                            className={`btn-ghost text-sm py-2 px-3 flex items-center ${!canGoPrevious ? 'opacity-40 cursor-not-allowed' : ''}`}
                         >
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -435,59 +418,50 @@ export default function RaceResultsPage() {
                             Previous
                         </button>
 
-                        {/* Week Selector */}
-                        <div className="flex-1 mx-4">
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowWeekSelector(!showWeekSelector)}
-                                    className="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <span className="flex items-center">
-                                        <span className="text-lg font-bold text-blue-600 mr-2">Week {selectedWeek}</span>
-                                        <span className="text-gray-600">{currentRaceData?.raceName}</span>
-                                    </span>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
+                        <div className="flex-1 mx-4 relative">
+                            <button
+                                onClick={() => setShowWeekSelector(!showWeekSelector)}
+                                className="input-field w-full flex items-center justify-between text-sm cursor-pointer"
+                            >
+                                <span className="flex items-center">
+                                    <span className="text-base font-bold text-blue-600 mr-2">Week {selectedWeek}</span>
+                                    <span className="text-gray-600">{currentRaceData?.raceName}</span>
+                                </span>
+                                <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
 
-                                {/* Week Selector Dropdown */}
-                                {showWeekSelector && (
-                                    <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                        {races.map((race) => (
-                                            <button
-                                                key={race.weekNumber}
-                                                ref={race.weekNumber === selectedWeek ? selectedWeekRef : null}
-                                                onClick={() => handleWeekChange(race.weekNumber)}
-                                                className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 ${race.weekNumber === selectedWeek ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <span className="font-medium">Week {race.weekNumber}</span>
-                                                        <span className="text-gray-500 ml-2">- {race.raceName}</span>
-                                                    </div>
-                                                    {race.weekNumber === selectedWeek && (
-                                                        <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                        </svg>
-                                                    )}
+                            {showWeekSelector && (
+                                <div ref={dropdownRef} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                    {races.map((race) => (
+                                        <button
+                                            key={race.weekNumber}
+                                            ref={race.weekNumber === selectedWeek ? selectedWeekRef : null}
+                                            onClick={() => handleWeekChange(race.weekNumber)}
+                                            className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors ${race.weekNumber === selectedWeek ? 'bg-blue-50 text-blue-700' : 'text-gray-700'}`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <span className="font-medium">Week {race.weekNumber}</span>
+                                                    <span className="text-gray-500 ml-2">- {race.raceName}</span>
                                                 </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                                {race.weekNumber === selectedWeek && (
+                                                    <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Next Button */}
                         <button
                             onClick={goToNextWeek}
                             disabled={!canGoNext}
-                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${canGoNext
-                                ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                                : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
-                                }`}
+                            className={`btn-ghost text-sm py-2 px-3 flex items-center ${!canGoNext ? 'opacity-40 cursor-not-allowed' : ''}`}
                         >
                             Next
                             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -499,30 +473,29 @@ export default function RaceResultsPage() {
 
                 {/* Multiple Position Notice */}
                 {requiredPositions.length > 1 && hasScoredResults && (
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
+                    <div className="glass-card p-5 mb-5">
                         <div className="mb-4">
                             <h3 className="text-lg font-medium text-gray-900 mb-2">
                                 View Results by Position
                             </h3>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
                             {requiredPositions.map((position) => (
                                 <Link
                                     key={position}
                                     href={`/leagues/${leagueId}/results/${selectedWeek}/position/${position}?eventType=${selectedEventType}`}
-                                    className="group relative bg-white border-2 border-blue-300 rounded-lg p-4 hover:bg-blue-50 hover:border-blue-500 hover:shadow-md transition-all duration-200 cursor-pointer shadow-sm"
+                                    className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors"
                                 >
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-blue-700 mb-2">
-                                            P{position}
-                                        </div>
-                                        <div className="mt-2 text-xs text-blue-600 flex items-center justify-center">
-                                            <span>View Results</span>
-                                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </div>
+                                    <div className="flex-shrink-0 w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center font-extrabold text-sm text-white tracking-wide">
+                                        P{position}
                                     </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-gray-900">{getPositionLabel(position)}</p>
+                                        <p className="text-xs text-blue-600 mt-0.5">View Results</p>
+                                    </div>
+                                    <svg className="flex-shrink-0 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
                                 </Link>
                             ))}
                         </div>
@@ -531,31 +504,29 @@ export default function RaceResultsPage() {
 
                 {/* Multiple Position Notice for Unscored Events */}
                 {requiredPositions.length > 1 && !hasScoredResults && results.length > 0 && (
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
+                    <div className="glass-card p-5 mb-5">
                         <div className="mb-4">
                             <h3 className="text-lg font-medium text-gray-900 mb-2">
                                 View Picks by Position
                             </h3>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
                             {requiredPositions.map((position) => (
                                 <Link
                                     key={position}
                                     href={`/leagues/${leagueId}/results/${selectedWeek}/unscored-position/${position}?eventType=${selectedEventType}`}
-                                    className="group relative bg-white border-2 border-gray-300 rounded-lg p-4 hover:bg-gray-50 hover:border-gray-500 hover:shadow-md transition-all duration-200 cursor-pointer shadow-sm"
+                                    className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors"
                                 >
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-gray-700 mb-1">
-                                            P{position}
-                                        </div>
-
-                                        <div className="mt-2 text-xs text-gray-600 flex items-center justify-center">
-                                            <span>View Picks</span>
-                                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </div>
+                                    <div className="flex-shrink-0 w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center font-extrabold text-sm text-white tracking-wide">
+                                        P{position}
                                     </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-gray-900">{getPositionLabel(position)}</p>
+                                        <p className="text-xs text-blue-600 mt-0.5">View Picks</p>
+                                    </div>
+                                    <svg className="flex-shrink-0 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
                                 </Link>
                             ))}
                         </div>
@@ -564,9 +535,9 @@ export default function RaceResultsPage() {
 
                 {/* Actual Race Results Section */}
                 {hasScoredResults && (
-                    <div className="bg-white shadow rounded-lg p-6 mb-6">
+                    <div className="glass-card p-5 mb-5">
                         <h2 className="text-lg font-medium text-gray-900 mb-4">Actual Race Results</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
                             {requiredPositions.map((position) => {
                                 // Find the first result that has actual data for this position
                                 const positionResult = results.find(result =>
@@ -577,22 +548,20 @@ export default function RaceResultsPage() {
                                 const actualPick = positionResult?.picks.find(pick => pick.position === position);
 
                                 return (
-                                    <div key={position} className="border border-gray-200 rounded-lg p-4">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-medium text-gray-500">
-                                                {getPositionLabel(position)}
-                                            </span>
+                                    <div key={position} className="flex items-center gap-4 px-4 py-3.5">
+                                        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center font-extrabold text-sm text-white tracking-wide">
+                                            P{position}
                                         </div>
-                                        {actualPick?.actualDriverName ? (
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-900">
-                                                    {actualPick.actualDriverName}
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-semibold text-gray-900">{getPositionLabel(position)}</p>
+                                            {actualPick?.actualDriverName ? (
+                                                <p className="text-xs text-blue-600 mt-0.5">
+                                                    {actualPick.actualDriverName} · {actualPick.actualDriverTeam}
                                                 </p>
-                                                <p className="text-xs text-gray-500">{actualPick.actualDriverTeam}</p>
-                                            </div>
-                                        ) : (
-                                            <p className="text-xs text-gray-400 italic">No result available</p>
-                                        )}
+                                            ) : (
+                                                <p className="text-xs text-gray-400 italic mt-0.5">No result available</p>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -602,27 +571,21 @@ export default function RaceResultsPage() {
 
                 {/* Not Scored Message */}
                 {!hasScoredResults && results.length > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <svg className="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-blue-800">
-                                    Race not scored yet
-                                </p>
-                                <p className="text-sm text-blue-700 mt-1">
-                                    The race results haven&apos;t been entered yet. Picks will be scored once the race finishes.
-                                </p>
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-5">
+                        <div className="flex items-center gap-3">
+                            <svg className="h-5 w-5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                            </svg>
+                            <div>
+                                <p className="text-sm font-semibold text-amber-800">Race not scored yet</p>
+                                <p className="text-sm text-amber-700 mt-0.5">Picks will be scored once the race finishes.</p>
                             </div>
                         </div>
                     </div>
                 )}
 
                 {/* Summary Stats */}
-                <div className="bg-white shadow rounded-lg p-4 mb-6">
+                <div className="glass-card p-4 mb-5">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Summary</h3>
 
                     {/* Mobile Summary Stats */}
@@ -662,7 +625,7 @@ export default function RaceResultsPage() {
 
                 {/* Event Type Selector */}
                 {currentRaceData?.hasSprint && (
-                    <div className="bg-white shadow rounded-lg p-4 mb-6">
+                    <div className="glass-card p-4 mb-5">
                         <div className="flex items-center justify-center">
                             <div className="flex bg-gray-100 rounded-lg p-1">
                                 <button
@@ -689,17 +652,17 @@ export default function RaceResultsPage() {
                 )}
 
                 {/* Results Table */}
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-lg font-medium text-gray-900">
+                <div className="glass-card overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100">
+                        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                             {hasScoredResults ? 'All Results' : 'All Picks'}
                         </h2>
                     </div>
 
                     {/* Desktop Table */}
                     <div className="hidden md:block overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-gray-100">
+                            <thead className="bg-gray-50/60">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         User
@@ -722,9 +685,9 @@ export default function RaceResultsPage() {
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white divide-y divide-gray-100">
                                 {results.map((result, index) => (
-                                    <tr key={`${result.userId}-${index}`} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                    <tr key={`${result.userId}-${index}`} className="hover:bg-gray-50/60 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="relative mr-3">
@@ -771,12 +734,12 @@ export default function RaceResultsPage() {
                                             {user ? (
                                                 <Link
                                                     href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}&eventType=${selectedEventType}`}
-                                                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
+                                                    className="btn-ghost text-xs py-1.5 px-3"
                                                 >
                                                     View All Picks
                                                 </Link>
                                             ) : (
-                                                <span className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-500 bg-gray-100 cursor-not-allowed">
+                                                <span className="btn-ghost text-xs py-1.5 px-3 opacity-50 cursor-not-allowed">
                                                     Login to View
                                                 </span>
                                             )}
@@ -789,9 +752,9 @@ export default function RaceResultsPage() {
 
                     {/* Mobile Cards */}
                     <div className="md:hidden">
-                        <div className="space-y-4 p-4">
+                        <div className="space-y-3 p-4">
                             {results.map((result, index) => (
-                                <div key={`${result.userId}-${index}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                <div key={`${result.userId}-${index}`} className="glass-card p-4">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center flex-1">
                                             <div className="relative mr-4">
@@ -834,7 +797,7 @@ export default function RaceResultsPage() {
                                     </div>
 
                                     {hasScoredResults && (
-                                        <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                                        <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50/60 rounded-xl">
                                             <div className="text-center">
                                                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Correct Picks</div>
                                                 <div className="text-xl font-bold text-green-600">{result.totalCorrect}</div>
@@ -850,7 +813,7 @@ export default function RaceResultsPage() {
                                         {user ? (
                                             <Link
                                                 href={`/leagues/${leagueId}/results/${selectedWeek}/member/${result.userId}?memberIndex=${index}&eventType=${selectedEventType}`}
-                                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
+                                                className="btn-primary text-sm py-2 px-4"
                                             >
                                                 View All Picks
                                                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -858,7 +821,7 @@ export default function RaceResultsPage() {
                                                 </svg>
                                             </Link>
                                         ) : (
-                                            <span className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-500 bg-gray-100 cursor-not-allowed">
+                                            <span className="btn-ghost text-sm py-2 px-4 opacity-50 cursor-not-allowed">
                                                 Login to View Picks
                                             </span>
                                         )}

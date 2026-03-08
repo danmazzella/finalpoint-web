@@ -151,122 +151,130 @@ function LoginForm() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <Logo className="w-32 h-32" />
+    <div className="page-bg min-h-screen flex flex-col justify-center py-10 px-4 sm:px-6">
+      <div className="w-full max-w-[420px] mx-auto animate-fade-in-up">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <Logo className="w-20 h-20 drop-shadow-lg" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">FinalPoint</h1>
-          <h2 className="text-xl text-gray-600">F1 Prediction Game</h2>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-1">FinalPoint</h1>
+          <p className="text-sm text-gray-500">F1 Prediction Game</p>
         </div>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* Card */}
+        <div className="glass-card px-8 py-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Welcome back</h2>
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 Email address
               </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setLoginFormData({ email: e.target.value, password })}
-                  placeholder="Enter your email address"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-                />
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setLoginFormData({ email: e.target.value, password })}
+                placeholder="you@example.com"
+                className="input-field"
+              />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 Password
               </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setLoginFormData({ email, password: e.target.value })}
-                  placeholder="Enter your password"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-                />
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setLoginFormData({ email, password: e.target.value })}
+                placeholder="••••••••"
+                className="input-field"
+              />
             </div>
 
             {(loginError || validationError) && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm text-center font-medium">
-                {loginError || validationError}
+              <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 animate-scale-in">
+                <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-red-700 font-medium">{loginError || validationError}</p>
               </div>
             )}
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {isLoading ? 'Signing in...' : 'Sign in'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn-primary w-full py-2.5 text-sm"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Signing in…
+                </>
+              ) : 'Sign in'}
+            </button>
 
-            <div className="mt-4 text-center">
+            <div className="text-center">
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(!showForgotPassword)}
-                className="text-sm text-blue-600 hover:text-blue-500"
+                className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
               >
                 Forgot your password?
               </button>
             </div>
           </form>
 
-          {/* Forgot Password Form */}
+          {/* Forgot Password */}
           {showForgotPassword && (
-            <div className="mt-6 border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Reset Password</h3>
+            <div className="mt-6 pt-6 border-t border-gray-200 animate-slide-down">
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Reset your password</h3>
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div>
-                  <label htmlFor="forgotEmail" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="forgotEmail" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                     Email address
                   </label>
-                  <div className="mt-1">
-                    <input
-                      id="forgotEmail"
-                      name="forgotEmail"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      value={forgotPasswordEmail}
-                      onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                      placeholder="Enter your email address"
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
-                    />
-                  </div>
+                  <input
+                    id="forgotEmail"
+                    name="forgotEmail"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="input-field"
+                  />
                 </div>
 
                 {forgotPasswordError && (
-                  <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm font-medium">
-                    {forgotPasswordError}
+                  <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                    <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm text-red-700 font-medium">{forgotPasswordError}</p>
                   </div>
                 )}
 
-                <div className="flex space-x-3">
+                <div className="flex gap-3">
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                    className="btn-primary flex-1 py-2.5 text-sm"
                   >
-                    {isLoading ? 'Sending...' : 'Send Reset Link'}
+                    {isLoading ? 'Sending…' : 'Send reset link'}
                   </button>
                   <button
                     type="button"
@@ -275,7 +283,7 @@ function LoginForm() {
                       setForgotPasswordEmail('');
                       setForgotPasswordError('');
                     }}
-                    className="flex-1 flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="btn-ghost flex-1 py-2.5 text-sm"
                   >
                     Cancel
                   </button>
@@ -284,53 +292,29 @@ function LoginForm() {
             </div>
           )}
 
-          {/* Google Sign-In Section */}
+          {/* Google Sign-In */}
           {shouldShowGoogleSignIn() && (
             <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div ref={googleButtonRef} className="w-full flex justify-center">
-                  {/* Google Sign-In button will be rendered here */}
-                </div>
-              </div>
+              <div className="divider-text my-5">or continue with</div>
+              <div ref={googleButtonRef} className="w-full flex justify-center" />
             </div>
           )}
 
+          {/* Sign up link */}
           <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Don&apos;t have an account?</span>
-              </div>
-            </div>
+            <div className="divider-text my-5">new here?</div>
+            <Link
+              href={`/signup?redirect=${encodeURIComponent(redirectTo)}`}
+              className="btn-secondary w-full py-2.5 text-sm"
+            >
+              Create an account
+            </Link>
+          </div>
 
-            <div className="mt-6">
-              <Link
-                href={`/signup?redirect=${encodeURIComponent(redirectTo)}`}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Create an account
-              </Link>
-            </div>
-
-            <div className="mt-4 text-center">
-              <Link
-                href="/info"
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Learn more about FinalPoint
-              </Link>
-            </div>
+          <div className="mt-5 text-center">
+            <Link href="/info" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              Learn more about FinalPoint
+            </Link>
           </div>
         </div>
       </div>
@@ -341,23 +325,11 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="text-center">
-            <div className="flex justify-center mb-4">
-              <Logo size="lg" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">FinalPoint</h1>
-            <h2 className="text-xl text-gray-600">F1 Prediction Game</h2>
-          </div>
-        </div>
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading...</p>
-            </div>
-          </div>
+      <div className="page-bg min-h-screen flex flex-col justify-center items-center">
+        <div className="glass-card px-10 py-10 flex flex-col items-center gap-4">
+          <Logo size="lg" />
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent" />
+          <p className="text-sm text-gray-500">Loading…</p>
         </div>
       </div>
     }>

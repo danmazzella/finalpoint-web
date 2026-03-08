@@ -6,14 +6,14 @@ interface PageTitleProps {
 
 export default function PageTitle({ title, subtitle, children }: PageTitleProps) {
     return (
-        <div className="mb-3 sm:mb-6">
-            <div className="flex items-center justify-between">
+        <div className="mb-5 animate-fade-in-up">
+            <div className="flex items-start justify-between gap-4">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{title}</h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">{title}</h1>
                     {subtitle && (
                         <div className="mt-1">
                             {typeof subtitle === 'string' ? (
-                                <p className="text-gray-600">{subtitle}</p>
+                                <p className="text-sm text-gray-500">{subtitle}</p>
                             ) : (
                                 subtitle
                             )}
@@ -21,7 +21,7 @@ export default function PageTitle({ title, subtitle, children }: PageTitleProps)
                     )}
                 </div>
                 {children && (
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                         {children}
                     </div>
                 )}

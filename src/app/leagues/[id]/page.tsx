@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import { useChatFeature, usePositionChanges } from '@/contexts/FeatureFlagContext';
+import { useChatFeature, usePositionChanges, useMultiPositionPicks } from '@/contexts/FeatureFlagContext';
 import { leaguesAPI, activityAPI, League, f1racesAPI, chatAPI, picksAPI } from '@/lib/api';
 import { copyToClipboardWithFeedback } from '@/utils/clipboardUtils';
 import Link from 'next/link';
@@ -46,6 +46,7 @@ export default function LeagueDetailPage() {
   const { showToast } = useToast();
   const { isChatFeatureEnabled } = useChatFeature();
   const { isPositionChangesEnabled } = usePositionChanges();
+  const { isMultiPositionPicksEnabled } = useMultiPositionPicks();
   const params = useParams();
   const router = useRouter();
   const leagueId = params.id as string;
@@ -337,33 +338,28 @@ export default function LeagueDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="page-bg min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
       </div>
     );
   }
 
   if (!league) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">League not found</h1>
-            <p className="text-gray-600 mt-2">The league you&apos;re looking for doesn&apos;t exist.</p>
-            <Link
-              href="/leagues"
-              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              Back to Leagues
-            </Link>
-          </div>
+      <div className="page-bg min-h-screen flex items-center justify-center">
+        <div className="glass-card p-8 text-center max-w-md mx-4">
+          <h1 className="text-xl font-bold text-gray-900 mb-2">League not found</h1>
+          <p className="text-gray-500 mb-5">The league you&apos;re looking for doesn&apos;t exist.</p>
+          <Link href="/leagues" className="btn-primary text-sm py-2 px-5">
+            Back to Leagues
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-bg min-h-screen">
       <main className="max-w-7xl mx-auto px-4 py-2 sm:px-6 sm:py-6 lg:px-8">
         <PageTitle
           title={league.name}
@@ -391,22 +387,16 @@ export default function LeagueDetailPage() {
           {/* Quick Actions and League Stats - Left Side */}
           <div className="lg:col-span-1">
             {/* Quick Actions */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
-              <div className="space-y-3">
+            <div className="glass-card p-6">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Quick Actions</h2>
+              <div className="space-y-2.5">
                 {user ? (
                   <>
-                    <Link
-                      href={`/picks?league=${league.id}`}
-                      className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                    >
+                    <Link href={`/picks?league=${league.id}`} className="btn-primary w-full text-sm py-2.5">
                       Make Picks
                     </Link>
                     {isMember && isChatFeatureEnabled && (
-                      <Link
-                        href={`/chat/${league.id}`}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-                      >
+                      <Link href={`/chat/${league.id}`} className="btn-secondary w-full text-sm py-2.5">
                         💬 League Chat
                       </Link>
                     )}
@@ -414,51 +404,35 @@ export default function LeagueDetailPage() {
                       <button
                         onClick={joinLeague}
                         disabled={joining}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-primary w-full text-sm py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {joining ? 'Joining...' : 'Join League'}
                       </button>
                     )}
                   </>
                 ) : (
-                  <div className="text-center py-4">
+                  <div className="text-center py-2">
                     <p className="text-sm text-gray-500 mb-3">Log in to make picks and join this league</p>
                     <div className="space-y-2">
-                      <Link
-                        href="/login"
-                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                      >
-                        Log In
-                      </Link>
-                      <Link
-                        href="/signup"
-                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        Sign Up
-                      </Link>
+                      <Link href="/login" className="btn-primary w-full text-sm py-2.5">Log In</Link>
+                      <Link href="/signup" className="btn-ghost w-full text-sm py-2.5">Sign Up</Link>
                     </div>
                   </div>
                 )}
 
-                <Link
-                  href={`/leagues/${leagueId}/standings`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
+                <Link href={`/leagues/${leagueId}/standings`} className="btn-ghost w-full text-sm py-2.5">
                   View Standings
                 </Link>
 
                 <Link
                   href={`/leagues/${leagueId}/results/${currentRace?.weekNumber || 1}`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  className="btn-ghost w-full text-sm py-2.5"
                 >
                   {loadingCurrentRace ? 'Loading...' : 'View Results'}
                 </Link>
 
                 {user && league?.userRole && (
-                  <button
-                    onClick={openSettings}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
+                  <button onClick={openSettings} className="btn-ghost w-full text-sm py-2.5">
                     League Settings
                   </button>
                 )}
@@ -466,8 +440,8 @@ export default function LeagueDetailPage() {
             </div>
 
             {/* League Stats */}
-            <div className="bg-white shadow rounded-lg p-6 mt-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">League Stats</h2>
+            <div className="glass-card p-6 mt-4">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">League Stats</h2>
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Total Picks</span>
@@ -492,9 +466,9 @@ export default function LeagueDetailPage() {
           {/* League Info and Recent Activity - Right Side */}
           <div className="lg:col-span-2">
             {/* League Info */}
-            <div className="bg-white shadow rounded-lg p-6">
+            <div className="glass-card p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-medium text-gray-900">League Information</h2>
+                <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">League Information</h2>
                 {league.joinCode && (
                   <div className="flex space-x-2">
                     <button
@@ -507,9 +481,9 @@ export default function LeagueDetailPage() {
                           'Failed to copy invite link. Please try again.'
                         );
                       }}
-                      className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      className="btn-ghost text-xs py-1.5 px-3 flex items-center gap-1"
                     >
-                      <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                       </svg>
                       Invite Friends
@@ -525,9 +499,9 @@ export default function LeagueDetailPage() {
                           );
                         }
                       }}
-                      className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      className="btn-ghost text-xs py-1.5 px-3 flex items-center gap-1"
                     >
-                      <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
                       Copy Code
@@ -551,25 +525,23 @@ export default function LeagueDetailPage() {
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Status</dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
+                    <span className="badge badge-green">Active</span>
                   </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Your Status</dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {user ? (
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${league?.userRole === 'Owner'
-                        ? 'bg-purple-100 text-purple-800'
+                      <span className={`badge ${league?.userRole === 'Owner'
+                        ? 'badge-gray' // will override with inline style
                         : league?.userRole === 'Member'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                        }`}>
+                          ? 'badge-green'
+                          : 'badge-gray'
+                        }`} style={league?.userRole === 'Owner' ? { background: 'rgba(147,51,234,0.1)', color: '#7c3aed', border: '1px solid rgba(147,51,234,0.2)' } : undefined}>
                         {league?.userRole || 'Not a Member'}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="badge badge-blue">
                         Guest Viewer
                       </span>
                     )}
@@ -590,14 +562,14 @@ export default function LeagueDetailPage() {
 
             {/* Recent Activity */}
             {user ? (
-              <div className="bg-white shadow rounded-lg p-6 mt-6">
+              <div className="glass-card p-6 mt-4">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
+                  <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Recent Activity</h2>
                   <Link
                     href={`/leagues/${leagueId}/activity`}
                     className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                   >
-                    View All Activity →
+                    View All →
                   </Link>
                 </div>
                 {activityLoading ? (
@@ -610,7 +582,7 @@ export default function LeagueDetailPage() {
                     {recentActivity.map((activity) => {
                       // Debug logging to see what we're receiving
                       return (
-                        <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-50/60 rounded-xl">
                           <div className="flex-shrink-0">
                             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${activity.activityType === 'pick_created' ? 'bg-green-100' :
                               activity.activityType === 'pick_changed' ? 'bg-blue-100' :
@@ -744,15 +716,12 @@ export default function LeagueDetailPage() {
                 )}
               </div>
             ) : (
-              <div className="bg-white shadow rounded-lg p-6 mt-6">
+              <div className="glass-card p-6 mt-4">
                 <div className="text-center py-8">
                   <h2 className="text-lg font-medium text-gray-900 mb-2">League Activity</h2>
                   <p className="text-gray-500 mb-4">Log in to see recent activity and member interactions</p>
                   <div className="space-y-2">
-                    <Link
-                      href="/login"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                    >
+                    <Link href="/login" className="btn-primary text-sm py-2 px-5">
                       Log In
                     </Link>
                   </div>
@@ -766,10 +735,10 @@ export default function LeagueDetailPage() {
 
       {/* League Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">League Settings</h3>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto flex items-start justify-center pt-16 px-4 z-50">
+          <div className="glass-card w-full max-w-md p-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-5">League Settings</h3>
 
               {league?.userRole === 'Owner' ? (
                 <>
@@ -783,13 +752,13 @@ export default function LeagueDetailPage() {
                       id="leagueName"
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                      className="input-field"
                       placeholder="Enter league name"
                     />
                     <button
                       onClick={updateLeagueName}
                       disabled={updating || !editingName.trim()}
-                      className="mt-2 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="btn-primary mt-2 w-full text-sm py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {updating ? 'Updating...' : 'Update Name'}
                     </button>
@@ -838,29 +807,35 @@ export default function LeagueDetailPage() {
                       </label>
                       <div className="space-y-2">
                         <p className="text-sm text-gray-500 mb-3">
-                          Select 1-2 positions that league members must predict for each race.
+                          {isMultiPositionPicksEnabled
+                            ? 'Select the positions that league members must predict for each race.'
+                            : 'Select 1-2 positions that league members must predict for each race.'}
                         </p>
                         <div className="grid grid-cols-5 gap-2">
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((position) => (
-                            <label
-                              key={position}
-                              className={`flex items-center justify-center p-2 border rounded-md transition-colors ${editingPositions.includes(position)
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : editingPositions.length >= 2
-                                  ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer'
-                                }`}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={editingPositions.includes(position)}
-                                onChange={() => handlePositionToggle(position)}
-                                disabled={editingPositions.length >= 2 && !editingPositions.includes(position)}
-                                className="sr-only"
-                              />
-                              <span className="text-sm font-medium">P{position}</span>
-                            </label>
-                          ))}
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((position) => {
+                            const isSelected = editingPositions.includes(position);
+                            const atLimit = !isMultiPositionPicksEnabled && editingPositions.length >= 2 && !isSelected;
+                            return (
+                              <label
+                                key={position}
+                                className={`flex items-center justify-center p-2 border rounded-md transition-colors ${isSelected
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : atLimit
+                                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer'
+                                  }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handlePositionToggle(position)}
+                                  disabled={atLimit}
+                                  className="sr-only"
+                                />
+                                <span className="text-sm font-medium">P{position}</span>
+                              </label>
+                            );
+                          })}
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
                           Current: P{league?.requiredPositions?.join(', P') || 'None selected'}
@@ -869,7 +844,7 @@ export default function LeagueDetailPage() {
                           onClick={() => updateLeaguePositions()}
                           disabled={updatingPositions || editingPositions.length === 0 ||
                             JSON.stringify(editingPositions.sort()) === JSON.stringify((league?.requiredPositions || []).sort())}
-                          className="mt-2 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="btn-primary mt-2 w-full text-sm py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {updatingPositions ? 'Updating...' : 'Update Positions'}
                         </button>
@@ -885,7 +860,7 @@ export default function LeagueDetailPage() {
                     </p>
                     <button
                       onClick={() => setShowDeleteConfirm(true)}
-                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                      className="btn-danger w-full text-sm py-2.5"
                     >
                       Delete League
                     </button>
@@ -901,7 +876,7 @@ export default function LeagueDetailPage() {
                     </p>
                     <button
                       onClick={() => setShowLeaveConfirm(true)}
-                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="btn-primary w-full text-sm py-2.5"
                     >
                       Leave League
                     </button>
@@ -916,7 +891,7 @@ export default function LeagueDetailPage() {
                     setShowSettings(false);
                     setEditingName('');
                   }}
-                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="btn-ghost w-full text-sm py-2.5"
                 >
                   Cancel
                 </button>
@@ -928,33 +903,30 @@ export default function LeagueDetailPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100">
-                <svg className="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9 9 0 0012 21a9 9 0 009-9 8.999 8.999 0 00-1.646-5.646z" />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4 z-50">
+          <div className="glass-card w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mt-4 mb-2">Delete League</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Are you sure you want to delete "{league?.name}"? This action cannot be undone and will permanently delete all league data including picks, standings, and activity.
-              </p>
-              <div className="flex space-x-3">
-                <button
-                  onClick={deleteLeague}
-                  disabled={deleting}
-                  className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {deleting ? 'Deleting...' : 'Delete League'}
-                </button>
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Cancel
-                </button>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Delete League</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-5">
+              Are you sure you want to delete &quot;{league?.name}&quot;? This cannot be undone and will permanently delete all picks, standings, and activity.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowDeleteConfirm(false)} className="btn-ghost flex-1 text-sm py-2.5">
+                Cancel
+              </button>
+              <button
+                onClick={deleteLeague}
+                disabled={deleting}
+                className="btn-danger flex-1 text-sm py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? 'Deleting...' : 'Delete League'}
+              </button>
             </div>
           </div>
         </div>
@@ -962,33 +934,30 @@ export default function LeagueDetailPage() {
 
       {/* Leave Confirmation Modal */}
       {showLeaveConfirm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4 z-50">
+          <div className="glass-card w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mt-4 mb-2">Leave League</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Are you sure you want to leave "{league?.name}"? You can rejoin later if you have the join code.
-              </p>
-              <div className="flex space-x-3">
-                <button
-                  onClick={leaveLeague}
-                  disabled={leaving}
-                  className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {leaving ? 'Leaving...' : 'Leave League'}
-                </button>
-                <button
-                  onClick={() => setShowLeaveConfirm(false)}
-                  className="flex-1 flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Cancel
-                </button>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Leave League</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-5">
+              Are you sure you want to leave &quot;{league?.name}&quot;? You can rejoin later if you have the join code.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowLeaveConfirm(false)} className="btn-ghost flex-1 text-sm py-2.5">
+                Cancel
+              </button>
+              <button
+                onClick={leaveLeague}
+                disabled={leaving}
+                className="btn-primary flex-1 text-sm py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {leaving ? 'Leaving...' : 'Leave League'}
+              </button>
             </div>
           </div>
         </div>
@@ -996,48 +965,42 @@ export default function LeagueDetailPage() {
 
       {/* Position Change Conflict Confirmation Modal */}
       {showPositionChangeConfirm && positionChangeConflict && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
-                <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4 z-50">
+          <div className="glass-card w-full max-w-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mt-4 mb-2">Position Change Conflict</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Changing positions will affect existing picks. {positionChangeConflict.affectedUsers?.length || 0} users have picks that will be affected by this change.
-              </p>
-              {positionChangeConflict.affectedUsers && positionChangeConflict.affectedUsers.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Affected users:</p>
-                  <div className="max-h-32 overflow-y-auto">
-                    <ul className="text-sm text-gray-600 space-y-1">
-                      {positionChangeConflict.affectedUsers.map((user: any, index: number) => (
-                        <li key={index}>• {user.name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => updateLeaguePositions()}
-                  disabled={updatingPositions}
-                  className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {updatingPositions ? 'Updating...' : 'Force Change'}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowPositionChangeConfirm(false);
-                    setPositionChangeConflict(null);
-                  }}
-                  className="flex-1 flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Cancel
-                </button>
+              <h3 className="text-lg font-semibold text-gray-900">Position Change Conflict</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              Changing positions will affect {positionChangeConflict.affectedUsers?.length || 0} users&apos; existing picks.
+            </p>
+            {positionChangeConflict.affectedUsers && positionChangeConflict.affectedUsers.length > 0 && (
+              <div className="mb-4 bg-gray-50/60 rounded-xl p-3 max-h-32 overflow-y-auto">
+                <ul className="text-sm text-gray-600 space-y-1">
+                  {positionChangeConflict.affectedUsers.map((user: any, index: number) => (
+                    <li key={index}>• {user.name}</li>
+                  ))}
+                </ul>
               </div>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowPositionChangeConfirm(false); setPositionChangeConflict(null); }}
+                className="btn-ghost flex-1 text-sm py-2.5"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => updateLeaguePositions()}
+                disabled={updatingPositions}
+                className="btn-primary flex-1 text-sm py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updatingPositions ? 'Updating...' : 'Force Change'}
+              </button>
             </div>
           </div>
         </div>

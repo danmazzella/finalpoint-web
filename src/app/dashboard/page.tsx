@@ -158,18 +158,18 @@ export default function DashboardPage() {
   // Show loading spinner only while auth is loading or while loading user data
   if (authLoading || (loading && user)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="page-bg min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+    <div className="page-bg min-h-screen">
+      <main className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <PageTitle
           title="Dashboard"
-          subtitle={user ? "Welcome to your F1 prediction game" : "Welcome to F1 prediction game - Explore without signing up"}
+          subtitle={user ? "Welcome to your F1 prediction game" : "Welcome to F1 prediction game — explore without signing up"}
         />
 
         {/* Notification Prompt - Only show for logged-in users */}
@@ -182,11 +182,8 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="mb-6">
-          <Link
-            href="/scoring"
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Link href="/scoring" className="btn-ghost text-sm py-2 px-4">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             How Scoring Works
@@ -194,16 +191,16 @@ export default function DashboardPage() {
         </div>
 
         {/* Your Leagues Section */}
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="glass-card overflow-hidden mb-6 animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+          <div className="px-5 py-4 border-b border-white/40">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-lg font-medium text-gray-900">Your Leagues</h3>
+              <h3 className="text-base font-semibold text-gray-900">Your Leagues</h3>
               <div className="flex items-center gap-2">
                 {seasons.length > 0 && (
                   <select
                     value={leagueSeasonFilter}
                     onChange={(e) => setLeagueSeasonFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                    className="inline-flex items-center px-2.5 py-1.5 rounded border border-blue-200 bg-blue-50 text-xs font-medium text-gray-900 shadow-sm hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0 cursor-pointer dark:border-blue-600 dark:bg-blue-900/40 dark:text-gray-100 dark:hover:bg-blue-900/60 dark:focus:ring-blue-400 dark:focus:border-blue-400 sm:px-4 sm:py-2 sm:rounded-md sm:text-sm sm:min-w-[140px]"
+                    className="text-xs font-medium rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">All seasons</option>
                     {seasons.map((s) => (
@@ -211,105 +208,66 @@ export default function DashboardPage() {
                     ))}
                   </select>
                 )}
-                {user ? (
-                <Link
-                  href="/leagues"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm"
-                >
-                  Manage Leagues
+                <Link href="/leagues" className="btn-primary text-xs py-1.5 px-3">
+                  {user ? 'Manage' : 'Browse'}
                 </Link>
-              ) : (
-                <Link
-                  href="/leagues"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-sm"
-                >
-                  View Public Leagues
-                </Link>
-              )}
               </div>
             </div>
           </div>
 
           {!user ? (
-            <div className="px-6 py-8 text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Log in to see your leagues</h3>
-              <p className="mt-1 text-sm text-gray-500">Sign up or log in to create and manage your own leagues.</p>
-              <div className="mt-6">
-                <div className="flex space-x-2 justify-center">
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    Log In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                  >
-                    Sign Up
-                  </Link>
-                </div>
+            <div className="px-6 py-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-3">
+                <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Log in to see your leagues</h3>
+              <p className="text-xs text-gray-500 mb-5">Create and manage your own prediction leagues.</p>
+              <div className="flex gap-2 justify-center">
+                <Link href="/login" className="btn-ghost text-sm py-2 px-4">Log In</Link>
+                <Link href="/signup" className="btn-primary text-sm py-2 px-4">Sign Up</Link>
               </div>
             </div>
           ) : leagues.length === 0 ? (
-            <div className="px-6 py-8 text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No leagues</h3>
-              <p className="mt-1 text-sm text-gray-500">Get started by creating or joining a league.</p>
-              <div className="mt-6">
-                <div className="flex space-x-2 justify-center">
-                  <Link
-                    href="/join"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    Join League
-                  </Link>
-                  <Link
-                    href="/leagues"
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                  >
-                    Create League
-                  </Link>
-                </div>
+            <div className="px-6 py-10 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-3">
+                <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">No leagues yet</h3>
+              <p className="text-xs text-gray-500 mb-5">Get started by creating or joining a league.</p>
+              <div className="flex gap-2 justify-center">
+                <Link href="/join" className="btn-ghost text-sm py-2 px-4">Join League</Link>
+                <Link href="/leagues" className="btn-primary text-sm py-2 px-4">Create League</Link>
               </div>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-gray-100 stagger">
               {(leagueSeasonFilter === 'all'
                 ? leagues
                 : leagues.filter((l) => l.seasonYear === leagueSeasonFilter)
               ).map((league) => (
-                <div key={league.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-medium text-gray-900">{league.name}</h4>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                          {league.seasonYear}
-                        </span>
+                <div key={league.id} className="px-5 py-3.5 hover:bg-white/40 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm font-semibold text-gray-900 truncate">{league.name}</h4>
+                        <span className="badge badge-gray">{league.seasonYear}</span>
                         {unreadCounts[league.id] > 0 && (
-                          <div className="relative">
-                            <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
-                            </svg>
-                            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-4 text-xs font-bold text-white bg-blue-500 rounded-full">
-                              {unreadCounts[league.id]}
-                            </span>
-                          </div>
+                          <span className="badge badge-blue">
+                            {unreadCounts[league.id]} new
+                          </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500">Join Code: {league.joinCode}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Code: {league.joinCode}</p>
                     </div>
                     <Link
                       href={`/leagues/${league.id}`}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-50 hover:bg-blue-100"
+                      className="btn-secondary text-xs py-1.5 px-3 flex-shrink-0 opacity-80 group-hover:opacity-100"
                     >
-                      View League
+                      Open
                     </Link>
                   </div>
                 </div>
@@ -318,15 +276,15 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* User Stats Section */}
-        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <h2 className="text-lg font-medium text-gray-900">Your Statistics</h2>
+        {/* User Stats */}
+        <div className="glass-card p-5 mb-6 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 className="text-base font-semibold text-gray-900">Your Statistics</h2>
             {user && seasons.length > 0 && (
               <select
                 value={userStatsSeason}
                 onChange={(e) => setUserStatsSeason(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                className="inline-flex items-center px-2.5 py-1.5 rounded border border-blue-200 bg-blue-50 text-xs font-medium text-gray-900 shadow-sm hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0 cursor-pointer dark:border-blue-600 dark:bg-blue-900/40 dark:text-gray-100 dark:hover:bg-blue-900/60 dark:focus:ring-blue-400 dark:focus:border-blue-400 sm:px-4 sm:py-2 sm:rounded-md sm:text-sm sm:min-w-[140px]"
+                className="text-xs font-medium rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All-Time</option>
                 {seasons.map((s) => (
@@ -336,75 +294,46 @@ export default function DashboardPage() {
             )}
           </div>
           {!user ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">Log in to see your personal statistics</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-400">N/A</div>
-                  <div className="text-sm text-gray-500">Total Picks</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-400">N/A</div>
-                  <div className="text-sm text-gray-500">Correct Picks</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-400">N/A</div>
-                  <div className="text-sm text-gray-500">Total Points</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-400">N/A</div>
-                  <div className="text-sm text-gray-500">Avg Points</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-400">N/A</div>
-                  <div className="text-sm text-gray-500">Avg Distance</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-400">N/A</div>
-                  <div className="text-sm text-gray-500">Perfect Rate</div>
-                </div>
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-500 mb-4">Log in to see your personal statistics</p>
+              <div className="grid grid-cols-3 gap-3">
+                {['Total Picks','Correct Picks','Total Points','Avg Points','Avg Distance','Perfect Rate'].map((label) => (
+                  <div key={label} className="stat-card text-center">
+                    <div className="text-xl font-bold text-gray-300 mb-0.5">—</div>
+                    <div className="text-xs text-gray-400">{label}</div>
+                  </div>
+                ))}
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userStats.totalPicks}</div>
-                <div className="text-sm text-gray-500">Total Picks</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userStats.correctPicks}</div>
-                <div className="text-sm text-gray-500">Correct Picks</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userStats.totalPoints}</div>
-                <div className="text-sm text-gray-500">Total Points</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userStats.averagePoints}</div>
-                <div className="text-sm text-gray-500">Avg Points</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userStats.avgDistance}</div>
-                <div className="text-sm text-gray-500">Avg Distance</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{userStats.perfectPicksRate}%</div>
-                <div className="text-sm text-gray-500">Perfect Rate</div>
-              </div>
+            <div className="grid grid-cols-3 gap-3 stagger">
+              {[
+                { value: userStats.totalPicks,        label: 'Total Picks' },
+                { value: userStats.correctPicks,      label: 'Correct Picks' },
+                { value: userStats.totalPoints,       label: 'Total Points' },
+                { value: userStats.averagePoints,     label: 'Avg Points' },
+                { value: userStats.avgDistance,       label: 'Avg Distance' },
+                { value: `${userStats.perfectPicksRate}%`, label: 'Perfect Rate' },
+              ].map(({ value, label }) => (
+                <div key={label} className="stat-card text-center">
+                  <div className="text-xl font-bold text-gray-900 mb-0.5">{value}</div>
+                  <div className="text-xs text-gray-500">{label}</div>
+                </div>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Global Stats Section */}
-        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-          <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-            <h2 className="text-lg font-medium text-gray-900">Platform Statistics</h2>
+        {/* Global Stats */}
+        <div className="glass-card p-5 mb-6 animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+          <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <h2 className="text-base font-semibold text-gray-900">Platform Statistics</h2>
             <div className="flex items-center gap-2">
               {seasons.length > 0 && (
                 <select
                   value={globalStatsSeason}
                   onChange={(e) => setGlobalStatsSeason(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                  className="inline-flex items-center px-2.5 py-1.5 rounded border border-blue-200 bg-blue-50 text-xs font-medium text-gray-900 shadow-sm hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-w-0 cursor-pointer dark:border-blue-600 dark:bg-blue-900/40 dark:text-gray-100 dark:hover:bg-blue-900/60 dark:focus:ring-blue-400 dark:focus:border-blue-400 sm:px-4 sm:py-2 sm:rounded-md sm:text-sm sm:min-w-[140px]"
+                  className="text-xs font-medium rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All-Time</option>
                   {seasons.map((s) => (
@@ -412,58 +341,47 @@ export default function DashboardPage() {
                   ))}
                 </select>
               )}
-              <Link
-              href="/stats"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              Driver Position Stats
-            </Link>
+              <Link href="/stats" className="btn-primary text-xs py-1.5 px-3">
+                Driver Stats
+              </Link>
             </div>
           </div>
 
-
-          <>
-            {/* Lifetime Stats */}
-            <div className="mb-6">
-              <h3 className="text-md font-medium text-gray-700 mb-4">Lifetime Performance</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{globalStats.lifetimeAccuracy || 0}%</div>
-                  <div className="text-sm text-gray-500">Global Accuracy</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{globalStats.lifetimeAvgDistance || 0}</div>
-                  <div className="text-sm text-gray-500">Avg Distance from Correct</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-gray-200 my-6"></div>
-
-            {/* Past Week Stats */}
+          <div className="space-y-5">
             <div>
-              <h3 className="text-md font-medium text-gray-700 mb-4">Past Week Performance</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{globalStats.weekAccuracy || 0}%</div>
-                  <div className="text-sm text-gray-500">Global Accuracy</div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Lifetime Performance</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="stat-card text-center">
+                  <div className="text-xl font-bold text-blue-600 mb-0.5">{globalStats.lifetimeAccuracy || 0}%</div>
+                  <div className="text-xs text-gray-500">Global Accuracy</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{globalStats.weekAvgDistance || 0}</div>
-                  <div className="text-sm text-gray-500">Avg Distance from Correct</div>
+                <div className="stat-card text-center">
+                  <div className="text-xl font-bold text-blue-600 mb-0.5">{globalStats.lifetimeAvgDistance || 0}</div>
+                  <div className="text-xs text-gray-500">Avg Distance</div>
                 </div>
               </div>
             </div>
-          </>
+
+            <div className="border-t border-gray-100" />
+
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Past Week</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="stat-card text-center">
+                  <div className="text-xl font-bold text-green-600 mb-0.5">{globalStats.weekAccuracy || 0}%</div>
+                  <div className="text-xs text-gray-500">Global Accuracy</div>
+                </div>
+                <div className="stat-card text-center">
+                  <div className="text-xl font-bold text-green-600 mb-0.5">{globalStats.weekAvgDistance || 0}</div>
+                  <div className="text-xs text-gray-500">Avg Distance</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Bottom spacing for mobile to account for fixed bottom navigation */}
-        <div className="md:hidden h-8"></div>
-
+        {/* Bottom spacing for mobile fixed nav */}
+        <div className="md:hidden h-20" />
       </main>
     </div>
   );

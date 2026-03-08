@@ -205,17 +205,14 @@ export default function StandingsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading standings...</p>
-                </div>
+            <div className="page-bg min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="page-bg min-h-screen">
             <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
                     title={`${league?.name} - Standings`}
@@ -226,10 +223,10 @@ export default function StandingsPage() {
 
                 {/* Stats Overview */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                    <div className="bg-white shadow-lg rounded-lg p-4">
+                    <div className="glass-card p-4">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
                                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                     </svg>
@@ -244,10 +241,10 @@ export default function StandingsPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white shadow-lg rounded-lg p-4">
+                    <div className="glass-card p-4">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
                                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
@@ -262,10 +259,10 @@ export default function StandingsPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white shadow-lg rounded-lg p-4">
+                    <div className="glass-card p-4">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
                                     <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
@@ -287,10 +284,10 @@ export default function StandingsPage() {
                         </div>
                     </div>
 
-                    <div className="bg-white shadow-lg rounded-lg p-4">
+                    <div className="glass-card p-4">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
                                     <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
@@ -307,11 +304,11 @@ export default function StandingsPage() {
                 </div>
 
                 {/* Standings Table */}
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="glass-card overflow-hidden">
                     {/* Desktop Table */}
                     <div className="hidden md:block">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-gray-100">
+                            <thead className="bg-gray-50/60">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Member
@@ -386,9 +383,9 @@ export default function StandingsPage() {
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white divide-y divide-gray-100">
                                 {sortedStandings.map((member, index) => (
-                                    <tr key={member.id} className="hover:bg-gray-50">
+                                    <tr key={member.id} className="hover:bg-gray-50/60 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="relative flex-shrink-0">
@@ -465,9 +462,9 @@ export default function StandingsPage() {
 
                     {/* Mobile Cards */}
                     <div className="md:hidden">
-                        <div className="space-y-6 p-4">
+                        <div className="space-y-4 p-4">
                             {sortedStandings.map((member, index) => (
-                                <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                                <div key={member.id} className="glass-card p-5">
                                     <div className="flex items-start justify-between mb-5">
                                         <div className="flex items-center flex-1">
                                             <div className="relative flex-shrink-0 mr-4">
@@ -502,7 +499,7 @@ export default function StandingsPage() {
                                     </div>
 
                                     {/* Primary Stats - 2 columns on mobile */}
-                                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg mb-3">
+                                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50/60 rounded-xl mb-3">
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points</div>
                                             <div className="text-xl font-bold text-gray-900 mb-2 sm:mb-1">{member.totalPoints}</div>
@@ -518,7 +515,7 @@ export default function StandingsPage() {
                                     </div>
 
                                     {/* Secondary Stats - 3 columns on mobile */}
-                                    <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50 rounded-lg mb-3">
+                                    <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50/60 rounded-xl mb-3">
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points Accuracy</div>
                                             <div className={`text-xl font-bold mb-2 sm:mb-1 ${getAccuracyColor(member.newAccuracy || 0)}`}>

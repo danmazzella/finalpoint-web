@@ -67,28 +67,17 @@ export default function ProfilePage() {
   // Show login prompt for logged-out users
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="page-bg min-h-screen">
         <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-          <div className="bg-white shadow-lg rounded-lg p-8 text-center">
-            <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <div className="glass-card p-8 text-center max-w-md mx-auto mt-10">
+            <svg className="mx-auto h-14 w-14 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <h1 className="mt-4 text-2xl font-bold text-gray-900">Profile Page</h1>
-            <p className="mt-2 text-lg text-gray-600">You must be logged in to access your profile</p>
-            <p className="mt-1 text-sm text-gray-500 mb-8">Sign up or log in to manage your account settings, avatar, and preferences.</p>
-            <div className="flex space-x-4 justify-center">
-              <Link
-                href="/login"
-                className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Log In
-              </Link>
-              <Link
-                href="/signup"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Sign Up
-              </Link>
+            <h1 className="text-xl font-bold text-gray-900 mb-1">Profile Page</h1>
+            <p className="text-sm text-gray-500 mb-6">Sign up or log in to manage your account settings, avatar, and preferences.</p>
+            <div className="flex gap-3 justify-center">
+              <Link href="/login" className="btn-ghost py-2 px-6 text-sm">Log In</Link>
+              <Link href="/signup" className="btn-primary py-2 px-6 text-sm">Sign Up</Link>
             </div>
           </div>
         </main>
@@ -268,449 +257,297 @@ export default function ProfilePage() {
     router.push(`/notifications?redirect=${encodeURIComponent(redirectTo)}`);
   };
 
+  const chevron = (
+    <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+    </svg>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-bg min-h-screen">
       <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-lg mx-auto">
           {/* Success/Error Messages */}
           {success && (
-            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-              {success}
+            <div className="mb-4 flex items-start gap-2.5 bg-green-50 border border-green-200 rounded-xl px-4 py-3 animate-scale-in">
+              <svg className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-green-700 font-medium">{success}</p>
             </div>
           )}
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
+            <div className="mb-4 flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3 animate-scale-in">
+              <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-red-700 font-medium">{error}</p>
             </div>
           )}
 
-          {/* Profile Information */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Account Information</h3>
-              <div className="flex items-center space-x-4 mb-6">
+          {/* Profile Header */}
+          <div className="glass-card p-6 mb-4 animate-fade-in-up">
+            <div className="flex items-center gap-4">
+              {isLoadingAvatar ? (
+                <div className="w-16 h-16 rounded-full skeleton flex-shrink-0" />
+              ) : (
                 <Avatar
                   src={profileAvatar || user?.avatar}
                   alt={`${user?.name}'s avatar`}
                   size="lg"
                   className="flex-shrink-0"
                 />
-                <div>
-                  <h4 className="text-xl font-medium text-gray-900">{user?.name}</h4>
-                  <p className="text-gray-500">{user?.email}</p>
-                </div>
+              )}
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold text-gray-900 truncate">{user?.name}</h2>
+                <p className="text-sm text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
           </div>
 
           {/* Account Settings */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Account Settings</h3>
-              <div className="space-y-4">
-                <button
-                  onClick={() => setShowAvatarUpload(true)}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Update Avatar</p>
-                      <p className="text-sm text-gray-800">Change your profile picture</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setShowEditProfile(true)}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Edit Profile</p>
-                      <p className="text-sm text-gray-800">Update your name</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setShowChangePassword(true)}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Change Password</p>
-                      <p className="text-sm text-gray-800">Update your password</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
-
-                <button
-                  onClick={handleNotificationSettings}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Notification Settings</p>
-                      <p className="text-sm text-gray-800">Manage email and push notifications</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </button>
-
-                {/* Theme Toggle */}
-                <div className="px-4 py-3 border border-gray-200 rounded-md">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Theme</p>
-                      <p className="text-sm text-gray-800">Switch between light and dark mode</p>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm text-gray-500">Light</span>
-                      <div
-                        className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 cursor-pointer"
-                        onClick={() => {
-                          toggleTheme();
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          className="sr-only"
-                          checked={resolvedTheme === 'dark'}
-                          readOnly
-                        />
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${resolvedTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'}`} />
-                      </div>
-                      <span className="text-sm text-gray-500">Dark</span>
-                    </div>
-                  </div>
+          <div className="glass-card mb-4 overflow-hidden animate-fade-in-up" style={{ animationDelay: '60ms' }}>
+            <div className="px-5 py-4 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Account Settings</h3>
+            </div>
+            <div className="divide-y divide-gray-100">
+              <button onClick={() => setShowAvatarUpload(true)} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50/80 transition-colors text-left">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                 </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">Update Avatar</p>
+                  <p className="text-xs text-gray-500">Change your profile picture</p>
+                </div>
+                {chevron}
+              </button>
 
-                <Link
-                  href="/profile/delete-account"
-                  className="w-full text-left px-4 py-3 border border-red-200 rounded-md hover:bg-red-50 transition-colors block"
+              <button onClick={() => setShowEditProfile(true)} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50/80 transition-colors text-left">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">Edit Profile</p>
+                  <p className="text-xs text-gray-500">Update your username</p>
+                </div>
+                {chevron}
+              </button>
+
+              <button onClick={() => setShowChangePassword(true)} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50/80 transition-colors text-left">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">Change Password</p>
+                  <p className="text-xs text-gray-500">Update your password</p>
+                </div>
+                {chevron}
+              </button>
+
+              <button onClick={handleNotificationSettings} className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50/80 transition-colors text-left">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">Notification Settings</p>
+                  <p className="text-xs text-gray-500">Manage email and push notifications</p>
+                </div>
+                {chevron}
+              </button>
+
+              {/* Theme Toggle */}
+              <div className="flex items-center gap-3 px-5 py-4">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">Theme</p>
+                  <p className="text-xs text-gray-500">Switch between light and dark mode</p>
+                </div>
+                <div
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${resolvedTheme === 'dark' ? 'bg-blue-600' : 'bg-gray-200'}`}
+                  onClick={toggleTheme}
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-red-900">Delete Account</p>
-                      <p className="text-sm text-red-700">Permanently delete your account</p>
-                    </div>
-                    <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </Link>
+                  <input type="checkbox" className="sr-only" checked={resolvedTheme === 'dark'} readOnly />
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${resolvedTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'}`} />
+                </div>
               </div>
+
+              <Link href="/profile/delete-account" className="flex items-center gap-3 px-5 py-4 hover:bg-red-50/60 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-red-700">Delete Account</p>
+                  <p className="text-xs text-red-400">Permanently delete your account</p>
+                </div>
+                <svg className="h-4 w-4 text-red-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </Link>
             </div>
           </div>
 
           {/* App Information */}
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">App Information</h3>
-              <div className="space-y-4">
-                <a
-                  href="https://finalpoint.app/info"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">About FinalPoint</p>
-                      <p className="text-sm text-gray-500">Learn more about the app</p>
+          <div className="glass-card mb-4 overflow-hidden animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+            <div className="px-5 py-4 border-b border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">App Information</h3>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {[
+                { href: 'https://finalpoint.app/info', label: 'About FinalPoint', sub: 'Learn more about the app', external: true },
+                { href: `/privacy?redirect=${encodeURIComponent(redirectTo)}`, label: 'Privacy Policy', sub: 'Read our privacy policy' },
+                { href: `/terms?redirect=${encodeURIComponent(redirectTo)}`, label: 'Terms of Service', sub: 'Read our terms of service' },
+                { href: `/scoring?redirect=${encodeURIComponent(redirectTo)}`, label: 'Scoring System', sub: 'Learn how points are calculated' },
+              ].map(({ href, label, sub, external }) => (
+                external ? (
+                  <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50/80 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{label}</p>
+                      <p className="text-xs text-gray-500">{sub}</p>
                     </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </a>
-
-                <Link href={`/privacy?redirect=${encodeURIComponent(redirectTo)}`} className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Privacy Policy</p>
-                      <p className="text-sm text-gray-500">Read our privacy policy</p>
+                    {chevron}
+                  </a>
+                ) : (
+                  <Link key={label} href={href} className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50/80 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{label}</p>
+                      <p className="text-xs text-gray-500">{sub}</p>
                     </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </Link>
-
-                <Link href={`/terms?redirect=${encodeURIComponent(redirectTo)}`} className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Terms of Service</p>
-                      <p className="text-sm text-gray-500">Read our terms of service</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </Link>
-
-                <Link href={`/scoring?redirect=${encodeURIComponent(redirectTo)}`} className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Scoring System</p>
-                      <p className="text-sm text-gray-500">Learn how points are calculated</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </Link>
-
-                <a
-                  href={`mailto:${CONTACT_EMAIL}?subject=FinalPoint%20Support%20Request`}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors block"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Help & Support</p>
-                      <p className="text-sm text-gray-500">Get help and support</p>
-                    </div>
-                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </a>
-              </div>
+                    {chevron}
+                  </Link>
+                )
+              ))}
+              <a
+                href={`mailto:${CONTACT_EMAIL}?subject=FinalPoint%20Support%20Request`}
+                className="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50/80 transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">Help & Support</p>
+                  <p className="text-xs text-gray-500">Get help and support</p>
+                </div>
+                {chevron}
+              </a>
             </div>
           </div>
 
           {/* Logout */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <button
-                onClick={handleLogout}
-                className="w-full px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Logout
-              </button>
-            </div>
+          <div className="animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+            <button onClick={handleLogout} className="btn-ghost w-full py-3 text-sm text-red-600 border-red-200 hover:bg-red-50">
+              Sign Out
+            </button>
           </div>
 
           {/* App Version */}
-          <div className="text-center mt-6">
-            <p className="text-sm text-gray-500">FinalPoint v1.0.0</p>
-            <p className="text-xs text-gray-400 mt-1">F1 Prediction Game</p>
+          <div className="text-center mt-6 mb-4">
+            <p className="text-xs text-gray-400">FinalPoint v1.0.0 · F1 Prediction Game</p>
           </div>
         </div>
       </main>
 
       {/* Avatar Upload Modal */}
       {showAvatarUpload && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Update Avatar</h3>
-              <form onSubmit={handleAvatarUpload}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Profile Picture
-                  </label>
-                  <div className="flex items-center space-x-4 mb-4">
-                    <Avatar
-                      src={avatarPreview || profileAvatar || user?.avatar}
-                      alt="Avatar preview"
-                      size="lg"
-                      className="flex-shrink-0"
-                    />
-                    <div className="flex-1">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                        className="hidden"
-                        id="avatar-upload-profile"
-                      />
-                      <label
-                        htmlFor="avatar-upload-profile"
-                        className="cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        Choose Image
-                      </label>
-                      {avatar && (
-                        <button
-                          type="button"
-                          onClick={handleRemoveAvatar}
-                          className="ml-2 inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-start justify-center pt-16 px-4">
+          <div className="glass-card w-full max-w-sm p-6 animate-fade-in-up">
+            <h3 className="text-lg font-semibold text-gray-900 mb-5">Update Avatar</h3>
+            <form onSubmit={handleAvatarUpload} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Profile Picture</label>
+                <div className="flex items-center gap-4">
+                  <Avatar
+                    src={avatarPreview || profileAvatar || user?.avatar}
+                    alt="Avatar preview"
+                    size="lg"
+                    className="flex-shrink-0"
+                  />
+                  <div className="flex gap-2">
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload-profile" />
+                    <label htmlFor="avatar-upload-profile" className="btn-ghost text-sm py-1.5 px-3 cursor-pointer">Choose Image</label>
+                    {avatar && (
+                      <button type="button" onClick={handleRemoveAvatar} className="btn-danger text-sm py-1.5 px-3">Remove</button>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500">
-                    JPEG, PNG, GIF, or WebP. Max 5MB.
-                  </p>
                 </div>
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAvatarUpload(false);
-                      setAvatar(null);
-                      setAvatarPreview(null);
-                      setError('');
-                      setSuccess('');
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = '';
-                      }
-                    }}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading || !avatar}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {isLoading ? 'Uploading...' : 'Upload Avatar'}
-                  </button>
-                </div>
-              </form>
-            </div>
+                <p className="mt-1.5 text-xs text-gray-400">JPEG, PNG, GIF, or WebP. Max 5MB.</p>
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => { setShowAvatarUpload(false); setAvatar(null); setAvatarPreview(null); setError(''); setSuccess(''); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="btn-ghost flex-1 py-2.5 text-sm">Cancel</button>
+                <button type="submit" disabled={isLoading || !avatar} className="btn-primary flex-1 py-2.5 text-sm">
+                  {isLoading ? 'Uploading…' : 'Upload Avatar'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
       {/* Edit Profile Modal */}
       {showEditProfile && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Edit Profile</h3>
-              <form onSubmit={handleEditProfile}>
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-                    required
-                    minLength={2}
-                  />
-                </div>
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowEditProfile(false);
-                      setEditName(user?.name || '');
-                      setError('');
-                      setSuccess('');
-                    }}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {isLoading ? 'Updating...' : 'Update Profile'}
-                  </button>
-                </div>
-              </form>
-            </div>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-start justify-center pt-16 px-4">
+          <div className="glass-card w-full max-w-sm p-6 animate-fade-in-up">
+            <h3 className="text-lg font-semibold text-gray-900 mb-5">Edit Profile</h3>
+            <form onSubmit={handleEditProfile} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Username</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="input-field"
+                  required
+                  minLength={2}
+                />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => { setShowEditProfile(false); setEditName(user?.name || ''); setError(''); setSuccess(''); }} className="btn-ghost flex-1 py-2.5 text-sm">Cancel</button>
+                <button type="submit" disabled={isLoading} className="btn-primary flex-1 py-2.5 text-sm">
+                  {isLoading ? 'Updating…' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
       {/* Change Password Modal */}
       {showChangePassword && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
-              <form onSubmit={handleChangePassword}>
-                <div className="mb-4">
-                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    id="currentPassword"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="newPassword"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <PasswordStrengthIndicator password={newPassword} />
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowChangePassword(false);
-                      setCurrentPassword('');
-                      setNewPassword('');
-                      setConfirmPassword('');
-                      setError('');
-                      setSuccess('');
-                    }}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {isLoading ? 'Changing...' : 'Change Password'}
-                  </button>
-                </div>
-              </form>
-            </div>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-start justify-center pt-16 px-4">
+          <div className="glass-card w-full max-w-sm p-6 animate-fade-in-up">
+            <h3 className="text-lg font-semibold text-gray-900 mb-5">Change Password</h3>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label htmlFor="currentPassword" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Current Password</label>
+                <input type="password" id="currentPassword" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="input-field" required />
+              </div>
+              <div>
+                <label htmlFor="newPassword" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">New Password</label>
+                <input type="password" id="newPassword" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field" required minLength={6} />
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Confirm New Password</label>
+                <input type="password" id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field" required minLength={6} />
+              </div>
+              <PasswordStrengthIndicator password={newPassword} />
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => { setShowChangePassword(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); setError(''); setSuccess(''); }} className="btn-ghost flex-1 py-2.5 text-sm">Cancel</button>
+                <button type="submit" disabled={isLoading} className="btn-primary flex-1 py-2.5 text-sm">
+                  {isLoading ? 'Changing…' : 'Change Password'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
