@@ -11,6 +11,7 @@ interface AdminUser {
     role: 'user' | 'admin';
     chat_feature_enabled: boolean;
     position_changes_enabled: boolean;
+    multi_position_picks_enabled: boolean;
     createdAt: string;
     updatedAt: string;
     leagueCount: number;
@@ -140,7 +141,8 @@ export default function AdminUsersPage() {
                         user.id === userId ? {
                             ...user,
                             chat_feature_enabled: featureFlags.chat_feature || false,
-                            position_changes_enabled: featureFlags.league_position_changes || false
+                            position_changes_enabled: featureFlags.league_position_changes || false,
+                            multi_position_picks_enabled: featureFlags.multi_position_picks || false
                         } : user
                     )
                 );
@@ -432,6 +434,25 @@ export default function AdminUsersPage() {
                                             <span
                                                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${userFeatureFlags.league_position_changes ? 'translate-x-6' : 'translate-x-1'
                                                     }`}
+                                            />
+                                        </button>
+                                    </div>
+
+                                    {/* Multi Position Picks Feature */}
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700">Multi Position Picks</label>
+                                            <p className="text-xs text-gray-500">Allow leagues with more than 2 pick positions</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setUserFeatureFlags(prev => ({
+                                                ...prev,
+                                                multi_position_picks: !prev.multi_position_picks
+                                            }))}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${userFeatureFlags.multi_position_picks ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                                        >
+                                            <span
+                                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${userFeatureFlags.multi_position_picks ? 'translate-x-6' : 'translate-x-1'}`}
                                             />
                                         </button>
                                     </div>

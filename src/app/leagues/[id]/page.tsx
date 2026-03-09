@@ -326,10 +326,11 @@ export default function LeagueDetailPage() {
   };
 
   const handlePositionToggle = (position: number) => {
+    const maxPositions = isMultiPositionPicksEnabled ? 10 : 2;
     setEditingPositions(prev => {
       if (prev.includes(position)) {
         return prev.filter(p => p !== position);
-      } else if (prev.length < 2) {
+      } else if (prev.length < maxPositions) {
         return [...prev, position].sort((a, b) => a - b);
       }
       return prev;
@@ -582,7 +583,7 @@ export default function LeagueDetailPage() {
                     {recentActivity.map((activity) => {
                       // Debug logging to see what we're receiving
                       return (
-                        <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-50/60 rounded-xl">
+                        <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
                           <div className="flex-shrink-0">
                             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${activity.activityType === 'pick_created' ? 'bg-green-100' :
                               activity.activityType === 'pick_changed' ? 'bg-blue-100' :

@@ -72,7 +72,7 @@ export default function PlatformStandingsPage() {
   const maxPoints = standings?.thresholds[0]?.points ?? 1;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-bg min-h-screen">
       <main className="max-w-2xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <PageTitle
           title="Platform Standings"
@@ -96,10 +96,10 @@ export default function PlatformStandingsPage() {
 
         {loading ? (
           <div className="flex justify-center py-16">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
           </div>
         ) : !standings || standings.totalPlayers === 0 ? (
-          <div className="bg-white shadow-lg rounded-lg p-8 text-center">
+          <div className="glass-card p-8 text-center">
             <p className="text-gray-500">No standings data available yet.</p>
           </div>
         ) : (
@@ -128,13 +128,13 @@ export default function PlatformStandingsPage() {
             )}
 
             {/* Points thresholds */}
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-              <div className="px-5 py-3 border-b border-gray-200 bg-gray-50">
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Points Thresholds</h2>
-                <p className="text-xs text-gray-500 mt-0.5">Points needed in a single league to reach each tier</p>
+            <div className="glass-card overflow-hidden">
+              <div className="px-5 py-3 border-b border-white/40 bg-gray-50">
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Points Thresholds</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Points needed in a single league to reach each tier</p>
               </div>
 
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100/60">
                 {standings.thresholds.map((threshold, idx) => {
                   const isFirst = idx === 0;
                   return (

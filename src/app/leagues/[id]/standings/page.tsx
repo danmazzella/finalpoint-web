@@ -308,7 +308,7 @@ export default function StandingsPage() {
                     {/* Desktop Table */}
                     <div className="hidden md:block">
                         <table className="min-w-full divide-y divide-gray-100">
-                            <thead className="bg-gray-50/60">
+                            <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Member
@@ -385,7 +385,7 @@ export default function StandingsPage() {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-100">
                                 {sortedStandings.map((member, index) => (
-                                    <tr key={member.id} className="hover:bg-gray-50/60 transition-colors">
+                                    <tr key={member.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="relative flex-shrink-0">
@@ -499,7 +499,7 @@ export default function StandingsPage() {
                                     </div>
 
                                     {/* Primary Stats - 2 columns on mobile */}
-                                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50/60 rounded-xl mb-3">
+                                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl mb-3">
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points</div>
                                             <div className="text-xl font-bold text-gray-900 mb-2 sm:mb-1">{member.totalPoints}</div>
@@ -515,7 +515,7 @@ export default function StandingsPage() {
                                     </div>
 
                                     {/* Secondary Stats - 3 columns on mobile */}
-                                    <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50/60 rounded-xl mb-3">
+                                    <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50 rounded-xl mb-3">
                                         <div className="text-center">
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Points Accuracy</div>
                                             <div className={`text-xl font-bold mb-2 sm:mb-1 ${getAccuracyColor(member.newAccuracy || 0)}`}>

@@ -189,14 +189,11 @@ export default function LeagueActivityPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Activity</h2>
-                    <p className="text-gray-600 mb-4">{error}</p>
-                    <Link
-                        href={`/leagues/${leagueId}`}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                    >
+            <div className="page-bg min-h-screen flex items-center justify-center">
+                <div className="glass-card p-8 text-center max-w-sm">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Activity</h2>
+                    <p className="text-sm text-gray-500 mb-5">{error}</p>
+                    <Link href={`/leagues/${leagueId}`} className="btn-primary text-sm py-2 px-4">
                         Back to League
                     </Link>
                 </div>
@@ -205,178 +202,126 @@ export default function LeagueActivityPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="page-bg min-h-screen">
+            <main className="max-w-3xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                 <PageTitle
                     title={leagueName ? `${leagueName} Activity` : 'League Activity'}
-                    subtitle="All league activity and history"
+                    subtitle="Complete history of all league activity"
                 >
                     <BackToLeagueButton leagueId={leagueId} className="text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2" />
                 </PageTitle>
 
-                {/* Activity List */}
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-lg font-medium text-gray-900">All Activity</h2>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Complete history of all league activity
-                        </p>
+                <div className="glass-card overflow-hidden">
+                    <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+                        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">All Activity</h2>
                     </div>
 
-                    <div className="p-6">
-                        {loading && activities.length === 0 ? (
-                            <div className="text-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                                <p className="mt-2 text-sm text-gray-500">Loading activities...</p>
-                            </div>
-                        ) : activities.length > 0 ? (
-                            <div className="space-y-4">
-                                {activities.map((activity, index) => (
-                                    <div key={activity.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                                        <div className="flex items-start space-x-3">
-                                            <div className="flex-shrink-0">
-                                                {activity.userId && activity.userName ? (
-                                                    <Avatar
-                                                        src={activity.userAvatar}
-                                                        alt={`${activity.userName}'s avatar`}
-                                                        size="md"
-                                                        className="flex-shrink-0"
-                                                    />
-                                                ) : (
-                                                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${getActivityIconBg(activity.activityType)}`}>
-                                                        {getActivityIcon(activity.activityType)}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-gray-900">
-                                                    {activity.primaryMessage || (() => {
-                                                        // Fallback to old field logic for backwards compatibility
-                                                        switch (activity.activityType) {
-                                                            case 'pick_created':
-                                                                return `${activity.userName} created a pick`;
-                                                            case 'pick_changed':
-                                                                return `${activity.userName} changed a pick`;
-                                                            case 'pick_removed':
-                                                                return `${activity.userName} removed a pick`;
-                                                            case 'member_joined':
-                                                            case 'user_joined':
-                                                                return `${activity.userName} joined the league`;
-                                                            case 'member_left':
-                                                                return `${activity.userName} left the league`;
-                                                            case 'league_name_changed':
-                                                                return `${activity.userName} changed the league name`;
-                                                            case 'league_visibility_changed':
-                                                                return `${activity.userName} changed league visibility`;
-                                                            case 'league_created':
-                                                                return `${activity.userName} created the league`;
-                                                            case 'race_result_processed':
-                                                                return `Race results processed for Week ${activity.weekNumber || 'Unknown'}`;
-                                                            case 'picks_locked':
-                                                                return 'Picks locked';
-                                                            // Admin activities
-                                                            case 'admin_user_added_to_league':
-                                                                return `${activity.driverName || 'Admin added user to league'}`;
-                                                            case 'admin_user_removed_from_league':
-                                                                return `${activity.driverName || 'Admin removed user from league'}`;
-                                                            case 'admin_pick_created':
-                                                                return `${activity.driverName || 'Admin created pick for user'}`;
-                                                            case 'admin_pick_updated':
-                                                                return `${activity.driverName || 'Admin updated user\'s pick'}`;
-                                                            case 'admin_pick_deleted':
-                                                                return `${activity.driverName || 'Admin deleted user\'s pick'}`;
-                                                            case 'admin_user_role_updated':
-                                                                return `${activity.driverName || 'Admin updated user role'}`;
-                                                            default:
-                                                                return `${activity.userName || 'System'} ${activity.activityType.replace(/_/g, ' ')}`;
-                                                        }
-                                                    })()}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {activity.secondaryMessage || (() => {
-                                                        // Fallback to old field logic for backwards compatibility
-                                                        switch (activity.activityType) {
-                                                            case 'pick_created':
-                                                                return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
-                                                            case 'pick_changed':
-                                                                return `Position P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
-                                                            case 'pick_removed':
-                                                                return `Removed ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) from P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
-                                                            case 'member_joined':
-                                                            case 'user_joined':
-                                                                return 'Welcome to the league!';
-                                                            case 'member_left':
-                                                                return 'Goodbye!';
-                                                            case 'league_name_changed':
-                                                                return `Changed from "${activity.previousDriverName || 'Unknown'}" to "${activity.driverName || 'Unknown'}"`;
-                                                            case 'league_visibility_changed':
-                                                                return `Changed league visibility from "${activity.previousDriverName || 'Unknown'}"`;
-                                                            case 'league_created':
-                                                                return 'League created successfully';
-                                                            case 'race_result_processed':
-                                                                return `${activity.raceName ? `${activity.raceName} - ` : ''}${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) finished in P${activity.position || '?'}`;
-                                                            case 'picks_locked':
-                                                                return `Picks locked for ${activity.raceName || 'this race'} • Week ${activity.weekNumber || 'Unknown'}`;
-                                                            // Admin activities
-                                                            case 'admin_user_added_to_league':
-                                                                return `${activity.driverTeam || 'Welcome to the league!'}`;
-                                                            case 'admin_user_removed_from_league':
-                                                                return `${activity.driverTeam || 'Goodbye!'}`;
-                                                            case 'admin_pick_created':
-                                                                return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
-                                                            case 'admin_pick_updated':
-                                                                return `Changed pick from ${activity.previousDriverName || 'Unknown'} to ${activity.driverName || 'Unknown'} for P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
-                                                            case 'admin_pick_deleted':
-                                                                return `Removed ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) from P${activity.position || '?'} • Week ${activity.weekNumber || 'Unknown'}`;
-                                                            case 'admin_user_role_updated':
-                                                                return `${activity.driverTeam || 'User role updated by administrator'}`;
-                                                            default:
-                                                                return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'}`;
-                                                        }
-                                                    })()}
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-2">
-                                                    {new Date(activity.createdAt).toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </p>
-                                            </div>
+                    {loading && activities.length === 0 ? (
+                        <div className="text-center py-10">
+                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mx-auto" />
+                            <p className="mt-3 text-sm text-gray-500">Loading activity...</p>
+                        </div>
+                    ) : activities.length === 0 ? (
+                        <div className="text-center py-10 px-6">
+                            <svg className="mx-auto h-10 w-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p className="text-sm font-medium text-gray-900">No activity yet</p>
+                            <p className="text-xs text-gray-500 mt-1">Activity will appear here as members make picks.</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="divide-y divide-gray-100">
+                                {activities.map((activity) => (
+                                    <div key={activity.id} className="flex items-start gap-3 px-5 py-4 hover:bg-gray-50 transition-colors">
+                                        <div className="flex-shrink-0">
+                                            {activity.userId && activity.userName ? (
+                                                <Avatar
+                                                    src={activity.userAvatar}
+                                                    alt={`${activity.userName}'s avatar`}
+                                                    size="sm"
+                                                />
+                                            ) : (
+                                                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${getActivityIconBg(activity.activityType)}`}>
+                                                    {getActivityIcon(activity.activityType)}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900">
+                                                {activity.primaryMessage || (() => {
+                                                    switch (activity.activityType) {
+                                                        case 'pick_created': return `${activity.userName} created a pick`;
+                                                        case 'pick_changed': return `${activity.userName} changed a pick`;
+                                                        case 'pick_removed': return `${activity.userName} removed a pick`;
+                                                        case 'member_joined':
+                                                        case 'user_joined': return `${activity.userName} joined the league`;
+                                                        case 'member_left': return `${activity.userName} left the league`;
+                                                        case 'league_name_changed': return `${activity.userName} changed the league name`;
+                                                        case 'league_visibility_changed': return `${activity.userName} changed league visibility`;
+                                                        case 'league_created': return `${activity.userName} created the league`;
+                                                        case 'race_result_processed': return `Race results processed for Week ${activity.weekNumber || 'Unknown'}`;
+                                                        case 'picks_locked': return 'Picks locked';
+                                                        case 'admin_user_added_to_league': return `${activity.driverName || 'Admin added user to league'}`;
+                                                        case 'admin_user_removed_from_league': return `${activity.driverName || 'Admin removed user from league'}`;
+                                                        case 'admin_pick_created': return `${activity.driverName || 'Admin created pick for user'}`;
+                                                        case 'admin_pick_updated': return `${activity.driverName || "Admin updated user's pick"}`;
+                                                        case 'admin_pick_deleted': return `${activity.driverName || "Admin deleted user's pick"}`;
+                                                        case 'admin_user_role_updated': return `${activity.driverName || 'Admin updated user role'}`;
+                                                        default: return `${activity.userName || 'System'} ${activity.activityType.replace(/_/g, ' ')}`;
+                                                    }
+                                                })()}
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-0.5">
+                                                {activity.secondaryMessage || (() => {
+                                                    switch (activity.activityType) {
+                                                        case 'pick_created': return `Picked ${activity.driverName || 'Unknown'} (${activity.driverTeam || 'Unknown'}) for P${activity.position || '?'} · Week ${activity.weekNumber || 'Unknown'}`;
+                                                        case 'pick_changed': return `Position P${activity.position || '?'} · Week ${activity.weekNumber || 'Unknown'}`;
+                                                        case 'pick_removed': return `Removed ${activity.driverName || 'Unknown'} from P${activity.position || '?'} · Week ${activity.weekNumber || 'Unknown'}`;
+                                                        case 'member_joined':
+                                                        case 'user_joined': return 'Welcome to the league!';
+                                                        case 'member_left': return 'Left the league';
+                                                        case 'league_name_changed': return `"${activity.previousDriverName || 'Unknown'}" → "${activity.driverName || 'Unknown'}"`;
+                                                        case 'league_visibility_changed': return `Visibility changed from "${activity.previousDriverName || 'Unknown'}"`;
+                                                        case 'league_created': return 'League created successfully';
+                                                        case 'race_result_processed': return `${activity.raceName ? `${activity.raceName} · ` : ''}${activity.driverName || 'Unknown'} finished P${activity.position || '?'}`;
+                                                        case 'picks_locked': return `Picks locked for ${activity.raceName || 'this race'} · Week ${activity.weekNumber || 'Unknown'}`;
+                                                        case 'admin_user_added_to_league': return `${activity.driverTeam || 'Welcome to the league!'}`;
+                                                        case 'admin_user_removed_from_league': return `${activity.driverTeam || 'Removed from league'}`;
+                                                        case 'admin_pick_created': return `Picked ${activity.driverName || 'Unknown'} for P${activity.position || '?'} · Week ${activity.weekNumber || 'Unknown'}`;
+                                                        case 'admin_pick_updated': return `Changed pick from ${activity.previousDriverName || 'Unknown'} to ${activity.driverName || 'Unknown'} · P${activity.position || '?'} · Week ${activity.weekNumber || 'Unknown'}`;
+                                                        case 'admin_pick_deleted': return `Removed ${activity.driverName || 'Unknown'} from P${activity.position || '?'} · Week ${activity.weekNumber || 'Unknown'}`;
+                                                        case 'admin_user_role_updated': return `${activity.driverTeam || 'User role updated by administrator'}`;
+                                                        default: return `${activity.driverName || 'Unknown'} · P${activity.position || '?'}`;
+                                                    }
+                                                })()}
+                                            </p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {new Date(activity.createdAt).toLocaleDateString('en-US', {
+                                                    year: 'numeric', month: 'short', day: 'numeric',
+                                                    hour: '2-digit', minute: '2-digit'
+                                                })}
+                                            </p>
                                         </div>
                                     </div>
                                 ))}
+                            </div>
 
-                                {hasMore && (
-                                    <div className="text-center pt-4">
-                                        <button
-                                            onClick={loadMore}
-                                            disabled={loading}
-                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            {loading ? 'Loading...' : 'Load More'}
-                                        </button>
-                                    </div>
-                                )}
-
-                                {!hasMore && activities.length > 0 && (
-                                    <div className="text-center pt-4">
-                                        <p className="text-sm text-gray-500">No more activities to load</p>
-                                    </div>
+                            <div className="px-5 py-4 border-t border-gray-100 text-center">
+                                {hasMore ? (
+                                    <button
+                                        onClick={loadMore}
+                                        disabled={loading}
+                                        className="btn-ghost text-sm py-2 px-5 disabled:opacity-50"
+                                    >
+                                        {loading ? 'Loading...' : 'Load More'}
+                                    </button>
+                                ) : (
+                                    <p className="text-xs text-gray-400">All activity loaded</p>
                                 )}
                             </div>
-                        ) : (
-                            <div className="text-center py-8">
-                                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <h3 className="mt-2 text-sm font-medium text-gray-900">No activity found</h3>
-                                <p className="mt-1 text-sm text-gray-500">Activity will appear here as members make picks.</p>
-                            </div>
-                        )}
-                    </div>
+                        </>
+                    )}
                 </div>
             </main>
         </div>

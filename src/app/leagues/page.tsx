@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useChatFeature } from '@/contexts/FeatureFlagContext';
+import { useChatFeature, useMultiPositionPicks } from '@/contexts/FeatureFlagContext';
 import { leaguesAPI, League, chatAPI, seasonsAPI } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
@@ -11,6 +11,7 @@ import { useSearchParams } from 'next/navigation';
 export default function LeaguesPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { isChatFeatureEnabled } = useChatFeature();
+  const { isMultiPositionPicksEnabled } = useMultiPositionPicks();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const [myLeagues, setMyLeagues] = useState<League[]>([]);
@@ -154,10 +155,11 @@ export default function LeaguesPage() {
   };
 
   const handlePositionToggle = (position: number) => {
+    const maxPositions = isMultiPositionPicksEnabled ? 10 : 2;
     setSelectedPositions(prev => {
       if (prev.includes(position)) {
         return prev.filter(p => p !== position);
-      } else if (prev.length < 2) {
+      } else if (prev.length < maxPositions) {
         return [...prev, position];
       }
       return prev;
@@ -278,8 +280,8 @@ export default function LeaguesPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        <span className="badge-gray">{league.seasonYear}</span>
-                        <span className={league.isPublic ? 'badge-green' : 'badge-gray'}>{league.isPublic ? 'Public' : 'Private'}</span>
+                        <span className="badge badge-gray">{league.seasonYear}</span>
+                        <span className={league.isPublic ? 'badge badge-green' : 'badge badge-gray'}>{league.isPublic ? 'Public' : 'Private'}</span>
                       </div>
                     </div>
                     <p className="text-xs text-gray-500 mb-3">
@@ -362,8 +364,8 @@ export default function LeaguesPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        <span className="badge-gray">{league.seasonYear}</span>
-                        <span className="badge-green">Public</span>
+                        <span className="badge badge-gray">{league.seasonYear}</span>
+                        <span className="badge badge-green">Public</span>
                       </div>
                     </div>
 

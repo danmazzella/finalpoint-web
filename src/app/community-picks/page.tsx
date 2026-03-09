@@ -135,7 +135,7 @@ function CommunityPicksContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-bg min-h-screen">
       <main className="max-w-4xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <PageTitle
           title="Community Picks"
@@ -143,7 +143,7 @@ function CommunityPicksContent() {
         />
 
         {/* Controls */}
-        <div className="bg-white shadow-lg rounded-lg p-4 mb-6">
+        <div className="glass-card p-4 mb-5">
           <div className="flex flex-wrap gap-4 items-end">
             {/* Season filter */}
             {seasons.length > 1 && (
@@ -152,7 +152,7 @@ function CommunityPicksContent() {
                 <select
                   value={seasonFilter ?? ''}
                   onChange={(e) => setSeasonFilter(e.target.value ? Number(e.target.value) : null)}
-                  className="px-3 py-2 rounded border border-gray-300 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field text-sm py-1.5"
                 >
                   {seasons.map(s => (
                     <option key={s.year} value={s.year}>{s.displayLabel || s.year}</option>
@@ -165,14 +165,14 @@ function CommunityPicksContent() {
             <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
               <label className="text-xs font-medium text-gray-600">Race Week</label>
               {weeksLoading ? (
-                <div className="h-9 bg-gray-100 animate-pulse rounded" />
+                <div className="h-9 bg-gray-100 animate-pulse rounded-lg" />
               ) : weeks.length === 0 ? (
                 <p className="text-sm text-gray-500">No weeks available</p>
               ) : (
                 <select
                   value={selectedWeek ?? ''}
                   onChange={(e) => handleWeekChange(Number(e.target.value))}
-                  className="px-3 py-2 rounded border border-gray-300 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field text-sm py-1.5"
                 >
                   {weeks.map(w => (
                     <option key={w.weekNumber} value={w.weekNumber}>
@@ -187,13 +187,11 @@ function CommunityPicksContent() {
             {selectedWeekData?.hasSprint && (
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-gray-600">Event</label>
-                <div className="flex rounded border border-gray-300 overflow-hidden">
+                <div className="flex rounded-lg border border-gray-200 overflow-hidden">
                   <button
                     onClick={() => setEventType('race')}
                     className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      eventType === 'race'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      eventType === 'race' ? 'bg-blue-600 text-white' : 'bg-white/60 text-gray-700 hover:bg-white/80'
                     }`}
                   >
                     Race
@@ -201,9 +199,7 @@ function CommunityPicksContent() {
                   <button
                     onClick={() => setEventType('sprint')}
                     className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      eventType === 'sprint'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                      eventType === 'sprint' ? 'bg-blue-600 text-white' : 'bg-white/60 text-gray-700 hover:bg-white/80'
                     }`}
                   >
                     Sprint
@@ -217,10 +213,10 @@ function CommunityPicksContent() {
         {/* Stats */}
         {loading ? (
           <div className="flex justify-center py-16">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
           </div>
         ) : stats == null || stats.positions.length === 0 ? (
-          <div className="bg-white shadow-lg rounded-lg p-8 text-center">
+          <div className="glass-card p-8 text-center">
             <p className="text-gray-500">No pick data available for this week.</p>
           </div>
         ) : (
@@ -255,24 +251,18 @@ function PositionCard({ position, isScored }: { position: PositionStat; isScored
   const correctDriver = position.drivers.find(d => d.isCorrect);
 
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="px-5 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-base font-semibold text-gray-900">P{position.position}</span>
-          <span className="text-sm text-gray-500">({ordinal(position.position)} place)</span>
-        </div>
+    <div className="glass-card overflow-hidden">
+      <div className="px-5 py-3 bg-gray-50 border-b border-white/40 flex items-center gap-3">
+        <span className="text-base font-semibold text-gray-900">P{position.position}</span>
+        <span className="text-sm text-gray-500">{ordinal(position.position)} place</span>
       </div>
 
       <div className="px-5 py-4 space-y-3">
         {position.drivers.map((driver) => (
           <div
             key={driver.driverId}
-            className={`rounded-lg p-3 transition-colors ${
-              driver.isCorrect
-                ? 'bg-green-50 ring-1 ring-green-300'
-                : isScored
-                ? 'bg-gray-50'
-                : 'bg-gray-50'
+            className={`rounded-xl p-3 transition-colors ${
+              driver.isCorrect ? 'bg-green-50 ring-1 ring-green-300' : 'bg-gray-50'
             }`}
           >
             <div className="flex items-center justify-between mb-1.5">
@@ -291,23 +281,22 @@ function PositionCard({ position, isScored }: { position: PositionStat; isScored
                 {driver.percentage}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
               <div
-                className={`h-2 rounded-full transition-all ${driver.isCorrect ? 'bg-green-500' : 'bg-blue-500'}`}
+                className={`h-1.5 rounded-full transition-all ${driver.isCorrect ? 'bg-green-500' : 'bg-blue-500'}`}
                 style={{ width: `${Math.max(driver.percentage, 1)}%` }}
               />
             </div>
           </div>
         ))}
 
-        {/* Scored summary */}
         {isScored && correctDriver && (
-          <div className="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500">
+          <div className="pt-2 border-t border-gray-100 text-xs text-gray-500">
             {correctDriver.percentage}% of players picked {correctDriver.driverName} correctly for P{position.position}
           </div>
         )}
         {isScored && !correctDriver && position.actualResult && (
-          <div className="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500">
+          <div className="pt-2 border-t border-gray-100 text-xs text-gray-500">
             Correct answer: {position.actualResult.driverName} — 0% of players got this right
           </div>
         )}
@@ -319,8 +308,8 @@ function PositionCard({ position, isScored }: { position: PositionStat; isScored
 export default function CommunityPicksPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+      <div className="page-bg min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
       </div>
     }>
       <CommunityPicksContent />
