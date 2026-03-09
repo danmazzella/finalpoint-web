@@ -284,10 +284,10 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Explore Card */}
+        {/* Stats & Info Card */}
         <div className="glass-card overflow-hidden mb-6">
           <div className="px-5 py-3.5 border-b border-white/40">
-            <h3 className="text-base font-semibold text-gray-900">Explore</h3>
+            <h3 className="text-base font-semibold text-gray-900">Stats &amp; Info</h3>
           </div>
           <Link href="/community-picks" className="flex items-center px-5 py-3.5 hover:bg-gray-50 transition-colors border-b border-gray-200 group">
             <div className="w-8 h-8 rounded-lg bg-blue-100/70 flex items-center justify-center mr-3 flex-shrink-0">
@@ -303,7 +303,7 @@ export default function DashboardPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
-          <Link href="/platform-standings" className="flex items-center px-5 py-3.5 hover:bg-gray-50 transition-colors group">
+          <Link href="/platform-standings" className="flex items-center px-5 py-3.5 hover:bg-gray-50 transition-colors border-b border-gray-200 group">
             <div className="w-8 h-8 rounded-lg bg-blue-100/70 flex items-center justify-center mr-3 flex-shrink-0">
               <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -312,6 +312,20 @@ export default function DashboardPage() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900">Platform Standings</p>
               <p className="text-xs text-gray-500">See how you rank against all players</p>
+            </div>
+            <svg className="w-4 h-4 text-gray-400 flex-shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+          <Link href="/stats" className="flex items-center px-5 py-3.5 hover:bg-gray-50 transition-colors group">
+            <div className="w-8 h-8 rounded-lg bg-blue-100/70 flex items-center justify-center mr-3 flex-shrink-0">
+              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900">Driver Position Stats</p>
+              <p className="text-xs text-gray-500">Historical driver finishing position data</p>
             </div>
             <svg className="w-4 h-4 text-gray-400 flex-shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -384,9 +398,6 @@ export default function DashboardPage() {
                   ))}
                 </select>
               )}
-              <Link href="/stats" className="btn-primary text-xs py-1.5 px-3">
-                Driver Stats
-              </Link>
             </div>
           </div>
 

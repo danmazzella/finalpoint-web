@@ -128,9 +128,7 @@ export default function LeaguesPage() {
 
   const getPositionBadgeClass = (league: League, position: number, eventType: 'race' | 'sprint' = 'race'): string => {
     const hasPick = hasPickForPosition(league, position, eventType);
-    return hasPick
-      ? 'inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 border border-green-300'
-      : 'inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-300';
+    return hasPick ? 'badge badge-green' : 'badge badge-gray';
   };
 
   const createLeague = async (e: React.FormEvent) => {
@@ -291,9 +289,9 @@ export default function LeaguesPage() {
                     {/* Required Positions with Status */}
                     {league.requiredPositions && league.requiredPositions.length > 0 && (
                       <div className="space-y-2 mb-4">
-                        {league.positionStatus?.hasSprint === true && (
+                        {league.positionStatus?.hasSprint && (
                           <div>
-                            <p className="text-xs text-gray-400 mb-1">Sprint</p>
+                            <p className="text-xs font-medium text-gray-400 mb-1">Sprint</p>
                             <div className="flex gap-1 flex-wrap">
                               {league.requiredPositions.sort((a, b) => a - b).map((position) => (
                                 <span key={`sprint-${position}`} className={getPositionBadgeClass(league, position, 'sprint')}>
@@ -304,7 +302,7 @@ export default function LeaguesPage() {
                           </div>
                         )}
                         <div>
-                          <p className="text-xs text-gray-400 mb-1">Race</p>
+                          <p className="text-xs font-medium text-gray-400 mb-1">Race</p>
                           <div className="flex gap-1 flex-wrap">
                             {league.requiredPositions.sort((a, b) => a - b).map((position) => (
                               <span key={`race-${position}`} className={getPositionBadgeClass(league, position, 'race')}>
@@ -376,22 +374,22 @@ export default function LeaguesPage() {
                       </div>
 
                       {league.requiredPositions && league.requiredPositions.length > 0 && (
-                        <div className="space-y-1">
-                          {league.positionStatus?.hasSprint === true && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-500">Sprint</span>
-                              <div className="flex gap-1">
+                        <div className="space-y-1.5">
+                          {league.positionStatus?.hasSprint && (
+                            <div>
+                              <span className="text-xs text-gray-400 font-medium">Sprint</span>
+                              <div className="flex gap-1 flex-wrap mt-1">
                                 {league.requiredPositions.sort((a, b) => a - b).map((position) => (
-                                  <span key={`sprint-${position}`} className="badge-gray">P{position}</span>
+                                  <span key={`sprint-${position}`} className="badge badge-gray">P{position}</span>
                                 ))}
                               </div>
                             </div>
                           )}
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-500">Race</span>
-                            <div className="flex gap-1">
+                          <div>
+                            <span className="text-xs text-gray-400 font-medium">Race</span>
+                            <div className="flex gap-1 flex-wrap mt-1">
                               {league.requiredPositions.sort((a, b) => a - b).map((position) => (
-                                <span key={`race-${position}`} className="badge-gray">P{position}</span>
+                                <span key={`race-${position}`} className="badge badge-gray">P{position}</span>
                               ))}
                             </div>
                           </div>
