@@ -290,6 +290,8 @@ export const authAPI = {
     apiService.get('/users/stats', { params: seasonYear != null && seasonYear !== 'all' ? { seasonYear } : {} }),
   getGlobalStats: (seasonYear?: number | 'all' | null) =>
     apiService.get('/users/global-stats', { params: seasonYear != null && seasonYear !== 'all' ? { seasonYear } : {} }),
+  getPlatformStandings: (seasonYear?: number | 'all' | null) =>
+    apiService.get('/users/platform-standings', { params: seasonYear != null && seasonYear !== 'all' ? { seasonYear } : {} }),
   getMonthlyStats: () => apiService.get('/users/monthly-stats'),
   updateProfile: (data: { name: string }) => apiService.put('/users/profile', data),
   updateAvatar: (data: FormData) => apiService.put('/users/avatar', data, {
@@ -368,6 +370,13 @@ export const picksAPI = {
   getLeaguePositionHistory: (leagueId: number) => apiService.get(`/picks/league/${leagueId}/positions/history`),
   getLeaguePositionsForWeek: (leagueId: number, weekNumber: number) =>
     apiService.get(`/picks/league/${leagueId}/positions/week/${weekNumber}`),
+};
+
+export const communityPicksAPI = {
+  getAvailableWeeks: (seasonYear?: number) =>
+    apiService.get('/picks/community/weeks', { params: seasonYear ? { seasonYear } : {} }),
+  getStats: (weekNumber: number, eventType: 'race' | 'sprint' = 'race', seasonYear?: number) =>
+    apiService.get('/picks/community/stats', { params: { weekNumber, eventType, ...(seasonYear ? { seasonYear } : {}) } }),
 };
 
 export const driversAPI = {
