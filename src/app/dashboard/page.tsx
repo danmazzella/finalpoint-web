@@ -69,6 +69,11 @@ export default function DashboardPage() {
         const res = await seasonsAPI.getSeasons();
         if (res.data?.success && Array.isArray(res.data.data)) {
           setSeasons(res.data.data);
+          if (res.data.data.length > 0) {
+            const latest = Math.max(...res.data.data.map((s: { year: number }) => s.year));
+            setUserStatsSeason(latest);
+            setGlobalStatsSeason(latest);
+          }
         }
       } catch {
         // ignore
@@ -181,9 +186,12 @@ export default function DashboardPage() {
         )}
 
         {/* Quick Actions */}
-        <div className="mb-6">
-          <Link href="/scoring" className="btn-ghost text-sm py-2 px-4">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mb-6 flex flex-wrap gap-2">
+          <Link
+            href="/scoring"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             How Scoring Works
@@ -276,10 +284,45 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* User Stats */}
-        <div className="glass-card p-5 mb-6 animate-fade-in-up" style={{ animationDelay: '120ms' }}>
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h2 className="text-base font-semibold text-gray-900">Your Statistics</h2>
+        {/* Explore Card */}
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">Explore</h3>
+          </div>
+          <Link href="/community-picks" className="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors border-b border-gray-100 group">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-blue-100 transition-colors">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900">Community Picks</p>
+              <p className="text-sm text-gray-500">See how everyone picked each race week</p>
+            </div>
+            <svg className="w-4 h-4 text-gray-400 flex-shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+          <Link href="/platform-standings" className="flex items-center px-6 py-4 hover:bg-gray-50 transition-colors group">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-blue-100 transition-colors">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900">Platform Standings</p>
+              <p className="text-sm text-gray-500">See how you rank against all players</p>
+            </div>
+            <svg className="w-4 h-4 text-gray-400 flex-shrink-0 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+
+        {/* User Stats Section */}
+        <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <h2 className="text-lg font-medium text-gray-900">Your Statistics</h2>
             {user && seasons.length > 0 && (
               <select
                 value={userStatsSeason}
@@ -297,7 +340,7 @@ export default function DashboardPage() {
             <div className="text-center py-4">
               <p className="text-sm text-gray-500 mb-4">Log in to see your personal statistics</p>
               <div className="grid grid-cols-3 gap-3">
-                {['Total Picks','Correct Picks','Total Points','Avg Points','Avg Distance','Perfect Rate'].map((label) => (
+                {['Total Picks', 'Correct Picks', 'Total Points', 'Avg Points', 'Avg Distance', 'Perfect Rate'].map((label) => (
                   <div key={label} className="stat-card text-center">
                     <div className="text-xl font-bold text-gray-300 mb-0.5">—</div>
                     <div className="text-xs text-gray-400">{label}</div>
@@ -308,11 +351,11 @@ export default function DashboardPage() {
           ) : (
             <div className="grid grid-cols-3 gap-3 stagger">
               {[
-                { value: userStats.totalPicks,        label: 'Total Picks' },
-                { value: userStats.correctPicks,      label: 'Correct Picks' },
-                { value: userStats.totalPoints,       label: 'Total Points' },
-                { value: userStats.averagePoints,     label: 'Avg Points' },
-                { value: userStats.avgDistance,       label: 'Avg Distance' },
+                { value: userStats.totalPicks, label: 'Total Picks' },
+                { value: userStats.correctPicks, label: 'Correct Picks' },
+                { value: userStats.totalPoints, label: 'Total Points' },
+                { value: userStats.averagePoints, label: 'Avg Points' },
+                { value: userStats.avgDistance, label: 'Avg Distance' },
                 { value: `${userStats.perfectPicksRate}%`, label: 'Perfect Rate' },
               ].map(({ value, label }) => (
                 <div key={label} className="stat-card text-center">
