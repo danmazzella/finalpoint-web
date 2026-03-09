@@ -591,7 +591,7 @@ function PicksV2Form() {
                                 </div>
 
                                 {/* Position Cards */}
-                                <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {requiredPositions.map((position) => {
                                         const pickedDriverId = sprintPicks.get(position);
                                         const pickedDriver = drivers.find(d => d.id === pickedDriverId);
@@ -600,12 +600,12 @@ function PicksV2Form() {
                                         return (
                                             <div
                                                 key={position}
-                                                className={`flex items-center gap-4 px-4 py-3.5 transition-colors ${
+                                                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-colors ${
                                                     pickedDriver
-                                                        ? 'bg-green-50'
+                                                        ? 'border-green-300 bg-green-50'
                                                         : isLocked
-                                                        ? 'bg-gray-50 cursor-not-allowed opacity-60'
-                                                        : 'hover:bg-gray-50 cursor-pointer'
+                                                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                                                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 cursor-pointer'
                                                 }`}
                                                 onClick={() => {
                                                     if (!isLocked) {
@@ -687,7 +687,7 @@ function PicksV2Form() {
                             </div>
 
                             {/* Position Cards */}
-                            <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 {requiredPositions.map((position) => {
                                     const pickedDriverId = userPicks.get(position);
                                     const pickedDriver = drivers.find(d => d.id === pickedDriverId);
@@ -696,12 +696,12 @@ function PicksV2Form() {
                                     return (
                                         <div
                                             key={position}
-                                            className={`flex items-center gap-4 px-4 py-3.5 transition-colors ${
+                                            className={`flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-colors ${
                                                 pickedDriver
-                                                    ? 'bg-green-50'
+                                                    ? 'border-green-300 bg-green-50'
                                                     : isLocked
-                                                    ? 'bg-gray-50 cursor-not-allowed opacity-60'
-                                                    : 'hover:bg-gray-50 cursor-pointer'
+                                                    ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                                                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 cursor-pointer'
                                             }`}
                                             onClick={() => {
                                                 if (!isLocked) {

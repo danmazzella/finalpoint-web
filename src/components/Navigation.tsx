@@ -114,21 +114,21 @@ export default function Navigation() {
                         </Link>
 
                         {/* Desktop Navigation Links */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
                             {allNavigationItems.map((item) => (
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                    className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                                         isActive(item.href)
-                                            ? 'text-primary bg-primary/10'
-                                            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                                            ? 'text-primary bg-primary/12 shadow-sm'
+                                            : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
                                     }`}
                                 >
                                     {item.icon}
                                     <span>{item.name}</span>
                                     {isActive(item.href) && (
-                                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary" />
+                                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-primary/60" />
                                     )}
                                 </Link>
                             ))}
@@ -146,6 +146,8 @@ export default function Navigation() {
                         </div>
                     </div>
                 </div>
+                {/* Subtle accent line */}
+                <div className="h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
             </nav>
 
             {/* Mobile Navigation */}

@@ -5,6 +5,7 @@ import { notificationsAPI, NotificationPreferences } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import PageTitle from '@/components/PageTitle';
 
 export default function NotificationsPage() {
     const { user } = useAuth();
@@ -222,50 +223,49 @@ export default function NotificationsPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading notification settings...</p>
-                </div>
+            <div className="page-bg min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="max-w-3xl mx-auto">
+        <div className="page-bg min-h-screen">
+            <main className="max-w-2xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                <PageTitle title="Notifications" subtitle="Manage your notification preferences">
+                    <Link href={`/profile?redirect=${encodeURIComponent(redirectTo)}`} className="btn-ghost text-xs px-3 py-1.5 sm:text-sm sm:px-4 sm:py-2">
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back
+                    </Link>
+                </PageTitle>
+
+                <div className="space-y-5">
                     {/* Success/Error Messages */}
                     {success && (
-                        <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-50 border border-green-200 text-sm text-green-700">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
                             {success}
                         </div>
                     )}
                     {error && (
-                        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                             {error}
                         </div>
                     )}
 
-                    {/* Back to Profile Button */}
-                    <div className="mb-6">
-                        <Link
-                            href={`/profile?redirect=${encodeURIComponent(redirectTo)}`}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            Back to Profile
-                        </Link>
-                    </div>
-
                     {/* Email Notifications */}
-                    <div className="bg-white shadow rounded-lg mb-6">
-                        <div className="px-4 py-5 sm:p-6">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                                Email Notifications
-                            </h3>
+                    <div className="glass-card overflow-hidden">
+                        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Email Notifications</h3>
+                        </div>
+                        <div className="px-5 py-4 space-y-5">
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -405,51 +405,37 @@ export default function NotificationsPage() {
                     </div>
 
                     {/* Push Notifications */}
-                    <div className="bg-white shadow rounded-lg mb-6">
-                        <div className="px-4 py-5 sm:p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg leading-6 font-medium text-gray-900">
-                                    Push Notifications
-                                </h3>
-                                <div className="flex items-center space-x-2">
+                    <div className="glass-card overflow-hidden">
+                        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Push Notifications</h3>
+                            <div className="flex items-center gap-2">
                                     {pushSupported && pushPermission === 'default' && (
-                                        <button
-                                            onClick={requestPushPermission}
-                                            className="px-3 py-1 text-sm font-medium text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200"
-                                        >
+                                        <button onClick={requestPushPermission} className="btn-primary text-xs py-1.5 px-3">
                                             Enable Push
                                         </button>
                                     )}
                                     {pushPermission === 'granted' && (
-                                        <span className="text-sm text-green-600 font-medium">✓ Enabled</span>
+                                        <span className="badge badge-green">Enabled</span>
                                     )}
                                     {pushPermission === 'denied' && (
-                                        <div className="flex items-center space-x-2">
-                                            <span className="text-sm text-red-600 font-medium">✗ Blocked</span>
-                                            <button
-                                                onClick={resetPushPermission}
-                                                className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
-                                            >
-                                                Reset
-                                            </button>
+                                        <div className="flex items-center gap-2">
+                                            <span className="badge badge-gray">Blocked</span>
+                                            <button onClick={resetPushPermission} className="btn-ghost text-xs py-1 px-2">Reset</button>
                                         </div>
                                     )}
-                                </div>
                             </div>
+                        </div>
 
+                        <div className="px-5 py-4 space-y-5">
                             {!pushSupported && (
-                                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                                    <p className="text-sm text-yellow-800">
-                                        Push notifications are not supported in this browser
-                                    </p>
+                                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200">
+                                    <p className="text-sm text-amber-800">Push notifications are not supported in this browser.</p>
                                 </div>
                             )}
 
                             {pushPermission === 'denied' && (
-                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                                    <p className="text-sm text-red-800">
-                                        Push notifications are blocked. To enable them:
-                                    </p>
+                                <div className="p-3 rounded-xl bg-red-50 border border-red-200">
+                                    <p className="text-sm text-red-800 font-medium mb-1">Push notifications are blocked. To enable them:</p>
                                     {navigator.userAgent.includes('Firefox') ? (
                                         <ul className="text-sm text-red-700 mt-2 list-disc list-inside">
                                             <li>Click the shield icon in your browser&apos;s address bar</li>
@@ -629,47 +615,31 @@ export default function NotificationsPage() {
                     </div>
 
                     {/* Test Notifications */}
-                    <div className="bg-white shadow rounded-lg mb-6">
-                        <div className="px-4 py-5 sm:p-6">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                                Test Notifications
-                            </h3>
-                            <p className="text-sm text-gray-500 mb-4">
-                                Send test notifications to verify your settings are working correctly
-                            </p>
-                            <div className="flex space-x-4">
-                                <button
-                                    onClick={() => testNotification('email')}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                                >
-                                    Test Email
-                                </button>
-                                <button
-                                    onClick={() => testNotification('push')}
-                                    disabled={!pushSupported || pushPermission !== 'granted'}
-                                    className={`px-4 py-2 text-sm font-medium text-white rounded-md ${pushSupported && pushPermission === 'granted'
-                                        ? 'bg-green-600 hover:bg-green-700'
-                                        : 'bg-gray-400 cursor-not-allowed'
-                                        }`}
-                                >
-                                    Test Push
-                                </button>
-                            </div>
+                    <div className="glass-card p-5">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">Test Notifications</h3>
+                        <p className="text-xs text-gray-500 mb-4">Send a test to verify your settings are working correctly.</p>
+                        <div className="flex gap-3">
+                            <button onClick={() => testNotification('email')} className="btn-primary text-sm py-2 px-4">
+                                Test Email
+                            </button>
+                            <button
+                                onClick={() => testNotification('push')}
+                                disabled={!pushSupported || pushPermission !== 'granted'}
+                                className={`btn-secondary text-sm py-2 px-4 ${(!pushSupported || pushPermission !== 'granted') ? 'opacity-40 cursor-not-allowed' : ''}`}
+                            >
+                                Test Push
+                            </button>
                         </div>
                     </div>
 
                     {/* Save Button */}
-                    <div className="bg-white shadow rounded-lg">
-                        <div className="px-4 py-5 sm:p-6">
-                            <button
-                                onClick={savePreferences}
-                                disabled={isSaving}
-                                className="w-full px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                            >
-                                {isSaving ? 'Saving...' : 'Save Preferences'}
-                            </button>
-                        </div>
-                    </div>
+                    <button
+                        onClick={savePreferences}
+                        disabled={isSaving}
+                        className="btn-primary w-full py-3 text-sm disabled:opacity-50"
+                    >
+                        {isSaving ? 'Saving...' : 'Save Preferences'}
+                    </button>
                 </div>
             </main>
         </div>

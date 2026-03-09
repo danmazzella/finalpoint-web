@@ -104,7 +104,7 @@ export default function MemberPicksPage() {
 
   const loadCurrentRace = async () => {
     try {
-      const response = await f1racesAPI.getAllRaces();
+      const response = await f1racesAPI.getAllRaces(new Date().getFullYear());
       if (response.data.success) {
         setCurrentRace(response.data.data.find((race: any) => race.weekNumber === parseInt(weekNumber)));
       }
