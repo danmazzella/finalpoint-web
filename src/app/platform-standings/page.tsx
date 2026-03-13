@@ -8,13 +8,14 @@ import { authAPI, seasonsAPI } from '@/lib/api';
 interface Threshold {
   label: string;
   percentile: number;
-  points: number;
+  accuracy: number;
 }
 
 interface UserLeague {
   leagueId: number;
   leagueName: string;
   totalPoints: number;
+  accuracy: number;
   platformRank: number;
   platformPercentile: number | null;
 }
@@ -42,7 +43,6 @@ export default function PlatformStandingsPage() {
         const res = await seasonsAPI.getSeasons();
         if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
           setSeasons(res.data.data);
-          // Default to the latest season
           const latest = Math.max(...res.data.data.map((s: { year: number }) => s.year));
           setSeasonFilter(latest);
         }
@@ -57,9 +57,7 @@ export default function PlatformStandingsPage() {
       try {
         setLoading(true);
         const res = await authAPI.getPlatformStandings(seasonFilter);
-        if (res.data?.success) {
-          setStandings(res.data.data);
-        }
+        if (res.data?.success) setStandings(res.data.data);
       } catch {
         setStandings(null);
       } finally {
@@ -69,15 +67,12 @@ export default function PlatformStandingsPage() {
     load();
   }, [seasonFilter]);
 
-  const maxPoints = standings?.thresholds[0]?.points ?? 1;
+  const maxAccuracy = standings?.thresholds[0]?.accuracy ?? 100;
 
   return (
     <div className="page-bg min-h-screen">
       <main className="max-w-2xl mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <PageTitle
-          title="Platform Standings"
-          subtitle="See how players rank across the platform"
-        />
+        <PageTitle title="Platform Standings" subtitle="See how players rank across the platform" />
 
         {/* Season filter */}
         {seasons.length > 1 && seasonFilter != null && (
@@ -113,7 +108,7 @@ export default function PlatformStandingsPage() {
                     <div key={league.leagueId} className="bg-blue-700/50 rounded-lg px-3 py-2.5">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm text-blue-100 truncate mr-3">{league.leagueName}</span>
-                        <span className="text-sm font-semibold text-white flex-shrink-0">{league.totalPoints} pts</span>
+                        <span className="text-sm font-semibold text-white flex-shrink-0">{league.accuracy}% accuracy</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-base font-bold text-white">#{league.platformRank}</span>
@@ -127,14 +122,14 @@ export default function PlatformStandingsPage() {
               </div>
             )}
 
-            {/* Points thresholds */}
+            {/* Accuracy thresholds */}
             <div className="glass-card overflow-hidden">
               <div className="px-5 py-3 border-b border-white/40 bg-gray-50">
-                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Points Thresholds</h2>
-                <p className="text-xs text-gray-400 mt-0.5">Points needed in a single league to reach each tier</p>
+                <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Accuracy Thresholds</h2>
+                <p className="text-xs text-gray-400 mt-0.5">% of available points earned — fair regardless of picks per race</p>
               </div>
 
-              <div className="divide-y divide-gray-100/60">
+              <div className="divide-y divide-gray-100">
                 {standings.thresholds.map((threshold, idx) => {
                   const isFirst = idx === 0;
                   return (
@@ -144,17 +139,15 @@ export default function PlatformStandingsPage() {
                           {threshold.label}
                         </span>
                       </div>
-
                       <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
                         <div
                           className={`h-2.5 rounded-full ${isFirst ? 'bg-yellow-400' : 'bg-blue-400'}`}
-                          style={{ width: `${Math.max((threshold.points / maxPoints) * 100, 2)}%` }}
+                          style={{ width: `${Math.max((threshold.accuracy / maxAccuracy) * 100, 2)}%` }}
                         />
                       </div>
-
-                      <div className="w-20 text-right flex-shrink-0">
+                      <div className="w-16 text-right flex-shrink-0">
                         <span className={`text-sm font-bold ${isFirst ? 'text-yellow-600' : 'text-gray-800'}`}>
-                          {threshold.points} pts
+                          {threshold.accuracy}%
                         </span>
                       </div>
                     </div>

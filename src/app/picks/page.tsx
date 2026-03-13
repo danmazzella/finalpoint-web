@@ -31,8 +31,13 @@ interface CurrentRace {
     timeUntilLock: number;
     qualifyingDate?: string;
     showCountdown?: boolean;
-    lockTime?: string; // Added for new countdown logic
-    hasSprint?: boolean; // Added for sprint race support
+    lockTime?: string; // Backward-compat: race/GP lock time
+    hasSprint?: boolean;
+    // Sprint weekend separate lock fields
+    sprintPicksLocked?: boolean;
+    sprintLockTime?: string | null;
+    racePicksLocked?: boolean;
+    raceLockTime?: string;
 }
 
 function PicksV2Form() {
@@ -196,9 +201,13 @@ function PicksV2Form() {
             return;
         }
 
-        // Check if picks are locked
-        if (currentRace?.picksLocked) {
-            showToast('Picks are currently locked for this race. Picks lock 5 minutes before qualifying starts.', 'error');
+        // Check if picks are locked (sprint picks lock at sprint qualifying, race picks at GP qualifying)
+        const isLocked = eventType === 'sprint'
+            ? (currentRace?.sprintPicksLocked ?? currentRace?.picksLocked)
+            : (currentRace?.racePicksLocked ?? currentRace?.picksLocked);
+        if (isLocked) {
+            const lockDesc = eventType === 'sprint' ? 'sprint qualifying' : 'qualifying';
+            showToast(`Picks are currently locked for this race. Picks lock 5 minutes before ${lockDesc} starts.`, 'error');
             return;
         }
 
@@ -257,9 +266,13 @@ function PicksV2Form() {
             return;
         }
 
-        // Check if picks are locked
-        if (currentRace?.picksLocked) {
-            showToast('Picks are currently locked for this race. Picks lock 5 minutes before qualifying starts.', 'error');
+        // Check if picks are locked (sprint picks lock at sprint qualifying, race picks at GP qualifying)
+        const isLocked = eventType === 'sprint'
+            ? (currentRace?.sprintPicksLocked ?? currentRace?.picksLocked)
+            : (currentRace?.racePicksLocked ?? currentRace?.picksLocked);
+        if (isLocked) {
+            const lockDesc = eventType === 'sprint' ? 'sprint qualifying' : 'qualifying';
+            showToast(`Picks are currently locked for this race. Picks lock 5 minutes before ${lockDesc} starts.`, 'error');
             return;
         }
 
@@ -498,61 +511,114 @@ function PicksV2Form() {
                     <div className="glass-card p-5 mb-5">
                         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Current Race</h2>
 
-                        {/* Pick Locking Status Banner */}
-                        {currentRace.picksLocked && (
-                            <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
-                                <svg className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                </svg>
-                                <div>
-                                    <p className="text-sm font-semibold text-red-800">Picks are Locked</p>
-                                    <p className="text-sm text-red-700 mt-0.5">{currentRace.lockMessage}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Pick Locking Countdown */}
-                        {!currentRace.picksLocked && (
-                            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
-                                <svg className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                                </svg>
-                                <div>
-                                    <p className="text-sm font-semibold text-amber-800">Pick Locking Status</p>
-                                    <div className="mt-0.5 text-sm text-amber-700">
-                                        <p>
-                                            {currentRace.lockTime ? (
-                                                (() => {
-                                                    const timeRemaining = formatTimeRemainingLocal(currentRace.lockTime);
-                                                    if (timeRemaining === 'Locked') {
-                                                        return (
-                                                            <>
-                                                                Picks are now locked for {currentRace.raceName}
-                                                                <br />
-                                                                <span className="text-xs text-amber-600">
-                                                                    Lock time: {new Date(currentRace.lockTime).toLocaleString()}
-                                                                </span>
-                                                            </>
-                                                        );
-                                                    } else {
-                                                        return (
-                                                            <>
-                                                                Picks will lock in {timeRemaining} for {currentRace.raceName}
-                                                                <br />
-                                                                <span className="text-xs text-amber-600">
-                                                                    Lock time: {new Date(currentRace.lockTime).toLocaleString()}
-                                                                </span>
-                                                                </>
-                                                            );
-                                                        }
-                                                    })()
-                                                ) : (
-                                                    currentRace.lockMessage
-                                                )}
-                                        </p>
+                        {/* Pick Locking Status Banners */}
+                        {currentRace.hasSprint ? (
+                            <>
+                                {/* Sprint picks lock banner */}
+                                {currentRace.sprintPicksLocked ? (
+                                    <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-3">
+                                        <svg className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <p className="text-sm font-semibold text-red-800">Sprint Picks are Locked</p>
+                                            <p className="text-sm text-red-700 mt-0.5">Sprint picks locked before sprint qualifying.</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+                                ) : currentRace.sprintLockTime ? (
+                                    <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-3">
+                                        <svg className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <p className="text-sm font-semibold text-amber-800">Sprint Picks Lock Soon</p>
+                                            <p className="text-sm text-amber-700 mt-0.5">
+                                                Sprint picks lock in {formatTimeRemainingLocal(currentRace.sprintLockTime)} &middot; {new Date(currentRace.sprintLockTime).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {/* Race/GP picks lock banner */}
+                                {currentRace.racePicksLocked ? (
+                                    <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-3">
+                                        <svg className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <p className="text-sm font-semibold text-red-800">Grand Prix Picks are Locked</p>
+                                            <p className="text-sm text-red-700 mt-0.5">Grand Prix picks locked before qualifying.</p>
+                                        </div>
+                                    </div>
+                                ) : currentRace.raceLockTime ? (
+                                    <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-3">
+                                        <svg className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <p className="text-sm font-semibold text-amber-800">Grand Prix Picks Lock Soon</p>
+                                            <p className="text-sm text-amber-700 mt-0.5">
+                                                GP picks lock in {formatTimeRemainingLocal(currentRace.raceLockTime)} &middot; {new Date(currentRace.raceLockTime).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : null}
+                            </>
+                        ) : (
+                            <>
+                                {/* Non-sprint weekend: single lock banner */}
+                                {currentRace.picksLocked ? (
+                                    <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                                        <svg className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <p className="text-sm font-semibold text-red-800">Picks are Locked</p>
+                                            <p className="text-sm text-red-700 mt-0.5">{currentRace.lockMessage}</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
+                                        <svg className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                        </svg>
+                                        <div>
+                                            <p className="text-sm font-semibold text-amber-800">Pick Locking Status</p>
+                                            <div className="mt-0.5 text-sm text-amber-700">
+                                                <p>
+                                                    {currentRace.lockTime ? (
+                                                        (() => {
+                                                            const timeRemaining = formatTimeRemainingLocal(currentRace.lockTime);
+                                                            if (timeRemaining === 'Locked') {
+                                                                return (
+                                                                    <>
+                                                                        Picks are now locked for {currentRace.raceName}
+                                                                        <br />
+                                                                        <span className="text-xs text-amber-600">
+                                                                            Lock time: {new Date(currentRace.lockTime).toLocaleString()}
+                                                                        </span>
+                                                                    </>
+                                                                );
+                                                            } else {
+                                                                return (
+                                                                    <>
+                                                                        Picks will lock in {timeRemaining} for {currentRace.raceName}
+                                                                        <br />
+                                                                        <span className="text-xs text-amber-600">
+                                                                            Lock time: {new Date(currentRace.lockTime).toLocaleString()}
+                                                                        </span>
+                                                                    </>
+                                                                );
+                                                            }
+                                                        })()
+                                                    ) : (
+                                                        currentRace.lockMessage
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         <div className="flex items-center justify-between">
@@ -587,7 +653,7 @@ function PicksV2Form() {
                                         <h2 className="text-base font-semibold text-gray-900">Sprint Race Picks</h2>
                                         <p className="text-xs text-gray-500">Week {currentWeek} · {currentRace?.raceName}</p>
                                     </div>
-                                    {currentRace?.picksLocked && <span className="badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#dc2626' }}>Picks Locked</span>}
+                                    {(currentRace?.sprintPicksLocked ?? currentRace?.picksLocked) && <span className="badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#dc2626' }}>Picks Locked</span>}
                                 </div>
 
                                 {/* Position Cards */}
@@ -595,7 +661,7 @@ function PicksV2Form() {
                                     {requiredPositions.map((position) => {
                                         const pickedDriverId = sprintPicks.get(position);
                                         const pickedDriver = drivers.find(d => d.id === pickedDriverId);
-                                        const isLocked = currentRace?.picksLocked;
+                                        const isLocked = currentRace?.sprintPicksLocked ?? currentRace?.picksLocked;
 
                                         return (
                                             <div
@@ -683,7 +749,7 @@ function PicksV2Form() {
                                     <h2 className="text-base font-semibold text-gray-900">Grand Prix Picks</h2>
                                     <p className="text-xs text-gray-500">Week {currentWeek} · {currentRace?.raceName}</p>
                                 </div>
-                                {currentRace?.picksLocked && <span className="badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#dc2626' }}>Picks Locked</span>}
+                                {(currentRace?.racePicksLocked ?? currentRace?.picksLocked) && <span className="badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#dc2626' }}>Picks Locked</span>}
                             </div>
 
                             {/* Position Cards */}
@@ -691,7 +757,7 @@ function PicksV2Form() {
                                 {requiredPositions.map((position) => {
                                     const pickedDriverId = userPicks.get(position);
                                     const pickedDriver = drivers.find(d => d.id === pickedDriverId);
-                                    const isLocked = currentRace?.picksLocked;
+                                    const isLocked = currentRace?.racePicksLocked ?? currentRace?.picksLocked;
 
                                     return (
                                         <div
@@ -782,7 +848,9 @@ function PicksV2Form() {
                     drivers={drivers}
                     selectedDriverId={modalPosition ? (modalEventType === 'race' ? userPicks.get(modalPosition) : sprintPicks.get(modalPosition)) : undefined}
                     onDriverSelect={handleModalDriverSelect}
-                    disabled={currentRace?.picksLocked}
+                    disabled={modalEventType === 'sprint'
+                        ? (currentRace?.sprintPicksLocked ?? currentRace?.picksLocked)
+                        : (currentRace?.racePicksLocked ?? currentRace?.picksLocked)}
                     submitting={submitting}
                     userPicks={userPicks}
                     sprintPicks={sprintPicks}
