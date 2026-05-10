@@ -15,6 +15,7 @@ interface League {
     joinCode: string;
     memberCount: number;
     requiredPositions: number[];
+    seasonYear?: number;
 }
 
 interface Driver {
@@ -381,7 +382,7 @@ export default function AdminUserPicksPage() {
                             <option value="">Choose a league...</option>
                             {leagues.map(league => (
                                 <option key={league.id} value={league.id}>
-                                    {league.name} ({league.memberCount} members)
+                                    {league.name} ({league.seasonYear ?? '?'} · {league.memberCount} members)
                                 </option>
                             ))}
                         </select>

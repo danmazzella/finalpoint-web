@@ -1,12 +1,7 @@
-'use client';
-
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import LandingPageCTA from '@/components/LandingPageCTA';
 
 export default function LandingPage() {
-    const { user } = useAuth();
-    const router = useRouter();
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             <main className="max-w-7xl mx-auto px-4 py-2 sm:px-6 sm:py-4 lg:px-8">
@@ -21,36 +16,11 @@ export default function LandingPage() {
                         </p>
                         <p className="text-lg text-gray-500 mb-8 max-w-2xl mx-auto">
                             Make picks for driver positions, compete in leagues, and see how your predictions stack up against the competition.
-                            {!user && " No signup required to explore!"}
+                            No signup required to explore!
                         </p>
                     </div>
 
-                    {/* Primary CTA Buttons */}
-                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center items-center mb-8">
-                        {!user ? (
-                            <>
-                                <button
-                                    onClick={() => router.push('/signup')}
-                                    className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[180px]"
-                                >
-                                    Get Started Free
-                                </button>
-                                <button
-                                    onClick={() => router.push('/login')}
-                                    className="inline-flex items-center justify-center px-10 py-4 border-2 border-gray-300 text-lg font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 min-w-[180px]"
-                                >
-                                    Sign In
-                                </button>
-                            </>
-                        ) : (
-                            <button
-                                onClick={() => router.push('/dashboard')}
-                                className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[180px]"
-                            >
-                                Go to Dashboard
-                            </button>
-                        )}
-                    </div>
+                    <LandingPageCTA variant="hero" />
                 </div>
 
                 {/* Features Section */}
@@ -73,7 +43,7 @@ export default function LandingPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Private & Public Leagues</h3>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Private &amp; Public Leagues</h3>
                             <p className="text-gray-600">Create your own league or join existing ones to compete with friends and strangers</p>
                         </div>
 
@@ -93,8 +63,8 @@ export default function LandingPage() {
                 <div className="py-8 border-t border-gray-200">
                     <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Explore FinalPoint</h2>
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <button
-                            onClick={() => router.push('/dashboard')}
+                        <Link
+                            href="/dashboard"
                             className="explore-card group p-6 bg-white rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-200 text-left relative overflow-hidden"
                         >
                             <div className="explore-card-triangle absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-blue-500 group-hover:border-t-blue-600 transition-colors duration-200"></div>
@@ -111,10 +81,10 @@ export default function LandingPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </div>
-                        </button>
+                        </Link>
 
-                        <button
-                            onClick={() => router.push('/leagues')}
+                        <Link
+                            href="/leagues"
                             className="explore-card group p-6 bg-white rounded-lg border-2 border-gray-200 hover:border-green-400 hover:shadow-xl transition-all duration-200 text-left relative overflow-hidden"
                         >
                             <div className="explore-card-triangle absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-green-500 group-hover:border-t-green-600 transition-colors duration-200"></div>
@@ -131,10 +101,10 @@ export default function LandingPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </div>
-                        </button>
+                        </Link>
 
-                        <button
-                            onClick={() => router.push('/picks')}
+                        <Link
+                            href="/picks"
                             className="explore-card group p-6 bg-white rounded-lg border-2 border-gray-200 hover:border-orange-400 hover:shadow-xl transition-all duration-200 text-left relative overflow-hidden"
                         >
                             <div className="explore-card-triangle absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-orange-500 group-hover:border-t-orange-600 transition-colors duration-200"></div>
@@ -151,10 +121,10 @@ export default function LandingPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </div>
-                        </button>
+                        </Link>
 
-                        <button
-                            onClick={() => router.push('/scoring')}
+                        <Link
+                            href="/scoring"
                             className="explore-card group p-6 bg-white rounded-lg border-2 border-gray-200 hover:border-purple-400 hover:shadow-xl transition-all duration-200 text-left relative overflow-hidden"
                         >
                             <div className="explore-card-triangle absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-purple-500 group-hover:border-t-purple-600 transition-colors duration-200"></div>
@@ -171,7 +141,7 @@ export default function LandingPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </div>
-                        </button>
+                        </Link>
                     </div>
                 </div>
 
@@ -210,7 +180,7 @@ export default function LandingPage() {
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 max-w-2xl mx-auto">
                         <h2 className="text-2xl font-bold text-gray-900 mb-3">Why &apos;FinalPoint&apos;?</h2>
                         <p className="text-gray-700 text-lg">
-                            In Formula 1, P10 is the last position that earns points - the <strong>final point</strong> available in a race.
+                            In Formula 1, P10 is the last position that earns points — the <strong>final point</strong> available in a race.
                             Just like in F1 where every point matters, your predictions can make the difference between
                             victory and defeat in this prediction game.
                         </p>
@@ -221,29 +191,7 @@ export default function LandingPage() {
                 <div className="py-6 border-t border-gray-200 text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Ready to Start Predicting?</h2>
                     <p className="text-lg text-gray-600 mb-6">Join thousands of F1 fans making predictions and competing in leagues</p>
-                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center items-center">
-                        {!user ? (
-                            <button
-                                onClick={() => router.push('/signup')}
-                                className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[200px]"
-                            >
-                                Create Free Account
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => router.push('/dashboard')}
-                                className="inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-w-[200px]"
-                            >
-                                Go to Dashboard
-                            </button>
-                        )}
-                        <button
-                            onClick={() => router.push('/dashboard')}
-                            className="inline-flex items-center justify-center px-10 py-4 border-2 border-gray-300 text-lg font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 min-w-[200px]"
-                        >
-                            Explore More
-                        </button>
-                    </div>
+                    <LandingPageCTA variant="bottom" />
                 </div>
             </main>
         </div>
