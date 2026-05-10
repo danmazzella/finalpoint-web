@@ -87,7 +87,7 @@ interface CurrentRace {
   qualifyingDate?: string;
   lockTime?: string;
   hasSprint?: boolean;
-  timeUntilLock: number;
+  timeUntilLock: { hours: number; minutes: number; seconds: number; locked: boolean } | null;
 }
 
 // ─── Card type config ─────────────────────────────────────────────────────────
@@ -297,7 +297,7 @@ export default function SocialPage() {
 
     const raceName = communityStats?.raceName ?? selectedWeekData?.raceName ?? `Week ${selectedWeek}`;
     const positions = (communityStats?.positions ?? []).filter(
-      p => selectedPositions.size === 0 || selectedPositions.has(p.position)
+      p => selectedPositions.has(p.position)
     );
     const spotlightPos = Array.from(selectedPositions).sort((a, b) => a - b)[0] ?? 10;
 
@@ -308,8 +308,12 @@ export default function SocialPage() {
       case 'final-point':
         return <FinalPointCard raceName={raceName} eventType={eventType} positions={positions} spotlightPosition={spotlightPos} />;
 
-      case 'race-countdown':
+      case 'race-countdown': {
         if (!currentRace) return <EmptyCard message="No upcoming race data." />;
+        const t = currentRace.timeUntilLock;
+        const timeUntilLockMs = !t || t.locked
+          ? -1
+          : (t.hours * 3600 + t.minutes * 60 + t.seconds) * 1000;
         return (
           <RaceCountdownCard
             raceName={currentRace.raceName}
@@ -319,9 +323,10 @@ export default function SocialPage() {
             qualifyingDate={currentRace.qualifyingDate}
             lockTime={currentRace.lockTime}
             hasSprint={currentRace.hasSprint}
-            timeUntilLock={currentRace.timeUntilLock}
+            timeUntilLock={timeUntilLockMs}
           />
         );
+      }
 
       case 'accuracy-reveal':
         return <AccuracyRevealCard raceName={raceName} eventType={eventType} positions={positions} />;
@@ -525,20 +530,36 @@ export default function SocialPage() {
               <div className="glass-card p-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Positions</p>
-                  <div className="flex gap-2">
-                    <button onClick={() => setSelectedPositions(new Set(communityStats.positions.map(p => p.position)))} className="text-xs text-blue-600 hover:text-blue-700 font-medium">All</button>
-                    <span className="text-gray-300">·</span>
-                    <button onClick={() => setSelectedPositions(new Set())} className="text-xs text-gray-400 hover:text-gray-600 font-medium">None</button>
-                  </div>
+                  <button
+                    onClick={() => setSelectedPositions(new Set(communityStats.positions.map(p => p.position)))}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    All
+                  </button>
                 </div>
+                <p className="text-xs text-gray-400 mb-2">Tap to isolate · tap again to reset</p>
                 <div className="flex flex-wrap gap-2">
                   {communityStats.positions.slice().sort((a, b) => a.position - b.position).map(pos => {
-                    const active = selectedPositions.size === 0 || selectedPositions.has(pos.position);
+                    const active = selectedPositions.has(pos.position);
+                    const allSelected = selectedPositions.size === communityStats.positions.length;
                     return (
                       <button
                         key={pos.position}
-                        onClick={() => setSelectedPositions(prev => { const n = new Set(prev); n.has(pos.position) ? n.delete(pos.position) : n.add(pos.position); return n; })}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400 border-gray-200 hover:border-blue-300'}`}
+                        onClick={() => setSelectedPositions(prev => {
+                          // Active + multiple selected → isolate to this one
+                          if (prev.has(pos.position) && prev.size > 1) {
+                            return new Set([pos.position]);
+                          }
+                          // Active + only one selected (already isolated) → reset to all
+                          if (prev.has(pos.position) && prev.size === 1) {
+                            return new Set(communityStats.positions.map(p => p.position));
+                          }
+                          // Inactive → add it
+                          const n = new Set(prev);
+                          n.add(pos.position);
+                          return n;
+                        })}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${active && !allSelected ? 'bg-blue-600 text-white border-blue-600' : active ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-white text-gray-400 border-gray-200 hover:border-blue-300'}`}
                       >
                         P{pos.position}
                       </button>
@@ -589,6 +610,13 @@ export default function SocialPage() {
             {scoredWarning && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-700 font-medium">
                 ⚠️ This week hasn't been scored yet. Post-race cards need results first.
+              </div>
+            )}
+
+            {/* Countdown locked warning */}
+            {cardType === 'race-countdown' && currentRace && (!currentRace.timeUntilLock || currentRace.timeUntilLock.locked) && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-700 font-medium">
+                ⚠️ Picks are locked for {currentRace.raceName}. This card is best posted before qualifying. Update race status in the DB if this race is over.
               </div>
             )}
           </div>
