@@ -157,6 +157,30 @@ const CARD_GROUPS = [
   { label: 'Marketing', ids: ['invite', 'brand', 'how-it-works', 'app-download'] },
 ];
 
+// ─── Hashtags ─────────────────────────────────────────────────────────────────
+
+const BASE_TAGS = ['#F1', '#Formula1', '#FinalPoint', '#F1Picks', '#F1Fantasy'];
+
+const CARD_HASHTAGS: Record<CardType, string[]> = {
+  'pick-distribution':   ['#F1Predictions', '#WhoWillWin', '#F1Community', '#GrandPrix'],
+  'final-point':         ['#F1Picks', '#P10', '#FantasyF1', '#F1Community'],
+  'driver-spotlight':    ['#F1Driver', '#F1Community', '#GrandPrix', '#F1Predictions'],
+  'race-countdown':      ['#F1Race', '#GrandPrix', '#F1Weekend', '#Qualifying'],
+  'accuracy-reveal':     ['#F1Results', '#GrandPrix', '#F1Community', '#Predictions'],
+  'chaos-rating':        ['#F1Chaos', '#GrandPrix', '#F1Results', '#F1Community'],
+  'hardest-pick':        ['#F1Picks', '#GrandPrix', '#F1Community', '#Predictions'],
+  'dark-horse':          ['#F1DarkHorse', '#GrandPrix', '#F1Community', '#Surprise'],
+  'consensus-vs-reality':['#F1Results', '#GrandPrix', '#CrowdVsReality', '#F1Community'],
+  'platform-standings':  ['#F1Fantasy', '#F1Standings', '#F1Community', '#F1Season'],
+  'milestone':           ['#F1Community', '#F1Fantasy', '#F1Picks', '#GrandPrix'],
+  'season-wrapped':      ['#F1Season', '#F1Stats', '#F1Community', '#F1Fantasy'],
+  'season-progress':     ['#F1Season', '#Formula1', '#F1Community', '#F1Calendar'],
+  'invite':              ['#F1Fantasy', '#F1Community', '#PlayF1', '#GrandPrix'],
+  'brand':               ['#F1Fantasy', '#F1Community', '#FinalPoint', '#F1Picks'],
+  'how-it-works':        ['#F1Fantasy', '#F1Community', '#F1Picks', '#HowToPlay'],
+  'app-download':        ['#F1App', '#F1Fantasy', '#F1Community', '#FreeToPlay'],
+};
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SocialPage() {
@@ -168,6 +192,7 @@ export default function SocialPage() {
   const [fullscreen, setFullscreen] = useState(false);
   const [selectedPositions, setSelectedPositions] = useState<Set<number>>(new Set());
   const [downloading, setDownloading] = useState(false);
+  const [hashtagsCopied, setHashtagsCopied] = useState(false);
 
   // Week / season
   const [weeks, setWeeks] = useState<CommunityWeek[]>([]);
@@ -740,6 +765,38 @@ export default function SocialPage() {
                 ⚠️ Picks are locked for {currentRace.raceName}. This card is best posted before qualifying. Update race status in the DB if this race is over.
               </div>
             )}
+
+            {/* Hashtags */}
+            <div className="glass-card p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Hashtags</p>
+                <button
+                  onClick={() => {
+                    const tags = [...BASE_TAGS, ...CARD_HASHTAGS[cardType]].join(' ');
+                    const text = `\n.\n.\n.\n${tags}`;
+                    navigator.clipboard.writeText(text);
+                    setHashtagsCopied(true);
+                    setTimeout(() => setHashtagsCopied(false), 2000);
+                  }}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  {hashtagsCopied ? '✓ Copied!' : 'Copy all'}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[...BASE_TAGS, ...CARD_HASHTAGS[cardType]].map(tag => (
+                  <span
+                    key={tag}
+                    className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-md border border-blue-100 cursor-pointer hover:bg-blue-100 transition-colors"
+                    onClick={() => {
+                      navigator.clipboard.writeText(tag);
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* ── Preview ───────────────────────────────────────────────────── */}
