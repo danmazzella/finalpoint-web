@@ -46,6 +46,7 @@ export default function ConsensusVsRealityCard({
           const correct = topPick?.driverName === actual.driverName;
           const topTeamColor = topPick ? getTeamColor(topPick.driverTeam) : '#64748b';
           const actualTeamColor = getTeamColor(actual.driverTeam);
+          const actualPickStat = pos.drivers.find(d => d.driverName === actual.driverName);
 
           return (
             <div
@@ -90,7 +91,11 @@ export default function ConsensusVsRealityCard({
                     {actual.driverName.split(' ').pop()}
                   </p>
                   <p style={{ fontSize: 10, color: actualTeamColor, fontWeight: 600, marginTop: 1 }}>
-                    {actual.driverTeam.split(' ').slice(-1)[0]}
+                    {correct
+                      ? `${actualPickStat?.percentage ?? topPick?.percentage ?? 0}% backed`
+                      : actualPickStat
+                        ? `${actualPickStat.percentage}% backed`
+                        : '0% backed'}
                   </p>
                 </div>
               </div>

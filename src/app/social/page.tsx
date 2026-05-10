@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { communityPicksAPI, authAPI, seasonsAPI, f1racesAPI } from '@/lib/api';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { communityPicksAPI, authAPI, seasonsAPI, f1racesAPI, leaguesAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { toPng } from 'html-to-image';
 
 import PickDistributionCard from '@/components/social/cards/PickDistributionCard';
 import FinalPointCard from '@/components/social/cards/FinalPointCard';
@@ -166,6 +167,7 @@ export default function SocialPage() {
   const [eventType, setEventType] = useState<'race' | 'sprint'>('race');
   const [fullscreen, setFullscreen] = useState(false);
   const [selectedPositions, setSelectedPositions] = useState<Set<number>>(new Set());
+  const [downloading, setDownloading] = useState(false);
 
   // Week / season
   const [weeks, setWeeks] = useState<CommunityWeek[]>([]);
@@ -185,6 +187,13 @@ export default function SocialPage() {
 
   // Driver spotlight selector
   const [spotlightDriver, setSpotlightDriver] = useState<string>('');
+
+  // Season wrapped player selector
+  const [wrappedLeagues, setWrappedLeagues] = useState<{ id: number; name: string }[]>([]);
+  const [wrappedLeagueId, setWrappedLeagueId] = useState<number | null>(null);
+  const [wrappedMembers, setWrappedMembers] = useState<{ id: number; name: string }[]>([]);
+  const [wrappedPlayerId, setWrappedPlayerId] = useState<number | null>(null);
+  const [wrappedPlayerStats, setWrappedPlayerStats] = useState<UserStats | null>(null);
 
   // Invite card custom inputs
   const [inviteLeagueName, setInviteLeagueName] = useState('');
@@ -282,7 +291,59 @@ export default function SocialPage() {
     }
   }, [communityStats]);
 
+  // Season wrapped — load leagues
+  useEffect(() => {
+    if (cardType !== 'season-wrapped') return;
+    leaguesAPI.getLeagues().then(res => {
+      if (res.data?.success) {
+        const leagues = res.data.data.map((l: { id: number; name: string }) => ({ id: l.id, name: l.name }));
+        setWrappedLeagues(leagues);
+        if (leagues.length > 0 && !wrappedLeagueId) setWrappedLeagueId(leagues[0].id);
+      }
+    }).catch(() => {});
+  }, [cardType]);
+
+  // Season wrapped — load members when league changes
+  useEffect(() => {
+    if (!wrappedLeagueId) return;
+    leaguesAPI.getLeagueMembers(wrappedLeagueId).then(res => {
+      if (res.data?.success) {
+        const members = res.data.data.map((m: { id: number; name: string }) => ({ id: m.id, name: m.name }));
+        setWrappedMembers(members);
+        // Default to current user if in list, else first member
+        const meInList = members.find((m: { id: number }) => m.id === user?.id);
+        setWrappedPlayerId(meInList ? meInList.id : members[0]?.id ?? null);
+      }
+    }).catch(() => {});
+  }, [wrappedLeagueId]);
+
+  // Season wrapped — load stats for selected player
+  useEffect(() => {
+    if (!wrappedPlayerId || !seasonFilter) return;
+    authAPI.getUserStatsById(wrappedPlayerId, seasonFilter).then(res => {
+      if (res.data?.success) setWrappedPlayerStats(res.data.data);
+    }).catch(() => setWrappedPlayerStats(null));
+  }, [wrappedPlayerId, seasonFilter]);
+
   const scoredWarning = cfg.needsScored && selectedWeekData && !selectedWeekData.isScored;
+
+  const downloadCard = useCallback(async () => {
+    if (!cardRef.current) return;
+    setDownloading(true);
+    try {
+      // Run twice — first pass loads cross-origin images into cache, second pass renders cleanly
+      await toPng(cardRef.current, { pixelRatio: 2 });
+      const dataUrl = await toPng(cardRef.current, { pixelRatio: 2 });
+      const link = document.createElement('a');
+      link.download = `finalpoint-${cardType}-${Date.now()}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Download failed:', err);
+    } finally {
+      setDownloading(false);
+    }
+  }, [cardRef, cardType]);
 
   // ─── Render card ───────────────────────────────────────────────────────────
 
@@ -362,19 +423,22 @@ export default function SocialPage() {
           />
         );
 
-      case 'season-wrapped':
-        if (!userStats) return <EmptyCard message={user ? 'Loading your stats…' : 'Sign in to see your season stats.'} />;
+      case 'season-wrapped': {
+        const swStats = wrappedPlayerStats ?? userStats;
+        const swName = wrappedMembers.find(m => m.id === wrappedPlayerId)?.name ?? user?.name ?? 'You';
+        if (!swStats) return <EmptyCard message={user ? 'Select a league and player.' : 'Sign in to see season stats.'} />;
         return (
           <SeasonWrappedCard
             seasonYear={seasonFilter ?? 2025}
-            userName={user?.name ?? 'You'}
-            accuracy={Math.round(userStats.accuracy ?? 0)}
-            totalPicks={userStats.totalPicks ?? 0}
-            correctPicks={userStats.correctPicks ?? 0}
-            totalPoints={userStats.totalPoints ?? 0}
-            perfectPicksRate={userStats.perfectPicksRate}
+            userName={swName}
+            accuracy={Math.round(swStats.accuracy ?? 0)}
+            totalPicks={swStats.totalPicks ?? 0}
+            correctPicks={swStats.correctPicks ?? 0}
+            totalPoints={swStats.totalPoints ?? 0}
+            perfectPicksRate={swStats.perfectPicksRate}
           />
         );
+      }
 
       case 'driver-spotlight': {
         if (!communityStats) return <EmptyCard message="Select a race week to load community data." />;
@@ -384,7 +448,7 @@ export default function SocialPage() {
           <DriverSpotlightCard
             raceName={raceName}
             eventType={eventType}
-            positions={communityStats.positions.filter(p => selectedPositions.size === 0 || selectedPositions.has(p.position))}
+            positions={communityStats.positions.filter(p => selectedPositions.has(p.position))}
             driverName={driverName}
           />
         );
@@ -394,11 +458,12 @@ export default function SocialPage() {
         return <ConsensusVsRealityCard raceName={raceName} eventType={eventType} positions={positions} />;
 
       case 'season-progress': {
-        const completed = allRaces.filter(r => r.status === 'completed' || r.status === 'scored').length;
+        const activeRaces = allRaces.filter(r => r.status !== 'cancelled');
+        const completed = activeRaces.filter(r => r.status === 'completed').length;
         return (
           <SeasonProgressCard
             seasonYear={seasonFilter ?? 2025}
-            races={allRaces}
+            races={activeRaces}
             completedCount={completed}
           />
         );
@@ -422,15 +487,36 @@ export default function SocialPage() {
 
   if (fullscreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: '#000' }}>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4" style={{ background: '#000' }}>
         <button
           onClick={() => setFullscreen(false)}
-          className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full w-10 h-10 flex items-center justify-center transition-colors text-xl"
+          className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full w-10 h-10 flex items-center justify-center transition-colors text-xl z-10"
         >
           ✕
         </button>
-        <div ref={cardRef}>{renderCard()}</div>
-        <p className="absolute bottom-6 text-slate-600 text-sm">Screenshot the card above</p>
+        {/* Scale card to fit viewport — keeps 600×600 DOM size for accurate screenshots */}
+        <div
+          style={{
+            transform: `scale(${Math.min(1, (window.innerWidth - 32) / 600, (window.innerHeight - 100) / 600)})`,
+            transformOrigin: 'center center',
+          }}
+        >
+          <div ref={cardRef}>{renderCard()}</div>
+        </div>
+        <button
+          onClick={downloadCard}
+          disabled={downloading}
+          className="absolute bottom-6 inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-60 transition-colors"
+        >
+          {downloading ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          )}
+          {downloading ? 'Generating…' : 'Download PNG'}
+        </button>
       </div>
     );
   }
@@ -606,6 +692,41 @@ export default function SocialPage() {
               </div>
             )}
 
+            {/* Season wrapped — league + player picker */}
+            {cardType === 'season-wrapped' && (
+              <div className="glass-card p-4 flex flex-col gap-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Player</p>
+                {wrappedLeagues.length > 0 ? (
+                  <>
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">League</label>
+                      <select
+                        value={wrappedLeagueId ?? ''}
+                        onChange={e => setWrappedLeagueId(Number(e.target.value))}
+                        className="input-field text-sm py-1.5 w-full"
+                      >
+                        {wrappedLeagues.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                      </select>
+                    </div>
+                    {wrappedMembers.length > 0 && (
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Player</label>
+                        <select
+                          value={wrappedPlayerId ?? ''}
+                          onChange={e => setWrappedPlayerId(Number(e.target.value))}
+                          className="input-field text-sm py-1.5 w-full"
+                        >
+                          {wrappedMembers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                        </select>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-gray-400">No leagues found. Join a league first.</p>
+                )}
+              </div>
+            )}
+
             {/* Scored warning */}
             {scoredWarning && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-700 font-medium">
@@ -631,19 +752,29 @@ export default function SocialPage() {
 
             <div className="flex gap-3 mt-2">
               <button
+                onClick={downloadCard}
+                disabled={downloading}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-60 transition-colors shadow-lg"
+              >
+                {downloading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                )}
+                {downloading ? 'Generating…' : 'Download PNG'}
+              </button>
+              <button
                 onClick={() => setFullscreen(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-lg"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
-                Fullscreen to Screenshot
+                Fullscreen
               </button>
             </div>
-
-            <p className="text-xs text-gray-400 text-center max-w-xs">
-              600×600px card. Fullscreen → screenshot on mobile or Cmd+Shift+4 on Mac.
-            </p>
           </div>
         </div>
       </main>

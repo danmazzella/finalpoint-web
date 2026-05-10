@@ -288,6 +288,8 @@ export const authAPI = {
   getProfile: () => apiService.get('/users/profile'),
   getUserStats: (seasonYear?: number | 'all' | null) =>
     apiService.get('/users/stats', { params: seasonYear != null && seasonYear !== 'all' ? { seasonYear } : {} }),
+  getUserStatsById: (userId: number, seasonYear?: number | null) =>
+    apiService.get(`/users/${userId}/stats`, { params: seasonYear != null ? { seasonYear } : {} }),
   getGlobalStats: (seasonYear?: number | 'all' | null) =>
     apiService.get('/users/global-stats', { params: seasonYear != null && seasonYear !== 'all' ? { seasonYear } : {} }),
   getPlatformStandings: (seasonYear?: number | 'all' | null) =>

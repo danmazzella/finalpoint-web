@@ -22,8 +22,6 @@ interface AccuracyRevealCardProps {
   positions: PositionStat[];
 }
 
-const SHOW_POSITIONS = [1, 2, 3];
-
 function getAccuracyLabel(pct: number): { label: string; color: string } {
   if (pct >= 60) return { label: 'Most saw it coming', color: '#22c55e' };
   if (pct >= 35) return { label: 'Half the grid got it', color: '#f59e0b' };
@@ -36,7 +34,7 @@ export default function AccuracyRevealCard({
   eventType,
   positions,
 }: AccuracyRevealCardProps) {
-  const filtered = positions.filter(p => SHOW_POSITIONS.includes(p.position) && p.isScored);
+  const filtered = positions.filter(p => p.isScored);
 
   return (
     <SocialCardFrame

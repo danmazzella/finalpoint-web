@@ -102,7 +102,7 @@ export default function DarkHorseCard({ raceName, eventType, positions }: DarkHo
 
         {/* Flavour text */}
         <p style={{ fontSize: 14, color: '#64748b', fontWeight: 600, fontStyle: 'italic' }}>
-          "{surprise}"
+          {surprise}
         </p>
       </div>
     </SocialCardFrame>

@@ -33,7 +33,7 @@ export default function ChaosRatingCard({
   eventType,
   positions,
 }: ChaosRatingCardProps) {
-  const podiumPositions = positions.filter(p => [1, 2, 3].includes(p.position) && p.isScored);
+  const podiumPositions = positions.filter(p => p.isScored);
 
   // Average % who got each podium position right
   const perPositionPct = podiumPositions.map(pos => {
