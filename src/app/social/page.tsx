@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { communityPicksAPI, authAPI, seasonsAPI, f1racesAPI, leaguesAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { toPng } from 'html-to-image';
@@ -351,6 +351,56 @@ export default function SocialPage() {
   }, [wrappedPlayerId, seasonFilter]);
 
   const scoredWarning = cfg.needsScored && selectedWeekData && !selectedWeekData.isScored;
+
+  const dynamicTags = useMemo(() => {
+    const tags: string[] = [];
+    const toTag = (s: string) => '#' + s.replace(/[^a-zA-Z0-9]/g, '');
+
+    // Race name → e.g. "Canadian Grand Prix" → #CanadaGP, "Monaco Grand Prix" → #MonacoGP
+    const raceName = communityStats?.raceName ?? selectedWeekData?.raceName ?? currentRace?.raceName;
+    if (raceName) {
+      const raceTag = toTag(raceName.replace(/\s+Grand\s+Prix/i, 'GP'));
+      if (raceTag.length > 1) tags.push(raceTag);
+    }
+
+    // Country for countdown
+    if (currentRace?.country) tags.push(toTag(currentRace.country));
+
+    // Drivers + teams from community stats
+    if (communityStats?.positions) {
+      const activePosns = communityStats.positions.filter(p =>
+        selectedPositions.size === 0 || selectedPositions.has(p.position)
+      );
+
+      const driversSeen = new Set<string>();
+      const teamsSeen = new Set<string>();
+
+      activePosns.forEach(pos => {
+        // Prefer actual result driver, else top community pick
+        const driverName = pos.actualResult?.driverName ?? pos.drivers[0]?.driverName;
+        const teamName = pos.actualResult?.driverTeam ?? pos.drivers[0]?.driverTeam;
+
+        if (driverName) {
+          const last = driverName.split(' ').pop()!;
+          if (!driversSeen.has(last)) { driversSeen.add(last); tags.push(`#${last}`); }
+        }
+        if (teamName) {
+          // "Red Bull Racing" → RedBull, "Mercedes-AMG Petronas" → Mercedes, "Ferrari" → Ferrari
+          const shortTeam = teamName.split(/[\s\-]/)[0];
+          if (!teamsSeen.has(shortTeam)) { teamsSeen.add(shortTeam); tags.push(`#${shortTeam}`); }
+        }
+      });
+    }
+
+    // Driver spotlight specific driver
+    if (cardType === 'driver-spotlight' && spotlightDriver) {
+      const last = spotlightDriver.split(' ').pop()!;
+      if (last) tags.push(`#${last}`);
+    }
+
+    // Dedupe and remove any that are just '#'
+    return [...new Set(tags)].filter(t => t.length > 1);
+  }, [cardType, communityStats, selectedPositions, currentRace, spotlightDriver, selectedWeekData]);
 
   const downloadCard = useCallback(async () => {
     if (!cardRef.current) return;
@@ -772,7 +822,7 @@ export default function SocialPage() {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Hashtags</p>
                 <button
                   onClick={() => {
-                    const tags = [...BASE_TAGS, ...CARD_HASHTAGS[cardType]].join(' ');
+                    const tags = [...BASE_TAGS, ...CARD_HASHTAGS[cardType], ...dynamicTags].join(' ');
                     const text = `\n.\n.\n.\n${tags}`;
                     navigator.clipboard.writeText(text);
                     setHashtagsCopied(true);
@@ -787,15 +837,25 @@ export default function SocialPage() {
                 {[...BASE_TAGS, ...CARD_HASHTAGS[cardType]].map(tag => (
                   <span
                     key={tag}
+                    onClick={() => navigator.clipboard.writeText(tag)}
                     className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-md border border-blue-100 cursor-pointer hover:bg-blue-100 transition-colors"
-                    onClick={() => {
-                      navigator.clipboard.writeText(tag);
-                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {dynamicTags.map(tag => (
+                  <span
+                    key={tag}
+                    onClick={() => navigator.clipboard.writeText(tag)}
+                    className="px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-md border border-purple-100 cursor-pointer hover:bg-purple-100 transition-colors"
                   >
                     {tag}
                   </span>
                 ))}
               </div>
+              {dynamicTags.length > 0 && (
+                <p className="text-xs text-gray-400 mt-2">Purple tags pulled from current card data</p>
+              )}
             </div>
           </div>
 
