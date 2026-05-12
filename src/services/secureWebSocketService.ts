@@ -15,6 +15,8 @@ interface WebSocketCallbacks {
     onMessage?: (message: ChatMessage) => void;
     onUserJoined?: (user: ChatUser | ChatUser[]) => void;
     onUserLeft?: (userId: string) => void;
+    onUserTyping?: (userId: string, userName: string) => void;
+    onUserStoppedTyping?: (userId: string) => void;
     onError?: (error: string) => void;
     onConnected?: () => void;
     onDisconnected?: () => void;
@@ -187,6 +189,14 @@ export class SecureWebSocketService {
         });
     }
 
+    sendTypingStart(leagueId: string): void {
+        this.send({ type: 'typing_start', leagueId });
+    }
+
+    sendTypingStop(leagueId: string): void {
+        this.send({ type: 'typing_stop', leagueId });
+    }
+
     /**
      * Set callbacks for WebSocket events
      */
@@ -278,6 +288,18 @@ export class SecureWebSocketService {
             case 'user_left':
                 if (data.userId) {
                     this.callbacks.onUserLeft?.(data.userId);
+                }
+                break;
+
+            case 'user_typing':
+                if (data.userId) {
+                    this.callbacks.onUserTyping?.(data.userId as string, (data.userName as string) || 'Someone');
+                }
+                break;
+
+            case 'user_stopped_typing':
+                if (data.userId) {
+                    this.callbacks.onUserStoppedTyping?.(data.userId as string);
                 }
                 break;
 

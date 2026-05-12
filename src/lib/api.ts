@@ -450,6 +450,7 @@ export const chatAPI = {
   getAllNotificationPreferences: () => apiService.get('/chat/notification-preferences'),
   getOnlineUsers: (leagueId: number) => apiService.get(`/chat/online-users/${leagueId}`),
   updateStatus: (isOnline: boolean) => apiService.post('/chat/update-status', { isOnline }),
+  getLinkPreview: (url: string) => apiService.get('/chat/link-preview', { params: { url } }),
 };
 
 // Types

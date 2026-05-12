@@ -20,16 +20,13 @@ interface FeatureFlagProviderProps {
 
 export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [isChatFeatureEnabled, setIsChatFeatureEnabled] = useState(false);
+    const [isChatFeatureEnabled] = useState(true); // Chat enabled for all users
     const [isPositionChangesEnabled, setIsPositionChangesEnabled] = useState(false);
     const [isMultiPositionPicksEnabled, setIsMultiPositionPicksEnabled] = useState(false);
     const { user } = useAuth();
 
     const refreshFlags = useCallback(async () => {
         try {
-            if (user?.chatFeatureEnabled !== undefined) {
-                setIsChatFeatureEnabled(user.chatFeatureEnabled);
-            }
             if (user?.positionChangesEnabled !== undefined) {
                 setIsPositionChangesEnabled(user.positionChangesEnabled);
             }
@@ -52,17 +49,11 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({ childr
     // Update feature flags when user changes
     useEffect(() => {
         if (user === null) {
-            setIsChatFeatureEnabled(false);
             setIsPositionChangesEnabled(false);
             setIsMultiPositionPicksEnabled(false);
             setIsLoading(false);
         } else if (user) {
             let flagsSet = 0;
-
-            if (user.chatFeatureEnabled !== undefined) {
-                setIsChatFeatureEnabled(user.chatFeatureEnabled);
-                flagsSet++;
-            }
 
             if (user.positionChangesEnabled !== undefined) {
                 setIsPositionChangesEnabled(user.positionChangesEnabled);

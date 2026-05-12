@@ -26,7 +26,8 @@ function getAccuracyLabel(pct: number): { label: string; color: string } {
   if (pct >= 60) return { label: 'Most saw it coming', color: '#22c55e' };
   if (pct >= 35) return { label: 'Half the grid got it', color: '#f59e0b' };
   if (pct >= 15) return { label: 'Few called it', color: '#f97316' };
-  return { label: 'Almost nobody predicted this', color: '#ef4444' };
+  if (pct > 0)   return { label: 'Almost nobody predicted this', color: '#ef4444' };
+  return { label: 'Nobody called it', color: '#ef4444' };
 }
 
 export default function AccuracyRevealCard({
