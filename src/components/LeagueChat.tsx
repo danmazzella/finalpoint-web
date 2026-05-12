@@ -169,7 +169,7 @@ function LinkPreview({ url, isOwn }: { url: string; isOwn: boolean }) {
         return () => { cancelled = true; };
     }, [url]);
 
-    if (!preview) return null;
+    if (!preview || preview === 'loading') return null;
 
     return (
         <a
