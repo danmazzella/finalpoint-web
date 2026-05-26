@@ -174,78 +174,43 @@ export default function MemberPicksPage() {
 
   /**
    * Returns Tailwind colour classes driven by pick.points (already event-aware).
+   * Uses opacity-based fills (bg-color/20) so cards look good on both light
+   * and dark glassmorphism backgrounds.
    *
    * Sprint tiers (4):  5→green  3→yellow  1→orange  0→red
    * Race tiers   (5): 10→green  7,5→yellow  3,2→amber  1→orange  0→red
    */
   const getPickStyle = (pick: typeof memberPicks.picks[0], eventType: 'race' | 'sprint' | null) => {
     if (pick.isCorrect === null) return {          // not yet scored
-      card: 'border-gray-200 bg-white/70',
-      header: 'border-gray-100 bg-gray-50',
-      badge: 'bg-gray-200 text-gray-600',
-      name: 'text-gray-900',
+      card: 'border-gray-500/40 bg-white/5',
+      header: 'border-gray-500/20 bg-white/5',
+      badge: 'bg-gray-500/30 text-gray-300',
+      name: 'text-gray-300',
     };
 
     const pts = pick.points ?? 0;
 
+    const TIERS = {
+      green:  { card: 'border-green-400  bg-green-500/20',  header: 'border-green-400/30  bg-green-500/10',  badge: 'bg-green-500  text-white', name: 'text-green-300'  },
+      yellow: { card: 'border-yellow-400 bg-yellow-500/20', header: 'border-yellow-400/30 bg-yellow-500/10', badge: 'bg-yellow-500 text-white', name: 'text-yellow-300' },
+      amber:  { card: 'border-amber-400  bg-amber-500/20',  header: 'border-amber-400/30  bg-amber-500/10',  badge: 'bg-amber-500  text-white', name: 'text-amber-300'  },
+      orange: { card: 'border-orange-400 bg-orange-500/20', header: 'border-orange-400/30 bg-orange-500/10', badge: 'bg-orange-500 text-white', name: 'text-orange-300' },
+      red:    { card: 'border-red-400    bg-red-500/20',    header: 'border-red-400/30    bg-red-500/10',    badge: 'bg-red-500    text-white', name: 'text-red-300'    },
+    };
+
     if (eventType === 'sprint') {
-      if (pts >= 5) return {                       // correct
-        card: 'border-green-400 bg-green-50',
-        header: 'border-green-200 bg-green-100/60',
-        badge: 'bg-green-500 text-white',
-        name: 'text-green-700',
-      };
-      if (pts >= 3) return {                       // 1 off
-        card: 'border-yellow-400 bg-yellow-50',
-        header: 'border-yellow-200 bg-yellow-100/60',
-        badge: 'bg-yellow-400 text-white',
-        name: 'text-yellow-700',
-      };
-      if (pts >= 1) return {                       // 2 off
-        card: 'border-orange-400 bg-orange-50',
-        header: 'border-orange-200 bg-orange-100/40',
-        badge: 'bg-orange-400 text-white',
-        name: 'text-orange-700',
-      };
-      return {                                     // 3+ off
-        card: 'border-red-300 bg-red-50',
-        header: 'border-red-200 bg-red-100/40',
-        badge: 'bg-red-400 text-white',
-        name: 'text-red-700',
-      };
+      if (pts >= 5) return TIERS.green;
+      if (pts >= 3) return TIERS.yellow;
+      if (pts >= 1) return TIERS.orange;
+      return TIERS.red;
     }
 
     // Race (default)
-    if (pts >= 10) return {                        // correct
-      card: 'border-green-400 bg-green-50',
-      header: 'border-green-200 bg-green-100/60',
-      badge: 'bg-green-500 text-white',
-      name: 'text-green-700',
-    };
-    if (pts >= 5) return {                         // 1–2 off (7 or 5 pts)
-      card: 'border-yellow-400 bg-yellow-50',
-      header: 'border-yellow-200 bg-yellow-100/60',
-      badge: 'bg-yellow-400 text-white',
-      name: 'text-yellow-700',
-    };
-    if (pts >= 2) return {                         // 3–4 off (3 or 2 pts)
-      card: 'border-amber-400 bg-amber-50',
-      header: 'border-amber-200 bg-amber-100/40',
-      badge: 'bg-amber-400 text-white',
-      name: 'text-amber-700',
-    };
-    if (pts >= 1) return {                         // 5 off (1 pt)
-      card: 'border-orange-400 bg-orange-50',
-      header: 'border-orange-200 bg-orange-100/40',
-      badge: 'bg-orange-400 text-white',
-      name: 'text-orange-700',
-    };
-    return {                                       // 6+ off (0 pts)
-      card: 'border-red-300 bg-red-50',
-      header: 'border-red-200 bg-red-100/40',
-      badge: 'bg-red-400 text-white',
-      name: 'text-red-700',
-    };
+    if (pts >= 10) return TIERS.green;
+    if (pts >= 5)  return TIERS.yellow;
+    if (pts >= 2)  return TIERS.amber;
+    if (pts >= 1)  return TIERS.orange;
+    return TIERS.red;
   };
 
   return (
