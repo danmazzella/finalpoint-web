@@ -24,33 +24,24 @@ export default function PositionResultsPage() {
     const weekNumber = params.week as string;
     const position = params.position as string;
 
+    // Initialise from URL param only — do NOT include selectedEventType in deps
+    // (causes same feedback loop as member-picks page).
     useEffect(() => {
         const eventTypeParam = searchParams.get('eventType');
         if (eventTypeParam === 'sprint' || eventTypeParam === 'race') {
             setSelectedEventType(eventTypeParam);
-            setEventTypeInitialized(true);
-        } else if (eventTypeParam === 'null' || eventTypeParam === null) {
-            if (selectedEventType) setEventTypeInitialized(true);
-        } else {
-            setEventTypeInitialized(true);
+        } else if (currentRace) {
+            setSelectedEventType(currentRace.hasSprint ? 'sprint' : 'race');
         }
-    }, [searchParams, selectedEventType]);
+        setEventTypeInitialized(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]); // intentionally omit selectedEventType and currentRace
 
     useEffect(() => {
-        if (currentRace?.hasSprint && !searchParams.get('eventType')) {
-            setSelectedEventType('sprint');
-        } else if (currentRace && !searchParams.get('eventType')) {
-            setSelectedEventType('race');
-        }
+        if (!currentRace || searchParams.get('eventType')) return;
+        setSelectedEventType(currentRace.hasSprint ? 'sprint' : 'race');
+        setEventTypeInitialized(true);
     }, [currentRace, searchParams]);
-
-    useEffect(() => {
-        if (selectedEventType) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('eventType', selectedEventType);
-            window.history.replaceState({}, '', url.toString());
-        }
-    }, [selectedEventType]);
 
     useEffect(() => {
         loadAvailablePositions();
@@ -89,7 +80,7 @@ export default function PositionResultsPage() {
 
     const loadCurrentRace = async () => {
         try {
-            const response = await f1racesAPI.getAllRaces();
+            const response = await f1racesAPI.getAllRaces(new Date().getFullYear());
             if (response.data.success) {
                 setCurrentRace(response.data.data.find((race: any) => race.weekNumber === parseInt(weekNumber)));
             }
@@ -113,6 +104,30 @@ export default function PositionResultsPage() {
     const navigateToNext = () => {
         const i = getCurrentPositionIndex();
         if (i < availablePositions.length - 1) navigateToPosition(availablePositions[i + 1]);
+    };
+
+    /**
+     * Sprint: 5→green  3→yellow  1→orange  0→red
+     * Race:  10→green  7,5→yellow  3,2→amber  1→orange  0→red
+     */
+    const getPickStyle = (pts: number | null, isCorrect: boolean | null, eventType: 'race' | 'sprint' | null) => {
+        if (isCorrect === null || pts === null) return {
+            row: 'border-l-gray-200',
+            points: 'text-gray-500',
+            icon: 'text-gray-400',
+        };
+        const p = pts ?? 0;
+        if (eventType === 'sprint') {
+            if (p >= 5) return { row: 'border-l-green-400',  points: 'text-green-600',  icon: 'text-green-600' };
+            if (p >= 3) return { row: 'border-l-yellow-400', points: 'text-yellow-600', icon: 'text-yellow-500' };
+            if (p >= 1) return { row: 'border-l-orange-400', points: 'text-orange-600', icon: 'text-orange-500' };
+            return             { row: 'border-l-red-300',    points: 'text-red-500',    icon: 'text-red-500' };
+        }
+        if (p >= 10) return   { row: 'border-l-green-400',  points: 'text-green-600',  icon: 'text-green-600' };
+        if (p >= 5)  return   { row: 'border-l-yellow-400', points: 'text-yellow-600', icon: 'text-yellow-500' };
+        if (p >= 2)  return   { row: 'border-l-amber-400',  points: 'text-amber-600',  icon: 'text-amber-500' };
+        if (p >= 1)  return   { row: 'border-l-orange-400', points: 'text-orange-600', icon: 'text-orange-500' };
+        return                { row: 'border-l-red-300',    points: 'text-red-500',    icon: 'text-red-500' };
     };
 
     if (loading) {
@@ -213,7 +228,11 @@ export default function PositionResultsPage() {
                             {(['sprint', 'race'] as const).map((type) => (
                                 <button
                                     key={type}
-                                    onClick={() => setSelectedEventType(type)}
+                                    onClick={() => {
+                                        const p = new URLSearchParams(searchParams.toString());
+                                        p.set('eventType', type);
+                                        router.replace(`/leagues/${leagueId}/results/${weekNumber}/position/${position}?${p.toString()}`);
+                                    }}
                                     className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                                         selectedEventType === type ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                                     }`}
@@ -250,10 +269,10 @@ export default function PositionResultsPage() {
                         {results.picks.map((pick, index) => {
                             const scored = pick.isCorrect !== null;
                             const correct = pick.isCorrect === true;
-                            const wrong = pick.isCorrect === false;
+                            const style = getPickStyle(pick.points, pick.isCorrect, selectedEventType);
 
                             return (
-                                <div key={pick.userId} className="flex items-center gap-4 px-5 py-4">
+                                <div key={pick.userId} className={`flex items-center gap-4 px-5 py-4 border-l-4 ${style.row}`}>
                                     {/* Avatar + rank badge */}
                                     <div className="relative flex-shrink-0">
                                         <Avatar src={pick.userAvatar} alt={pick.userName} size="sm" />
@@ -272,7 +291,7 @@ export default function PositionResultsPage() {
                                         <div className="flex items-center gap-2 mb-0.5">
                                             <p className="text-sm font-semibold text-gray-900 truncate">{pick.userName}</p>
                                             {scored && (
-                                                <span className={`text-xs ${correct ? 'text-green-600' : 'text-red-500'}`}>
+                                                <span className={`text-xs font-bold ${style.icon}`}>
                                                     {correct ? '✓' : '✗'}
                                                 </span>
                                             )}
@@ -287,7 +306,7 @@ export default function PositionResultsPage() {
 
                                     {/* Points */}
                                     <div className="flex-shrink-0 text-right">
-                                        <p className={`text-lg font-bold ${correct ? 'text-green-600' : wrong ? 'text-red-500' : 'text-gray-900'}`}>
+                                        <p className={`text-lg font-bold ${style.points}`}>
                                             {pick.points !== null ? pick.points : '—'}
                                         </p>
                                         <p className="text-xs text-gray-400">pts</p>
