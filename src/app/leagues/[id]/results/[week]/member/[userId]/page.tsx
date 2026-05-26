@@ -190,10 +190,12 @@ export default function MemberPicksPage() {
 
     const pts = pick.points ?? 0;
 
+    // 4 tiers for both sprint and race — amber dropped (too close to yellow).
+    // Sprint: 5→green  3→yellow  1→orange  0→red
+    // Race:  10→green  7,5→yellow  3,2,1→orange  0→red
     const TIERS = {
       green:  { card: 'border-green-400  bg-green-500/20',  header: 'border-green-400/30  bg-green-500/10',  badge: 'bg-green-500  text-white', name: 'text-green-300'  },
       yellow: { card: 'border-yellow-400 bg-yellow-500/20', header: 'border-yellow-400/30 bg-yellow-500/10', badge: 'bg-yellow-500 text-white', name: 'text-yellow-300' },
-      amber:  { card: 'border-amber-400  bg-amber-500/20',  header: 'border-amber-400/30  bg-amber-500/10',  badge: 'bg-amber-500  text-white', name: 'text-amber-300'  },
       orange: { card: 'border-orange-400 bg-orange-500/20', header: 'border-orange-400/30 bg-orange-500/10', badge: 'bg-orange-500 text-white', name: 'text-orange-300' },
       red:    { card: 'border-red-400    bg-red-500/20',    header: 'border-red-400/30    bg-red-500/10',    badge: 'bg-red-500    text-white', name: 'text-red-300'    },
     };
@@ -205,10 +207,9 @@ export default function MemberPicksPage() {
       return TIERS.red;
     }
 
-    // Race (default)
+    // Race
     if (pts >= 10) return TIERS.green;
     if (pts >= 5)  return TIERS.yellow;
-    if (pts >= 2)  return TIERS.amber;
     if (pts >= 1)  return TIERS.orange;
     return TIERS.red;
   };

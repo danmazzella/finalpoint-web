@@ -108,7 +108,7 @@ export default function PositionResultsPage() {
 
     /**
      * Sprint: 5→green  3→yellow  1→orange  0→red
-     * Race:  10→green  7,5→yellow  3,2→amber  1→orange  0→red
+     * Race:  10→green  5+→yellow  1+→orange  0→red
      */
     // Left-border accent + text colours for list rows. Using -300/-400 text so
     // they're readable on both the light and dark glassmorphism backgrounds.
@@ -125,11 +125,10 @@ export default function PositionResultsPage() {
             if (p >= 1) return { row: 'border-l-orange-400', points: 'text-orange-400', icon: 'text-orange-400' };
             return             { row: 'border-l-red-400',    points: 'text-red-400',    icon: 'text-red-400'    };
         }
-        if (p >= 10) return   { row: 'border-l-green-400',  points: 'text-green-400',  icon: 'text-green-400'  };
-        if (p >= 5)  return   { row: 'border-l-yellow-400', points: 'text-yellow-400', icon: 'text-yellow-400' };
-        if (p >= 2)  return   { row: 'border-l-amber-400',  points: 'text-amber-400',  icon: 'text-amber-400'  };
-        if (p >= 1)  return   { row: 'border-l-orange-400', points: 'text-orange-400', icon: 'text-orange-400' };
-        return                { row: 'border-l-red-400',    points: 'text-red-400',    icon: 'text-red-400'    };
+        if (p >= 10) return    { row: 'border-l-green-400',  points: 'text-green-400',  icon: 'text-green-400'  };
+        if (p >= 5)  return    { row: 'border-l-yellow-400', points: 'text-yellow-400', icon: 'text-yellow-400' };
+        if (p >= 1)  return    { row: 'border-l-orange-400', points: 'text-orange-400', icon: 'text-orange-400' };
+        return                 { row: 'border-l-red-400',    points: 'text-red-400',    icon: 'text-red-400'    };
     };
 
     if (loading) {
