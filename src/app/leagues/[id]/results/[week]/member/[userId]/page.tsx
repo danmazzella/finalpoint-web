@@ -31,39 +31,26 @@ export default function MemberPicksPage() {
   const weekNumber = params.week as string;
   const userId = params.userId as string;
 
+  // Initialise from URL param. Do NOT include selectedEventType in deps —
+  // that caused a feedback loop: click race → effect re-runs → reads stale
+  // 'sprint' from searchParams → reverts toggle + fires duplicate requests.
   useEffect(() => {
     const eventTypeParam = searchParams.get('eventType');
     if (eventTypeParam === 'sprint' || eventTypeParam === 'race') {
       setSelectedEventType(eventTypeParam);
-      setEventTypeInitialized(true);
-    } else if (eventTypeParam === 'null' || eventTypeParam === null) {
-      setEventTypeInitialized(true);
-    } else {
-      setEventTypeInitialized(true);
+    } else if (currentRace) {
+      setSelectedEventType(currentRace.hasSprint ? 'sprint' : 'race');
     }
-  }, [searchParams, selectedEventType]);
+    setEventTypeInitialized(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]); // intentionally omit selectedEventType and currentRace
 
+  // When race data loads and there is no eventType in the URL yet, set default.
   useEffect(() => {
-    if (currentRace?.hasSprint && !searchParams.get('eventType')) {
-      setSelectedEventType('sprint');
-    } else if (currentRace && !searchParams.get('eventType')) {
-      setSelectedEventType('race');
-    }
+    if (!currentRace || searchParams.get('eventType')) return;
+    setSelectedEventType(currentRace.hasSprint ? 'sprint' : 'race');
+    setEventTypeInitialized(true);
   }, [currentRace, searchParams]);
-
-  useEffect(() => {
-    if (!selectedEventType) return;
-    const timeoutId = setTimeout(() => {
-      const currentUrl = new URL(window.location.href);
-      const currentEventType = currentUrl.searchParams.get('eventType') || 'race';
-      if (currentEventType !== selectedEventType) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('eventType', selectedEventType);
-        window.history.replaceState({}, '', url.toString());
-      }
-    }, 100);
-    return () => clearTimeout(timeoutId);
-  }, [selectedEventType]);
 
   const loadMemberPicks = useCallback(async () => {
     if (!selectedEventType) return;
@@ -142,12 +129,20 @@ export default function MemberPicksPage() {
 
   useEffect(() => { loadCurrentRace(); }, [leagueId, weekNumber]);
 
+  // Reload picks when eventType changes.
   useEffect(() => {
     if (eventTypeInitialized && selectedEventType) {
       loadMemberPicks();
+    }
+  }, [selectedEventType, eventTypeInitialized, loadMemberPicks]);
+
+  // Members list doesn't change between sprint/race — load once on mount.
+  useEffect(() => {
+    if (eventTypeInitialized && selectedEventType && leagueMembers.length === 0) {
       loadLeagueMembers();
     }
-  }, [selectedEventType, eventTypeInitialized, loadMemberPicks, loadLeagueMembers]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventTypeInitialized, selectedEventType]); // intentionally run once after init
 
   const getPositionLabel = (position: number) => `P${position}`;
 
@@ -176,6 +171,82 @@ export default function MemberPicksPage() {
   const canPrev = getCurrentMemberIndex() > 0;
   const canNext = getCurrentMemberIndex() < leagueMembers.length - 1;
   const isScored = memberPicks.picks.some(p => p.isCorrect !== null);
+
+  /**
+   * Returns Tailwind colour classes driven by pick.points (already event-aware).
+   *
+   * Sprint tiers (4):  5→green  3→yellow  1→orange  0→red
+   * Race tiers   (5): 10→green  7,5→yellow  3,2→amber  1→orange  0→red
+   */
+  const getPickStyle = (pick: typeof memberPicks.picks[0], eventType: 'race' | 'sprint' | null) => {
+    if (pick.isCorrect === null) return {          // not yet scored
+      card: 'border-gray-200 bg-white/70',
+      header: 'border-gray-100 bg-gray-50',
+      badge: 'bg-gray-200 text-gray-600',
+      name: 'text-gray-900',
+    };
+
+    const pts = pick.points ?? 0;
+
+    if (eventType === 'sprint') {
+      if (pts >= 5) return {                       // correct
+        card: 'border-green-400 bg-green-50',
+        header: 'border-green-200 bg-green-100/60',
+        badge: 'bg-green-500 text-white',
+        name: 'text-green-700',
+      };
+      if (pts >= 3) return {                       // 1 off
+        card: 'border-yellow-400 bg-yellow-50',
+        header: 'border-yellow-200 bg-yellow-100/60',
+        badge: 'bg-yellow-400 text-white',
+        name: 'text-yellow-700',
+      };
+      if (pts >= 1) return {                       // 2 off
+        card: 'border-orange-400 bg-orange-50',
+        header: 'border-orange-200 bg-orange-100/40',
+        badge: 'bg-orange-400 text-white',
+        name: 'text-orange-700',
+      };
+      return {                                     // 3+ off
+        card: 'border-red-300 bg-red-50',
+        header: 'border-red-200 bg-red-100/40',
+        badge: 'bg-red-400 text-white',
+        name: 'text-red-700',
+      };
+    }
+
+    // Race (default)
+    if (pts >= 10) return {                        // correct
+      card: 'border-green-400 bg-green-50',
+      header: 'border-green-200 bg-green-100/60',
+      badge: 'bg-green-500 text-white',
+      name: 'text-green-700',
+    };
+    if (pts >= 5) return {                         // 1–2 off (7 or 5 pts)
+      card: 'border-yellow-400 bg-yellow-50',
+      header: 'border-yellow-200 bg-yellow-100/60',
+      badge: 'bg-yellow-400 text-white',
+      name: 'text-yellow-700',
+    };
+    if (pts >= 2) return {                         // 3–4 off (3 or 2 pts)
+      card: 'border-amber-400 bg-amber-50',
+      header: 'border-amber-200 bg-amber-100/40',
+      badge: 'bg-amber-400 text-white',
+      name: 'text-amber-700',
+    };
+    if (pts >= 1) return {                         // 5 off (1 pt)
+      card: 'border-orange-400 bg-orange-50',
+      header: 'border-orange-200 bg-orange-100/40',
+      badge: 'bg-orange-400 text-white',
+      name: 'text-orange-700',
+    };
+    return {                                       // 6+ off (0 pts)
+      card: 'border-red-300 bg-red-50',
+      header: 'border-red-200 bg-red-100/40',
+      badge: 'bg-red-400 text-white',
+      name: 'text-red-700',
+    };
+  };
 
   return (
     <div className="page-bg min-h-screen">
@@ -247,7 +318,14 @@ export default function MemberPicksPage() {
               {(['sprint', 'race'] as const).map((type) => (
                 <button
                   key={type}
-                  onClick={() => setSelectedEventType(type)}
+                  onClick={() => {
+                    // Use router.replace so useSearchParams updates and the
+                    // initialisation effect re-runs with the new value.
+                    // Do NOT call setSelectedEventType here — the effect handles it.
+                    const p = new URLSearchParams(searchParams.toString());
+                    p.set('eventType', type);
+                    router.replace(`/leagues/${leagueId}/results/${weekNumber}/member/${userId}?${p.toString()}`);
+                  }}
                   className={`px-4 py-2 text-sm font-medium rounded-md transition-colors capitalize ${
                     selectedEventType === type ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
@@ -269,32 +347,18 @@ export default function MemberPicksPage() {
             {memberPicks.picks.map((pick) => {
               const scored = pick.isCorrect !== null;
               const correct = pick.isCorrect === true;
-              const wrong = pick.isCorrect === false;
               const wrongDriver = pick.actualDriverId && pick.actualDriverId !== pick.driverId;
+              const style = getPickStyle(pick, selectedEventType);
 
               return (
                 <div
                   key={pick.position}
-                  className={`rounded-2xl border-2 overflow-hidden ${
-                    correct
-                      ? 'border-green-400 bg-green-50'
-                      : wrong
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-gray-200 bg-white/70'
-                  }`}
+                  className={`rounded-2xl border-2 overflow-hidden ${style.card}`}
                 >
                   {/* Card header */}
-                  <div className={`flex items-center justify-between px-4 py-2.5 border-b ${
-                    correct ? 'border-green-200 bg-green-100/60' : wrong ? 'border-red-200 bg-red-100/40' : 'border-gray-100 bg-gray-50'
-                  }`}>
+                  <div className={`flex items-center justify-between px-4 py-2.5 border-b ${style.header}`}>
                     <span className="text-sm font-bold text-gray-700">{getPositionLabel(pick.position)}</span>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      correct
-                        ? 'bg-green-500 text-white'
-                        : wrong
-                          ? 'bg-red-400 text-white'
-                          : 'bg-gray-200 text-gray-600'
-                    }`}>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${style.badge}`}>
                       {scored ? (correct ? `✓ ${pick.points} pts` : `✗ ${pick.points} pts`) : 'Not scored'}
                     </span>
                   </div>
@@ -302,7 +366,7 @@ export default function MemberPicksPage() {
                   {/* Your pick */}
                   <div className="px-4 pt-3 pb-2">
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Your Pick</p>
-                    <p className={`text-sm font-bold ${correct ? 'text-green-700' : wrong ? 'text-red-700' : 'text-gray-900'}`}>
+                    <p className={`text-sm font-bold ${style.name}`}>
                       {pick.driverName || '—'}
                     </p>
                     <p className="text-xs text-gray-400">{pick.driverTeam || ''}</p>
