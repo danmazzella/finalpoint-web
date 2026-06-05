@@ -267,6 +267,13 @@ export const adminAPI = {
     release_notes: string;
     update_url?: string;
   }) => apiService.post('/app/versions', data),
+
+  // Email suppression
+  getEmailSuppressionList: () => apiService.get('/admin/email-suppression'),
+  addEmailSuppression: (userId: number, email: string, reason?: string) =>
+    apiService.post('/admin/email-suppression', { userId, email, reason }),
+  removeEmailSuppression: (userId: number) =>
+    apiService.delete(`/admin/email-suppression/${userId}`),
 };
 
 export const authAPI = {
