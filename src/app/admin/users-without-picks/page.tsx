@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, f1racesAPI } from '@/lib/api';
 
 interface UserWithoutPicks {
     userId: number;
@@ -25,6 +25,13 @@ function UsersWithoutPicksPageContent() {
     const [usersWithoutPicks, setUsersWithoutPicks] = useState<UserWithoutPicks[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [races, setRaces] = useState<any[]>([]);
+
+    useEffect(() => {
+        f1racesAPI.getAllRaces().then(res => {
+            if (res.data?.success) setRaces(res.data.data);
+        }).catch(() => {});
+    }, []);
 
     // Initialize week number from query params
     useEffect(() => {
@@ -112,11 +119,14 @@ function UsersWithoutPicksPageContent() {
                             onChange={(e) => handleWeekChange(parseInt(e.target.value))}
                             className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
-                            {Array.from({ length: 24 }, (_, i) => i + 1).map((week) => (
-                                <option key={week} value={week}>
-                                    Week {week}
-                                </option>
-                            ))}
+                            {Array.from({ length: 24 }, (_, i) => i + 1).map((week) => {
+                                const race = races.find(r => r.weekNumber === week);
+                                return (
+                                    <option key={week} value={week}>
+                                        Week {week}{race?.raceName ? ` - ${race.raceName}` : ''}
+                                    </option>
+                                );
+                            })}
                         </select>
                     </div>
                 </div>
