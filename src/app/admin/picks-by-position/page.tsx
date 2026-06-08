@@ -84,7 +84,7 @@ function PicksByPositionPageContent() {
             setLoading(true);
             setError(null);
 
-            const response = await adminAPI.getPicksByPositionDetailedForEvent(selectedWeek, selectedEventType);
+            const response = await adminAPI.getPicksByPositionDetailedForEvent(selectedWeek, selectedEventType, selectedSeason);
 
             if (response.data.success) {
                 setOverview(response.data.data);
@@ -97,7 +97,7 @@ function PicksByPositionPageContent() {
         } finally {
             setLoading(false);
         }
-    }, [selectedWeek, selectedEventType]);
+    }, [selectedWeek, selectedEventType, selectedSeason]);
 
     useEffect(() => {
         if (selectedWeek) {
