@@ -135,7 +135,7 @@ function UsersWithoutPicksPageContent() {
     const router = useRouter();
     const [weekNumber, setWeekNumber] = useState<number>(1);
     const [usersWithoutPicks, setUsersWithoutPicks] = useState<UserWithoutPicks[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [races, setRaces] = useState<any[]>([]);
     const [allLeagues, setAllLeagues] = useState<{ id: number; name: string }[]>([]);
@@ -155,10 +155,11 @@ function UsersWithoutPicksPageContent() {
     }, []);
 
     useEffect(() => {
+        if (selectedSeason == null) return;
         adminAPI.getAllLeagues().then(res => {
             if (res.data?.success) {
                 const leagues = (res.data.data as any[])
-                    .filter(l => selectedSeason == null || l.seasonYear === selectedSeason)
+                    .filter(l => l.seasonYear === selectedSeason)
                     .map(l => ({ id: l.id, name: l.name }))
                     .sort((a: any, b: any) => a.name.localeCompare(b.name));
                 setAllLeagues(leagues);
@@ -219,7 +220,6 @@ function UsersWithoutPicksPageContent() {
 
     const handleWeekChange = (newWeek: number) => {
         setWeekNumber(newWeek);
-        setSelectedLeagueIds(new Set()); // reset filter on week change
         const params = new URLSearchParams(searchParams.toString());
         params.set('week', newWeek.toString());
         router.replace(`?${params.toString()}`);
