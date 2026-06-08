@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useCallback } from 'react';
+import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { adminAPI, f1racesAPI } from '@/lib/api';
 
@@ -18,6 +18,118 @@ interface UserWithoutPicks {
     }>;
 }
 
+function LeagueFilter({
+    allLeagues,
+    selectedLeagueIds,
+    onChange,
+}: {
+    allLeagues: { id: number; name: string }[];
+    selectedLeagueIds: Set<number>;
+    onChange: (ids: Set<number>) => void;
+}) {
+    const [query, setQuery] = useState('');
+    const [open, setOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const filtered = query.trim()
+        ? allLeagues.filter(l => l.name.toLowerCase().includes(query.toLowerCase()))
+        : allLeagues;
+
+    const allSelected = selectedLeagueIds.size === 0;
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const toggle = (id: number) => {
+        const next = new Set(selectedLeagueIds);
+        if (next.has(id)) {
+            next.delete(id);
+        } else {
+            next.add(id);
+        }
+        onChange(next);
+    };
+
+    const clearAll = () => onChange(new Set());
+
+    const label = allSelected
+        ? 'All leagues'
+        : `${selectedLeagueIds.size} league${selectedLeagueIds.size !== 1 ? 's' : ''} selected`;
+
+    return (
+        <div ref={containerRef} className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Filter by League</label>
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                className="w-full sm:w-72 flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                <span className={allSelected ? 'text-gray-400' : 'text-gray-900'}>{label}</span>
+                <svg className={`ml-2 h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            {open && (
+                <div className="absolute z-20 mt-1 w-full sm:w-72 bg-white border border-gray-200 rounded-md shadow-lg">
+                    {/* Search input */}
+                    <div className="p-2 border-b border-gray-100">
+                        <input
+                            autoFocus
+                            type="text"
+                            placeholder="Search leagues..."
+                            value={query}
+                            onChange={e => setQuery(e.target.value)}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
+                    {/* Clear selection */}
+                    {!allSelected && (
+                        <div className="px-3 py-1.5 border-b border-gray-100">
+                            <button
+                                type="button"
+                                onClick={clearAll}
+                                className="text-xs text-blue-600 hover:text-blue-800"
+                            >
+                                Clear selection (show all)
+                            </button>
+                        </div>
+                    )}
+
+                    {/* League list */}
+                    <ul className="max-h-60 overflow-y-auto py-1">
+                        {filtered.length === 0 ? (
+                            <li className="px-3 py-2 text-sm text-gray-500">No leagues found</li>
+                        ) : (
+                            filtered.map(league => (
+                                <li key={league.id}>
+                                    <label className="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedLeagueIds.has(league.id)}
+                                            onChange={() => toggle(league.id)}
+                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm text-gray-800">{league.name}</span>
+                                    </label>
+                                </li>
+                            ))
+                        )}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+}
+
 function UsersWithoutPicksPageContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -26,6 +138,7 @@ function UsersWithoutPicksPageContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [races, setRaces] = useState<any[]>([]);
+    const [selectedLeagueIds, setSelectedLeagueIds] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         f1racesAPI.getAllRaces().then(res => {
@@ -68,21 +181,34 @@ function UsersWithoutPicksPageContent() {
         loadUsersWithoutPicks();
     }, [loadUsersWithoutPicks]);
 
-    const formatRequiredPositions = (positions: string[]) => {
-        return positions.map(pos => `P${pos}`).join(', ');
-    };
+    // Derive all unique leagues from the results
+    const allLeagues = Array.from(
+        new Map(
+            usersWithoutPicks
+                .flatMap(u => u.leagues)
+                .map(l => [l.leagueId, { id: l.leagueId, name: l.leagueName }])
+        ).values()
+    ).sort((a, b) => a.name.localeCompare(b.name));
 
-    const getTotalMissingPicks = () => {
-        return usersWithoutPicks.reduce((total, user) => total + user.leagues.length, 0);
-    };
+    // Filter users based on selected leagues
+    const filteredUsers = selectedLeagueIds.size === 0
+        ? usersWithoutPicks
+        : usersWithoutPicks
+            .map(user => ({
+                ...user,
+                leagues: user.leagues.filter(l => selectedLeagueIds.has(l.leagueId)),
+            }))
+            .filter(user => user.leagues.length > 0);
 
-    const getUniqueUsers = () => {
-        return usersWithoutPicks.length;
-    };
+    const getTotalMissingPicks = () =>
+        filteredUsers.reduce((total, user) => total + user.leagues.length, 0);
+
+    const formatRequiredPositions = (positions: string[]) =>
+        positions.map(pos => `P${pos}`).join(', ');
 
     const handleWeekChange = (newWeek: number) => {
         setWeekNumber(newWeek);
-        // Update URL with new week parameter (replace instead of push to avoid history buildup)
+        setSelectedLeagueIds(new Set()); // reset filter on week change
         const params = new URLSearchParams(searchParams.toString());
         params.set('week', newWeek.toString());
         router.replace(`?${params.toString()}`);
@@ -100,7 +226,7 @@ function UsersWithoutPicksPageContent() {
         <div className="space-y-6">
             {/* Header */}
             <div className="bg-white shadow-lg rounded-lg p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Users Without Picks</h1>
                         <p className="mt-1 text-sm text-gray-600">
@@ -108,26 +234,37 @@ function UsersWithoutPicksPageContent() {
                         </p>
                     </div>
 
-                    {/* Week Selector */}
-                    <div className="mt-4 sm:mt-0">
-                        <label htmlFor="week-select" className="block text-sm font-medium text-gray-700 mb-2">
-                            Select Week
-                        </label>
-                        <select
-                            id="week-select"
-                            value={weekNumber}
-                            onChange={(e) => handleWeekChange(parseInt(e.target.value))}
-                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        >
-                            {Array.from({ length: 24 }, (_, i) => i + 1).map((week) => {
-                                const race = races.find(r => r.weekNumber === week);
-                                return (
-                                    <option key={week} value={week}>
-                                        Week {week}{race?.raceName ? ` - ${race.raceName}` : ''}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                    <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
+                        {/* Week Selector */}
+                        <div>
+                            <label htmlFor="week-select" className="block text-sm font-medium text-gray-700 mb-2">
+                                Select Week
+                            </label>
+                            <select
+                                id="week-select"
+                                value={weekNumber}
+                                onChange={(e) => handleWeekChange(parseInt(e.target.value))}
+                                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                                {Array.from({ length: 24 }, (_, i) => i + 1).map((week) => {
+                                    const race = races.find(r => r.weekNumber === week);
+                                    return (
+                                        <option key={week} value={week}>
+                                            Week {week}{race?.raceName ? ` - ${race.raceName}` : ''}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+
+                        {/* League Filter */}
+                        {allLeagues.length > 0 && (
+                            <LeagueFilter
+                                allLeagues={allLeagues}
+                                selectedLeagueIds={selectedLeagueIds}
+                                onChange={setSelectedLeagueIds}
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -144,7 +281,7 @@ function UsersWithoutPicksPageContent() {
                             </div>
                             <div className="ml-3">
                                 <p className="text-sm font-medium text-blue-900">Total Users</p>
-                                <p className="text-2xl font-bold text-blue-600">{getUniqueUsers()}</p>
+                                <p className="text-2xl font-bold text-blue-600">{filteredUsers.length}</p>
                             </div>
                         </div>
                     </div>
@@ -187,14 +324,16 @@ function UsersWithoutPicksPageContent() {
             )}
 
             {/* Users List */}
-            {usersWithoutPicks.length === 0 && !loading && !error ? (
+            {filteredUsers.length === 0 && !loading && !error ? (
                 <div className="text-center py-12">
                     <div className="mx-auto h-12 w-12 text-gray-400">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">All users have made their picks!</h3>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">
+                        {selectedLeagueIds.size > 0 ? 'No missing picks for selected leagues' : 'All users have made their picks!'}
+                    </h3>
                     <p className="mt-1 text-sm text-gray-500">No users are missing picks for Week {weekNumber}.</p>
                 </div>
             ) : (
@@ -202,11 +341,16 @@ function UsersWithoutPicksPageContent() {
                     <div className="px-6 py-4 border-b border-gray-200">
                         <h2 className="text-lg font-medium text-gray-900">
                             Users Missing Picks for Week {weekNumber}
+                            {selectedLeagueIds.size > 0 && (
+                                <span className="ml-2 text-sm font-normal text-gray-500">
+                                    ({selectedLeagueIds.size} league{selectedLeagueIds.size !== 1 ? 's' : ''} filtered)
+                                </span>
+                            )}
                         </h2>
                     </div>
 
                     <div className="divide-y divide-gray-200">
-                        {usersWithoutPicks.map((user) => (
+                        {filteredUsers.map((user) => (
                             <div key={user.userId} className="p-6">
                                 <div className="flex items-start space-x-4">
                                     {/* User Avatar */}
