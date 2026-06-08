@@ -220,7 +220,7 @@ export const adminAPI = {
   getPicksByPositionOverviewOverallForEvent: (eventType: 'race' | 'sprint') => apiService.get(`/admin/picks-by-position-overview/overall/event?eventType=${eventType}`),
   getPicksByPositionDetailed: (weekNumber: number) => apiService.get(`/admin/picks-by-position-detailed?weekNumber=${weekNumber}`),
   getPicksByPositionDetailedForEvent: (weekNumber: number, eventType: 'race' | 'sprint', seasonYear?: number | null) => apiService.get(`/admin/picks-by-position-detailed/event?weekNumber=${weekNumber}&eventType=${eventType}${seasonYear != null ? `&seasonYear=${seasonYear}` : ''}`),
-  getUsersWithoutPicks: (weekNumber: number) => apiService.get(`/admin/users-without-picks?weekNumber=${weekNumber}`),
+  getUsersWithoutPicks: (weekNumber: number, seasonYear?: number | null) => apiService.get(`/admin/users-without-picks?weekNumber=${weekNumber}${seasonYear != null ? `&seasonYear=${seasonYear}` : ''}`),
   testNotifications: (data: { userId: number; notificationType: 'email' | 'push' | 'both'; customMessage?: string; templateId?: string; templateFields?: Record<string, string> }) => apiService.post('/admin/test-notifications', data),
   getUserNotificationHistory: (userId: number) => apiService.get(`/admin/users/${userId}/notification-history`),
   getPickLockingStatus: () => apiService.get('/admin/pick-locking-status'),
