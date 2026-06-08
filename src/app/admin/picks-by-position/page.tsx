@@ -226,11 +226,14 @@ function PicksByPositionPageContent() {
                                 onChange={(e) => handleWeekChange(parseInt(e.target.value))}
                                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                {availableWeeks.map((week) => (
-                                    <option key={week} value={week}>
-                                        Week {week}
-                                    </option>
-                                ))}
+                                {availableWeeks.map((week) => {
+                                    const race = races.find(r => r.weekNumber === week);
+                                    return (
+                                        <option key={week} value={week}>
+                                            Week {week}{race?.raceName ? ` - ${race.raceName}` : ''}
+                                        </option>
+                                    );
+                                })}
                             </select>
                         </div>
 
