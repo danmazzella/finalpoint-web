@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { adminAPI, f1racesAPI } from '@/lib/api';
+import { adminAPI, f1racesAPI, seasonsAPI } from '@/lib/api';
 
 interface UserWithoutPicks {
     userId: number;
@@ -138,13 +138,33 @@ function UsersWithoutPicksPageContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [races, setRaces] = useState<any[]>([]);
+    const [allLeagues, setAllLeagues] = useState<{ id: number; name: string }[]>([]);
     const [selectedLeagueIds, setSelectedLeagueIds] = useState<Set<number>>(new Set());
+    const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
 
     useEffect(() => {
         f1racesAPI.getAllRaces().then(res => {
             if (res.data?.success) setRaces(res.data.data);
         }).catch(() => {});
+
+        seasonsAPI.getSeasons().then(res => {
+            if (res.data?.success && res.data.data.length > 0) {
+                setSelectedSeason(res.data.data[0].year);
+            }
+        }).catch(() => {});
     }, []);
+
+    useEffect(() => {
+        adminAPI.getAllLeagues().then(res => {
+            if (res.data?.success) {
+                const leagues = (res.data.data as any[])
+                    .filter(l => selectedSeason == null || l.seasonYear === selectedSeason)
+                    .map(l => ({ id: l.id, name: l.name }))
+                    .sort((a: any, b: any) => a.name.localeCompare(b.name));
+                setAllLeagues(leagues);
+            }
+        }).catch(() => {});
+    }, [selectedSeason]);
 
     // Initialize week number from query params
     useEffect(() => {
@@ -180,15 +200,6 @@ function UsersWithoutPicksPageContent() {
     useEffect(() => {
         loadUsersWithoutPicks();
     }, [loadUsersWithoutPicks]);
-
-    // Derive all unique leagues from the results
-    const allLeagues = Array.from(
-        new Map(
-            usersWithoutPicks
-                .flatMap(u => u.leagues)
-                .map(l => [l.leagueId, { id: l.leagueId, name: l.leagueName }])
-        ).values()
-    ).sort((a, b) => a.name.localeCompare(b.name));
 
     // Filter users based on selected leagues
     const filteredUsers = selectedLeagueIds.size === 0
@@ -258,13 +269,11 @@ function UsersWithoutPicksPageContent() {
                         </div>
 
                         {/* League Filter */}
-                        {allLeagues.length > 0 && (
-                            <LeagueFilter
-                                allLeagues={allLeagues}
-                                selectedLeagueIds={selectedLeagueIds}
-                                onChange={setSelectedLeagueIds}
-                            />
-                        )}
+                        <LeagueFilter
+                            allLeagues={allLeagues}
+                            selectedLeagueIds={selectedLeagueIds}
+                            onChange={setSelectedLeagueIds}
+                        />
                     </div>
                 </div>
 
