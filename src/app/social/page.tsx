@@ -398,9 +398,18 @@ export default function SocialPage() {
       if (last) tags.push(`#${last}`);
     }
 
+    // Season wrapped — tag the player's first name if it's someone other than "You"
+    if (cardType === 'season-wrapped' && wrappedPlayerId) {
+      const memberName = wrappedMembers.find(m => m.id === wrappedPlayerId)?.name;
+      if (memberName) {
+        const first = memberName.trim().split(/\s+/)[0];
+        if (first) tags.push(`#${first.replace(/[^a-zA-Z0-9]/g, '')}F1`);
+      }
+    }
+
     // Dedupe and remove any that are just '#'
     return [...new Set(tags)].filter(t => t.length > 1);
-  }, [cardType, communityStats, selectedPositions, currentRace, spotlightDriver, selectedWeekData]);
+  }, [cardType, communityStats, selectedPositions, currentRace, spotlightDriver, selectedWeekData, wrappedPlayerId, wrappedMembers]);
 
   const downloadCard = useCallback(async () => {
     if (!cardRef.current) return;
