@@ -205,6 +205,14 @@ const getTemplateAutoFillFeatures = (templateId: string): string[] => {
 //     return examples;
 // };
 
+interface BroadcastResult {
+    success: boolean;
+    message: string;
+    sent?: number;
+    failed?: number;
+    results?: Array<{ userId: number; name: string; email?: string; success: boolean; error?: string }>;
+}
+
 const NotificationTester: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [races, setRaces] = useState<Race[]>([]);
@@ -220,6 +228,13 @@ const NotificationTester: React.FC = () => {
     const [historyLoading, setHistoryLoading] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
     const [dataLoading, setDataLoading] = useState(true);
+
+    // Broadcast state
+    const [broadcastTemplate, setBroadcastTemplate] = useState<string>('multi_position_picks_announcement');
+    const [broadcastType, setBroadcastType] = useState<'email' | 'push' | 'both'>('both');
+    const [broadcastLoading, setBroadcastLoading] = useState(false);
+    const [broadcastResult, setBroadcastResult] = useState<BroadcastResult | null>(null);
+    const [showBroadcastConfirm, setShowBroadcastConfirm] = useState(false);
 
     // Fetch users, races, and leagues on component mount
     useEffect(() => {
@@ -343,6 +358,38 @@ const NotificationTester: React.FC = () => {
         });
 
         return { title, body, emailSubject };
+    };
+
+    const handleBroadcast = async () => {
+        setBroadcastLoading(true);
+        setBroadcastResult(null);
+        setShowBroadcastConfirm(false);
+        try {
+            const response = await adminAPI.broadcastToLeagueOwners({
+                notificationType: broadcastType,
+                templateId: broadcastTemplate,
+            });
+            if (response.status === 200) {
+                setBroadcastResult({
+                    success: true,
+                    message: response.data.message,
+                    sent: response.data.sent,
+                    failed: response.data.failed,
+                    results: response.data.results,
+                });
+            } else {
+                setBroadcastResult({ success: false, message: response.data.message || 'Failed to send broadcast' });
+            }
+        } catch (error: unknown) {
+            let errorMessage = 'Error sending broadcast';
+            if (error && typeof error === 'object' && 'response' in error) {
+                const responseError = error as { response?: { data?: { message?: string } } };
+                errorMessage = responseError.response?.data?.message || errorMessage;
+            }
+            setBroadcastResult({ success: false, message: errorMessage });
+        } finally {
+            setBroadcastLoading(false);
+        }
     };
 
     const handleTestNotification = async () => {
@@ -512,7 +559,105 @@ const NotificationTester: React.FC = () => {
     };
 
     return (
-        <div className="bg-white shadow-lg rounded-lg p-6">
+        <div className="bg-white shadow-lg rounded-lg p-6 space-y-8">
+
+            {/* Broadcast to League Owners */}
+            <div>
+                <h2 className="text-lg font-medium text-gray-900 mb-1">Broadcast to League Owners</h2>
+                <p className="text-sm text-gray-500 mb-4">Send a notification to all active league owners at once.</p>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Template</label>
+                        <select
+                            value={broadcastTemplate}
+                            onChange={(e) => setBroadcastTemplate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                        >
+                            {notificationTemplates.map((t) => (
+                                <option key={t.id} value={t.id}>{t.name} — {t.description}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Notification Type</label>
+                        <div className="flex space-x-4">
+                            {(['email', 'push', 'both'] as const).map((type) => (
+                                <label key={type} className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        name="broadcastType"
+                                        value={type}
+                                        checked={broadcastType === type}
+                                        onChange={(e) => setBroadcastType(e.target.value as 'email' | 'push' | 'both')}
+                                        className="mr-2 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-gray-700 capitalize">{type}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    {!showBroadcastConfirm ? (
+                        <button
+                            onClick={() => setShowBroadcastConfirm(true)}
+                            disabled={broadcastLoading}
+                            className="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+                        >
+                            Send to All League Owners
+                        </button>
+                    ) : (
+                        <div className="bg-yellow-50 border border-yellow-300 rounded-md p-4 space-y-3">
+                            <p className="text-sm font-medium text-yellow-800">
+                                This will send a <strong>{broadcastType}</strong> notification to <strong>all active league owners</strong> using the &ldquo;{notificationTemplates.find(t => t.id === broadcastTemplate)?.name}&rdquo; template. Continue?
+                            </p>
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={handleBroadcast}
+                                    disabled={broadcastLoading}
+                                    className="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 disabled:opacity-50"
+                                >
+                                    {broadcastLoading ? 'Sending...' : 'Yes, Send'}
+                                </button>
+                                <button
+                                    onClick={() => setShowBroadcastConfirm(false)}
+                                    className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-md hover:bg-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {broadcastResult && (
+                        <div className={`p-4 rounded-md ${broadcastResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                            <h4 className={`font-medium ${broadcastResult.success ? 'text-green-800' : 'text-red-800'}`}>
+                                {broadcastResult.success ? 'Broadcast Complete' : 'Error'}
+                            </h4>
+                            <p className={`text-sm mt-1 ${broadcastResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                                {broadcastResult.message}
+                            </p>
+                            {broadcastResult.results && broadcastResult.results.length > 0 && (
+                                <details className="mt-3">
+                                    <summary className="text-xs text-gray-600 cursor-pointer">View per-user results</summary>
+                                    <div className="mt-2 max-h-48 overflow-y-auto space-y-1">
+                                        {broadcastResult.results.map((r) => (
+                                            <div key={r.userId} className={`text-xs px-2 py-1 rounded ${r.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                {r.success ? '✓' : '✗'} {r.name} ({r.email}){r.error ? ` — ${r.error}` : ''}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </details>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <hr className="border-gray-200" />
+
+            <div>
             <h2 className="text-lg font-medium text-gray-900 mb-6">Test Notifications</h2>
 
             <div className="space-y-6">
@@ -832,6 +977,7 @@ const NotificationTester: React.FC = () => {
                         )}
                     </div>
                 )}
+            </div>
             </div>
         </div>
     );

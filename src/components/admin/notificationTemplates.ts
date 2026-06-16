@@ -97,6 +97,17 @@ export const notificationTemplates: NotificationTemplate[] = [
         description: 'Notify users when league position requirements are changed mid-season'
     },
 
+    // Multi-Position Picks Announcement
+    {
+        id: 'multi_position_picks_announcement',
+        name: 'Multi-Position Picks Announcement',
+        title: 'New Feature: Pick More Positions in FinalPoint!',
+        body: 'You can now let your league members pick more than 2 positions per race. Go to your league settings to configure it!',
+        emailSubject: 'FinalPoint: You can now enable multi-position picks in your league',
+        category: 'system',
+        description: 'Announce to league owners that they can now allow more than 2 position picks per race'
+    },
+
     // Custom Template
     {
         id: 'custom_message',

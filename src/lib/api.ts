@@ -274,6 +274,10 @@ export const adminAPI = {
     apiService.post('/admin/email-suppression', { userId, email, reason }),
   removeEmailSuppression: (userId: number) =>
     apiService.delete(`/admin/email-suppression/${userId}`),
+
+  // Broadcast
+  broadcastToLeagueOwners: (data: { notificationType: 'email' | 'push' | 'both'; templateId: string; templateFields?: Record<string, string>; customMessage?: string }) =>
+    apiService.post('/admin/broadcast/league-owners', data),
 };
 
 export const authAPI = {
