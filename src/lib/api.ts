@@ -243,6 +243,14 @@ export const adminAPI = {
     apiService.delete(`/admin/leagues/${leagueId}/remove-user/${userId}`),
   createUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, driverId: number, eventType: 'race' | 'sprint' = 'race') =>
     apiService.post(`/admin/users/${userId}/picks`, { leagueId, weekNumber, position, driverId, eventType }),
+  bulkUpsertUserPicks: (
+    userId: number,
+    leagueId: number,
+    weekNumber: number,
+    picks: Array<{ position: number; driverId: number }>,
+    eventType: 'race' | 'sprint' = 'race'
+  ) =>
+    apiService.post(`/admin/users/${userId}/picks/bulk`, { leagueId, weekNumber, eventType, picks }),
   updateUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, driverId: number, eventType: 'race' | 'sprint' = 'race') =>
     apiService.put(`/admin/users/${userId}/picks`, { leagueId, weekNumber, position, driverId, eventType }),
   deleteUserPick: (userId: number, leagueId: number, weekNumber: number, position: number, eventType: 'race' | 'sprint' = 'race') =>
