@@ -233,6 +233,24 @@ export const adminAPI = {
     apiService.post('/admin/rescore-race-results', { weekNumber, results, leagueId, logActivity }),
   rescoreSprintResults: (weekNumber: number, results: Array<{ driverId: number; finishingPosition: number }>, leagueId?: number, logActivity: boolean = true) =>
     apiService.post('/admin/rescore-sprint-results', { weekNumber, results, leagueId, logActivity }),
+
+  // Automatic F1 results import
+  importRaceResults: (
+    weekNumber: number,
+    eventType: 'race' | 'sprint',
+    mode: 'diff' | 'apply',
+    seasonYear?: number | null,
+    force?: boolean,
+  ) => apiService.post('/admin/import-race-results', { weekNumber, eventType, mode, seasonYear, force }),
+  lockRaceResults: (weekNumber: number, eventType: 'race' | 'sprint', locked: boolean, seasonYear?: number | null) =>
+    apiService.post('/admin/lock-race-results', { weekNumber, eventType, locked, seasonYear }),
+  getResultsImportStatus: (seasonYear?: number | null) =>
+    apiService.get('/admin/results-import-status', { params: seasonYear != null ? { seasonYear } : {} }),
+  releaseResultNotifications: (weekNumber: number, eventType: 'race' | 'sprint', seasonYear?: number | null) =>
+    apiService.post('/admin/release-result-notifications', { weekNumber, eventType, seasonYear }),
+  getAppSettings: () => apiService.get('/admin/app-settings'),
+  setAppSetting: (key: string, value: string | boolean) => apiService.put(`/admin/app-settings/${key}`, { value }),
+
   rescheduleAllPicks: () => apiService.post('/admin/reschedule-all-picks'),
   rescheduleAllReminders: () => apiService.post('/admin/reschedule-all-reminders'),
 

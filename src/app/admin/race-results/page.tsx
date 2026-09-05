@@ -4,6 +4,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, driversAPI, seasonsAPI } from '@/lib/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import logger from '@/utils/logger';
+import ResultsImportModal from '@/components/admin/ResultsImportModal';
+
+interface ImportStateRow {
+    source: 'manual' | 'imported' | null;
+    locked: boolean;
+    notificationsPending: boolean;
+    lastImportedAt: string | null;
+    lastDiffAt: string | null;
+    lastError: string | null;
+}
 
 interface Driver {
     id: number;
@@ -51,6 +61,10 @@ export default function RaceResultsEntryPage() {
     const [sprintResults, setSprintResults] = useState<RaceResult[]>([]);
     const [seasons, setSeasons] = useState<{ year: number; displayLabel: string }[]>([]);
     const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [importStateRow, setImportStateRow] = useState<ImportStateRow | null>(null);
+    const [autoSendNotifications, setAutoSendNotifications] = useState<boolean>(false);
+    const [importBusy, setImportBusy] = useState(false);
 
     useEffect(() => {
         const load = async () => {
@@ -155,6 +169,37 @@ export default function RaceResultsEntryPage() {
         }
     }, [searchParams, selectedSeason]);
 
+    const loadImportState = useCallback(async (weekNumber: number, eventType: 'race' | 'sprint') => {
+        try {
+            const res = await adminAPI.getResultsImportStatus(selectedSeason ?? undefined);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const rows: any[] = res.data?.data?.rows || [];
+            const match = rows.find((r) => r.weekNumber === weekNumber && r.eventType === eventType);
+            setImportStateRow(match
+                ? {
+                    source: match.source ?? null,
+                    locked: !!match.locked,
+                    notificationsPending: !!match.notificationsPending,
+                    lastImportedAt: match.lastImportedAt ?? null,
+                    lastDiffAt: match.lastDiffAt ?? null,
+                    lastError: match.lastError ?? null,
+                }
+                : null);
+        } catch {
+            setImportStateRow(null);
+        }
+    }, [selectedSeason]);
+
+    useEffect(() => {
+        adminAPI.getAppSettings()
+            .then((res) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const row = (res.data?.data || []).find((s: any) => s.settingKey === 'auto_send_result_notifications');
+                setAutoSendNotifications(row?.settingValue === 'true');
+            })
+            .catch(() => undefined);
+    }, []);
+
     const loadExistingResults = async (weekNumber: number, eventType: 'race' | 'sprint') => {
         try {
             setLoading(true);
@@ -245,6 +290,8 @@ export default function RaceResultsEntryPage() {
 
         // Set rescoring mode based on whether any results exist
         setIsRescoring(hasRaceResults || hasSprintResults);
+
+        await loadImportState(weekNumber, selectedEventType);
     };
 
     const handleRescoringModeChange = (mode: 'all' | 'specific') => {
@@ -273,6 +320,8 @@ export default function RaceResultsEntryPage() {
         } catch (error) {
             setIsRescoring(false);
         }
+
+        await loadImportState(selectedWeek, eventType);
     };
 
     const handleDriverChange = (position: number, driverId: number) => {
@@ -420,6 +469,58 @@ export default function RaceResultsEntryPage() {
             setError(errorMessage);
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const handleFillGrid = (rows: Array<{ finishingPosition?: number; position: number; driverId: number }>) => {
+        const count = (selectedSeason ?? 0) >= 2026 ? 22 : 20;
+        const next = Array.from({ length: count }, (_, i) => {
+            const match = rows.find(r => (r.position ?? r.finishingPosition) === i + 1);
+            return { driverId: match?.driverId || 0, finishingPosition: i + 1 };
+        });
+        if (selectedEventType === 'race') setResults(next); else setSprintResults(next);
+        setSuccess('Grid filled from the F1 feed — review, then submit to score.');
+    };
+
+    const handleImportApplied = async () => {
+        setShowImportModal(false);
+        setSuccess(`Imported ${selectedEventType} results for ${selectedRace?.raceName} (Week ${selectedWeek}).`);
+        await handleWeekChange(selectedWeek);
+    };
+
+    const handleToggleLock = async () => {
+        if (!importStateRow) return;
+        setImportBusy(true);
+        try {
+            await adminAPI.lockRaceResults(selectedWeek, selectedEventType, !importStateRow.locked, selectedSeason ?? undefined);
+            await loadImportState(selectedWeek, selectedEventType);
+        } catch (e) {
+            setError(e instanceof Error ? e.message : 'Failed to toggle lock');
+        } finally {
+            setImportBusy(false);
+        }
+    };
+
+    const handleReleaseNotifications = async () => {
+        setImportBusy(true);
+        try {
+            const res = await adminAPI.releaseResultNotifications(selectedWeek, selectedEventType, selectedSeason ?? undefined);
+            setSuccess(res.data?.message || 'Score notifications sent.');
+            await loadImportState(selectedWeek, selectedEventType);
+        } catch (e) {
+            setError(e instanceof Error ? e.message : 'Failed to send notifications');
+        } finally {
+            setImportBusy(false);
+        }
+    };
+
+    const handleToggleAutoSend = async () => {
+        const next = !autoSendNotifications;
+        setAutoSendNotifications(next);
+        try {
+            await adminAPI.setAppSetting('auto_send_result_notifications', next);
+        } catch {
+            setAutoSendNotifications(!next);
         }
     };
 
@@ -639,12 +740,63 @@ export default function RaceResultsEntryPage() {
                     <h2 className="text-lg font-medium text-gray-900 mb-4">
                         {isRescoring && rescoringMode === 'specific' ? `Current ${selectedEventType === 'race' ? 'Race' : 'Sprint'} Results (Read-only)` : `Enter ${selectedEventType === 'race' ? 'Race' : 'Sprint'} Finishing Positions`}
                     </h2>
-                    <p className="text-sm text-gray-600 mb-6">
+                    <p className="text-sm text-gray-600 mb-4">
                         {isRescoring && rescoringMode === 'specific'
                             ? 'Current race results are displayed below. Only the selected league will be rescored.'
                             : `Select the driver who finished in each position. All ${driverCount} positions must be filled.`
                         }
                     </p>
+
+                    {/* F1 feed import toolbar */}
+                    <div className="mb-6 flex flex-wrap items-center gap-3 rounded-md border border-gray-200 bg-gray-50 p-3">
+                        <button
+                            type="button"
+                            onClick={() => setShowImportModal(true)}
+                            disabled={!selectedRace}
+                            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                        >
+                            Import from F1 API
+                        </button>
+
+                        {importStateRow?.source && (
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${importStateRow.source === 'imported' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-700'}`}>
+                                {importStateRow.source === 'imported' ? 'auto-imported' : 'manual'}
+                            </span>
+                        )}
+                        {importStateRow?.locked && (
+                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">locked</span>
+                        )}
+                        {importStateRow?.lastDiffAt && !importStateRow.locked && (
+                            <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700" title="the feed disagreed with the stored results">feed differs</span>
+                        )}
+
+                        {importStateRow && (
+                            <button
+                                type="button"
+                                onClick={handleToggleLock}
+                                disabled={importBusy}
+                                className="rounded-md border border-gray-300 px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                            >
+                                {importStateRow.locked ? 'Unlock' : 'Lock (stop feed overwrites)'}
+                            </button>
+                        )}
+
+                        {importStateRow?.notificationsPending && (
+                            <button
+                                type="button"
+                                onClick={handleReleaseNotifications}
+                                disabled={importBusy}
+                                className="rounded-md bg-green-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                            >
+                                Send score notifications
+                            </button>
+                        )}
+
+                        <label className="ml-auto flex items-center gap-2 text-xs text-gray-600">
+                            <input type="checkbox" checked={autoSendNotifications} onChange={handleToggleAutoSend} />
+                            Auto-send score notifications on import
+                        </label>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {(selectedEventType === 'race' ? results : sprintResults).map((result, index) => (
@@ -768,6 +920,18 @@ export default function RaceResultsEntryPage() {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {showImportModal && selectedRace && (
+                <ResultsImportModal
+                    isOpen={showImportModal}
+                    onClose={() => setShowImportModal(false)}
+                    weekNumber={selectedWeek}
+                    eventType={selectedEventType}
+                    seasonYear={selectedSeason}
+                    onApplied={handleImportApplied}
+                    onFillGrid={handleFillGrid}
+                />
             )}
         </div>
     );
