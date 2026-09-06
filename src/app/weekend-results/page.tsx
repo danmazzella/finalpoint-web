@@ -148,16 +148,16 @@ export default function WeekendResultsPage() {
     return (
         <div className="page-bg min-h-screen">
             <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 mb-20">
-                <h1 className="text-2xl font-bold text-foreground">Weekend Results</h1>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <h1 className="text-2xl font-bold text-gray-900">Weekend Results</h1>
+                <p className="mt-1 text-sm text-gray-500">
                     Every session&apos;s order for a race weekend — practice and qualifying with best lap and
                     gap, sprint and Grand Prix finishing order.
                 </p>
 
                 <div className="mt-4">
-                    <label className="mb-1 block text-sm font-medium text-foreground">Race weekend</label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Race weekend</label>
                     <select
-                        className="w-full rounded-lg border border-border bg-card p-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        className="w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={selectedWeek ?? ''}
                         disabled={loadingRaces}
                         onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
@@ -172,18 +172,16 @@ export default function WeekendResultsPage() {
                 </div>
 
                 {error && (
-                    <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                        {error}
-                    </div>
+                    <div className="mt-4 rounded-lg bg-red-100 p-3 text-sm text-red-800">{error}</div>
                 )}
 
                 <div className="mt-6">
                     {loadingResults ? (
-                        <div className="glass-card px-6 py-12 text-center text-sm text-muted-foreground">
+                        <div className="glass-card px-6 py-12 text-center text-sm text-gray-500">
                             Loading results…
                         </div>
                     ) : availableTabs.length === 0 ? (
-                        <div className="glass-card px-6 py-12 text-center text-sm text-muted-foreground">
+                        <div className="glass-card px-6 py-12 text-center text-sm text-gray-500">
                             No results yet for {selectedRace?.raceName ?? 'this weekend'}.
                         </div>
                     ) : (
@@ -195,8 +193,8 @@ export default function WeekendResultsPage() {
                                         onClick={() => setActiveTab(tab)}
                                         className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${
                                             activeTab === tab
-                                                ? 'bg-primary font-semibold text-primary-foreground shadow-sm'
-                                                : 'bg-secondary font-medium text-muted-foreground hover:text-foreground'
+                                                ? 'bg-blue-600 font-semibold text-white shadow-sm'
+                                                : 'bg-gray-100 font-medium text-gray-600 hover:text-gray-900'
                                         }`}
                                     >
                                         {SESSION_LABEL[tab]}
@@ -205,7 +203,7 @@ export default function WeekendResultsPage() {
                             </div>
 
                             <div className="glass-card animate-fade-in-up overflow-hidden">
-                                <ul className="divide-y divide-border">
+                                <ul className="divide-y divide-gray-200">
                                     {rows.map((row) => {
                                         const lap = fmtLap(row.bestLapMs);
                                         const gap = fmtGap(row.gapToLeaderMs);
@@ -214,22 +212,22 @@ export default function WeekendResultsPage() {
                                             <li
                                                 key={`${row.position ?? 'nt'}-${row.driverId}`}
                                                 className={`flex items-center gap-3 px-4 py-3 ${
-                                                    isLeader ? 'bg-primary/[0.06]' : ''
+                                                    isLeader ? 'bg-blue-500/10' : ''
                                                 }`}
                                             >
-                                                <span className="w-8 shrink-0 text-center text-sm font-bold tabular-nums text-foreground">
+                                                <span className="w-8 shrink-0 text-center text-sm font-bold tabular-nums text-gray-900">
                                                     {row.position == null ? (
-                                                        <span className="text-muted-foreground">–</span>
+                                                        <span className="text-gray-400">–</span>
                                                     ) : (
                                                         row.position
                                                     )}
                                                 </span>
 
                                                 <div className="min-w-0 flex-1">
-                                                    <div className="truncate text-sm font-semibold text-foreground">
+                                                    <div className="truncate text-sm font-semibold text-gray-900">
                                                         {row.driverName}
                                                     </div>
-                                                    <div className="truncate text-xs text-muted-foreground">
+                                                    <div className="truncate text-xs text-gray-500">
                                                         {row.driverTeam}
                                                         {timedSession && row.lapsCompleted != null && (
                                                             <>
@@ -244,21 +242,17 @@ export default function WeekendResultsPage() {
                                                 {timedSession && (
                                                     <div className="shrink-0 text-right tabular-nums">
                                                         {lap == null ? (
-                                                            <span className="text-xs text-muted-foreground">
-                                                                No time
-                                                            </span>
+                                                            <span className="text-xs text-gray-400">No time</span>
                                                         ) : isLeader ? (
-                                                            <span className="text-sm font-semibold text-foreground">
+                                                            <span className="text-sm font-semibold text-gray-900">
                                                                 {lap}
                                                             </span>
                                                         ) : (
                                                             <>
-                                                                <div className="text-sm font-semibold text-foreground">
+                                                                <div className="text-sm font-semibold text-gray-900">
                                                                     {gap ?? lap}
                                                                 </div>
-                                                                <div className="text-[11px] text-muted-foreground">
-                                                                    {lap}
-                                                                </div>
+                                                                <div className="text-[11px] text-gray-500">{lap}</div>
                                                             </>
                                                         )}
                                                     </div>
