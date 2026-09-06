@@ -16,7 +16,21 @@ interface DriverSelectionModalProps {
     sprintPicks?: Map<number, number>; // position -> driverId mapping for sprint
     hasSprint?: boolean; // whether this is a sprint weekend
     eventType: 'race' | 'sprint'; // which event type this modal is for
+    // driverId -> that driver's finishing position in each completed weekend session
+    sessionResultsByDriver?: Record<number, { type: string; position: number }[]>;
 }
+
+// Compact session labels + display order for the driver-tile badges.
+const SESSION_BADGE: Record<string, string> = {
+    fp1: 'FP1',
+    fp2: 'FP2',
+    fp3: 'FP3',
+    sprint_qualifying: 'SQ',
+    sprint: 'SR',
+    qualifying: 'Q',
+    race: 'GP',
+};
+const SESSION_BADGE_ORDER = ['fp1', 'fp2', 'fp3', 'sprint_qualifying', 'sprint', 'qualifying', 'race'];
 
 export const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({
     isOpen,
@@ -31,6 +45,7 @@ export const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({
     sprintPicks,
     hasSprint = false,
     eventType,
+    sessionResultsByDriver,
 }) => {
     if (!isOpen) return null;
 
@@ -105,6 +120,28 @@ export const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({
                                     </div>
                                     <h3 className="font-semibold text-gray-900 mb-2 text-base">{driver.name}</h3>
                                     <p className="text-sm text-gray-600 font-medium mb-3">{driver.team}</p>
+
+                                    {(() => {
+                                        const sr = sessionResultsByDriver?.[driver.id];
+                                        if (!sr || sr.length === 0) return null;
+                                        const sorted = [...sr].sort(
+                                            (a, b) =>
+                                                SESSION_BADGE_ORDER.indexOf(a.type) - SESSION_BADGE_ORDER.indexOf(b.type),
+                                        );
+                                        return (
+                                            <div className="mb-3 flex flex-wrap gap-1">
+                                                {sorted.map((s) => (
+                                                    <span
+                                                        key={s.type}
+                                                        className="inline-flex items-center rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600"
+                                                        title={`${s.type} finishing position`}
+                                                    >
+                                                        {SESSION_BADGE[s.type] ?? s.type.toUpperCase()} P{s.position}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        );
+                                    })()}
 
                                     {isSelected && (
                                         <div className="mt-3 flex justify-center">

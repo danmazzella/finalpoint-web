@@ -59,6 +59,10 @@ function PicksV2Form() {
     const [showDriverModal, setShowDriverModal] = useState(false);
     const [modalPosition, setModalPosition] = useState<number>(0);
     const [modalEventType, setModalEventType] = useState<'race' | 'sprint'>('race');
+    // driverId -> that driver's finishing position in each completed weekend session
+    const [driverSessionResults, setDriverSessionResults] = useState<
+        Record<number, { type: string; position: number }[]>
+    >({});
 
     useEffect(() => {
         if (authLoading) return;
@@ -194,6 +198,39 @@ function PicksV2Form() {
             }
         }
     }, [selectedLeague, currentRace, loadExistingPicks, loadExistingSprintPicks]);
+
+    // Pull this weekend's session results (practice / qualifying / sprint) so completed
+    // sessions can be shown on the driver tiles to inform picks.
+    useEffect(() => {
+        if (!currentRace?.weekNumber) {
+            setDriverSessionResults({});
+            return;
+        }
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await f1racesAPI.getSessionResults(currentRace.weekNumber);
+                if (cancelled || !res?.data?.success) return;
+                const sessions = (res.data.data.sessions ?? {}) as Record<
+                    string,
+                    { position: number; driverId: number }[]
+                >;
+                const byDriver: Record<number, { type: string; position: number }[]> = {};
+                for (const [type, entries] of Object.entries(sessions)) {
+                    for (const e of entries) {
+                        (byDriver[e.driverId] = byDriver[e.driverId] || []).push({ type, position: e.position });
+                    }
+                }
+                setDriverSessionResults(byDriver);
+            } catch (err) {
+                console.warn('Could not load weekend session results:', err);
+                if (!cancelled) setDriverSessionResults({});
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [currentRace?.weekNumber]);
 
     const makePick = async (position: number, driverId: number, eventType: 'race' | 'sprint' = 'race') => {
         if (!selectedLeague) {
@@ -856,6 +893,7 @@ function PicksV2Form() {
                     sprintPicks={sprintPicks}
                     hasSprint={currentRace?.hasSprint || false}
                     eventType={modalEventType}
+                    sessionResultsByDriver={driverSessionResults}
                 />
             </main>
         </div>
