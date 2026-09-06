@@ -146,112 +146,132 @@ export default function WeekendResultsPage() {
     const timedSession = activeTab != null && activeTab !== 'race' && activeTab !== 'sprint';
 
     return (
-        <div className="mx-auto max-w-3xl px-4 py-6">
-            <h1 className="text-2xl font-bold text-gray-900">Weekend Results</h1>
-            <p className="mt-1 text-sm text-gray-600">
-                Every session&apos;s order for a race weekend — practice and qualifying with best lap and gap,
-                sprint and Grand Prix finishing order.
-            </p>
+        <div className="page-bg min-h-screen">
+            <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 mb-20">
+                <h1 className="text-2xl font-bold text-foreground">Weekend Results</h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    Every session&apos;s order for a race weekend — practice and qualifying with best lap and
+                    gap, sprint and Grand Prix finishing order.
+                </p>
 
-            <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Race weekend</label>
-                <select
-                    className="w-full rounded-lg border border-gray-300 p-2 text-sm"
-                    value={selectedWeek ?? ''}
-                    disabled={loadingRaces}
-                    onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
-                >
-                    {races.map((r) => (
-                        <option key={r.weekNumber} value={r.weekNumber}>
-                            Week {r.weekNumber} — {r.raceName}
-                            {r.hasSprint ? ' (sprint)' : ''}
-                        </option>
-                    ))}
-                </select>
-            </div>
+                <div className="mt-4">
+                    <label className="mb-1 block text-sm font-medium text-foreground">Race weekend</label>
+                    <select
+                        className="w-full rounded-lg border border-border bg-card p-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        value={selectedWeek ?? ''}
+                        disabled={loadingRaces}
+                        onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                    >
+                        {races.map((r) => (
+                            <option key={r.weekNumber} value={r.weekNumber}>
+                                Week {r.weekNumber} — {r.raceName}
+                                {r.hasSprint ? ' (sprint)' : ''}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
-            {error && (
-                <div className="mt-4 rounded-lg bg-red-100 p-3 text-sm text-red-800">{error}</div>
-            )}
-
-            <div className="mt-6">
-                {loadingResults ? (
-                    <div className="py-12 text-center text-sm text-gray-500">Loading results…</div>
-                ) : availableTabs.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-gray-300 py-12 text-center text-sm text-gray-500">
-                        No results yet for {selectedRace?.raceName ?? 'this weekend'}.
+                {error && (
+                    <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                        {error}
                     </div>
-                ) : (
-                    <>
-                        <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-2">
-                            {availableTabs.map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-                                        activeTab === tab
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {SESSION_LABEL[tab]}
-                                </button>
-                            ))}
-                        </div>
-
-                        <ul className="mt-3 divide-y divide-gray-100">
-                            {rows.map((row) => {
-                                const lap = fmtLap(row.bestLapMs);
-                                const gap = fmtGap(row.gapToLeaderMs);
-                                const isLeader = row.gapToLeaderMs === 0;
-                                return (
-                                    <li
-                                        key={`${row.position ?? 'nt'}-${row.driverId}`}
-                                        className="flex items-center gap-3 py-2.5"
-                                    >
-                                        <span className="w-8 shrink-0 text-center text-sm font-bold text-gray-900">
-                                            {row.position == null ? (
-                                                <span className="text-gray-400">–</span>
-                                            ) : (
-                                                row.position
-                                            )}
-                                        </span>
-
-                                        <div className="min-w-0 flex-1">
-                                            <div className="truncate text-sm font-semibold text-gray-900">
-                                                {row.driverName}
-                                            </div>
-                                            <div className="truncate text-xs text-gray-500">
-                                                {row.driverTeam}
-                                                {timedSession && row.lapsCompleted != null && (
-                                                    <> · {row.lapsCompleted} lap{row.lapsCompleted === 1 ? '' : 's'}</>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {timedSession && (
-                                            <div className="shrink-0 text-right tabular-nums">
-                                                {lap == null ? (
-                                                    <span className="text-xs text-gray-400">No time</span>
-                                                ) : isLeader ? (
-                                                    <span className="text-sm font-semibold text-gray-900">{lap}</span>
-                                                ) : (
-                                                    <>
-                                                        <div className="text-sm font-semibold text-gray-900">
-                                                            {gap ?? lap}
-                                                        </div>
-                                                        <div className="text-[11px] text-gray-500">{lap}</div>
-                                                    </>
-                                                )}
-                                            </div>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </>
                 )}
-            </div>
+
+                <div className="mt-6">
+                    {loadingResults ? (
+                        <div className="glass-card px-6 py-12 text-center text-sm text-muted-foreground">
+                            Loading results…
+                        </div>
+                    ) : availableTabs.length === 0 ? (
+                        <div className="glass-card px-6 py-12 text-center text-sm text-muted-foreground">
+                            No results yet for {selectedRace?.raceName ?? 'this weekend'}.
+                        </div>
+                    ) : (
+                        <>
+                            <div className="mb-4 flex flex-wrap gap-2">
+                                {availableTabs.map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${
+                                            activeTab === tab
+                                                ? 'bg-primary font-semibold text-primary-foreground shadow-sm'
+                                                : 'bg-secondary font-medium text-muted-foreground hover:text-foreground'
+                                        }`}
+                                    >
+                                        {SESSION_LABEL[tab]}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="glass-card animate-fade-in-up overflow-hidden">
+                                <ul className="divide-y divide-border">
+                                    {rows.map((row) => {
+                                        const lap = fmtLap(row.bestLapMs);
+                                        const gap = fmtGap(row.gapToLeaderMs);
+                                        const isLeader = row.gapToLeaderMs === 0;
+                                        return (
+                                            <li
+                                                key={`${row.position ?? 'nt'}-${row.driverId}`}
+                                                className={`flex items-center gap-3 px-4 py-3 ${
+                                                    isLeader ? 'bg-primary/[0.06]' : ''
+                                                }`}
+                                            >
+                                                <span className="w-8 shrink-0 text-center text-sm font-bold tabular-nums text-foreground">
+                                                    {row.position == null ? (
+                                                        <span className="text-muted-foreground">–</span>
+                                                    ) : (
+                                                        row.position
+                                                    )}
+                                                </span>
+
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="truncate text-sm font-semibold text-foreground">
+                                                        {row.driverName}
+                                                    </div>
+                                                    <div className="truncate text-xs text-muted-foreground">
+                                                        {row.driverTeam}
+                                                        {timedSession && row.lapsCompleted != null && (
+                                                            <>
+                                                                {' · '}
+                                                                {row.lapsCompleted} lap
+                                                                {row.lapsCompleted === 1 ? '' : 's'}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {timedSession && (
+                                                    <div className="shrink-0 text-right tabular-nums">
+                                                        {lap == null ? (
+                                                            <span className="text-xs text-muted-foreground">
+                                                                No time
+                                                            </span>
+                                                        ) : isLeader ? (
+                                                            <span className="text-sm font-semibold text-foreground">
+                                                                {lap}
+                                                            </span>
+                                                        ) : (
+                                                            <>
+                                                                <div className="text-sm font-semibold text-foreground">
+                                                                    {gap ?? lap}
+                                                                </div>
+                                                                <div className="text-[11px] text-muted-foreground">
+                                                                    {lap}
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </main>
         </div>
     );
 }
