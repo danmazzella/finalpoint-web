@@ -174,7 +174,6 @@ function WeekendResultsInner() {
 
     const selectedRace = races.find((r) => r.weekNumber === selectedWeek) ?? null;
     const rows = activeTab ? sessions[activeTab] ?? [] : [];
-    const timedSession = activeTab != null && activeTab !== 'race' && activeTab !== 'sprint';
 
     return (
         <div className="page-bg min-h-screen">
@@ -239,6 +238,20 @@ function WeekendResultsInner() {
                                         const lap = fmtLap(row.bestLapMs);
                                         const gap = fmtGap(row.gapToLeaderMs);
                                         const isLeader = row.gapToLeaderMs === 0;
+                                        // right-hand figure: gap if behind, lap if fastest,
+                                        // nothing for a race/sprint winner, "No time" if unclassified
+                                        let mainFigure: string | null;
+                                        let subFigure: string | null = null;
+                                        if (gap != null) {
+                                            mainFigure = gap;
+                                            subFigure = lap;
+                                        } else if (lap != null) {
+                                            mainFigure = lap;
+                                        } else if (isLeader || row.position != null) {
+                                            mainFigure = null;
+                                        } else {
+                                            mainFigure = 'No time';
+                                        }
                                         return (
                                             <li
                                                 key={`${row.position ?? 'nt'}-${row.driverId}`}
@@ -260,7 +273,7 @@ function WeekendResultsInner() {
                                                     </div>
                                                     <div className="truncate text-xs text-gray-500">
                                                         {row.driverTeam}
-                                                        {timedSession && row.lapsCompleted != null && (
+                                                        {row.lapsCompleted != null && (
                                                             <>
                                                                 {' · '}
                                                                 {row.lapsCompleted} lap
@@ -270,21 +283,19 @@ function WeekendResultsInner() {
                                                     </div>
                                                 </div>
 
-                                                {timedSession && (
+                                                {(mainFigure != null || subFigure != null) && (
                                                     <div className="shrink-0 text-right tabular-nums">
-                                                        {lap == null ? (
+                                                        {mainFigure === 'No time' ? (
                                                             <span className="text-xs text-gray-400">No time</span>
-                                                        ) : isLeader ? (
-                                                            <span className="text-sm font-semibold text-gray-900">
-                                                                {lap}
-                                                            </span>
                                                         ) : (
-                                                            <>
+                                                            mainFigure != null && (
                                                                 <div className="text-sm font-semibold text-gray-900">
-                                                                    {gap ?? lap}
+                                                                    {mainFigure}
                                                                 </div>
-                                                                <div className="text-[11px] text-gray-500">{lap}</div>
-                                                            </>
+                                                            )
+                                                        )}
+                                                        {subFigure != null && (
+                                                            <div className="text-[11px] text-gray-500">{subFigure}</div>
                                                         )}
                                                     </div>
                                                 )}

@@ -9,14 +9,16 @@ interface RaceRow {
     hasSprint?: boolean;
 }
 
-type SessionType = 'fp1' | 'fp2' | 'fp3' | 'sprint_qualifying' | 'qualifying';
+type SessionType = 'fp1' | 'fp2' | 'fp3' | 'sprint_qualifying' | 'sprint' | 'qualifying' | 'race';
 
 const SESSION_OPTIONS: { value: SessionType; label: string; sprintOnly?: boolean }[] = [
     { value: 'fp1', label: 'Practice 1' },
     { value: 'fp2', label: 'Practice 2' },
     { value: 'fp3', label: 'Practice 3' },
     { value: 'sprint_qualifying', label: 'Sprint Qualifying', sprintOnly: true },
+    { value: 'sprint', label: 'Sprint', sprintOnly: true },
     { value: 'qualifying', label: 'Qualifying' },
+    { value: 'race', label: 'Grand Prix' },
 ];
 
 interface DiffEntry {

@@ -248,7 +248,7 @@ export const adminAPI = {
     apiService.get('/admin/results-import-status', { params: seasonYear != null ? { seasonYear } : {} }),
   importSessionResults: (
     weekNumber: number,
-    sessionType: 'fp1' | 'fp2' | 'fp3' | 'sprint_qualifying' | 'qualifying',
+    sessionType: 'fp1' | 'fp2' | 'fp3' | 'sprint_qualifying' | 'sprint' | 'qualifying' | 'race',
     mode: 'diff' | 'apply',
     seasonYear?: number | null,
   ) => apiService.post('/admin/import-session-results', { weekNumber, sessionType, mode, seasonYear }),
