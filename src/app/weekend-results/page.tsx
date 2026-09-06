@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { f1racesAPI } from '@/lib/api';
 
 interface RaceRow {
@@ -50,6 +51,9 @@ const SESSION_LABEL: Record<SessionType, string> = {
     race: 'Grand Prix',
 };
 
+const isSessionType = (v: string | null): v is SessionType =>
+    v != null && (SESSION_ORDER as string[]).includes(v);
+
 // 71163 -> "1:11.163"
 const fmtLap = (ms: number | null): string | null => {
     if (ms == null) return null;
@@ -66,8 +70,10 @@ const fmtGap = (ms: number | null): string | null => {
     return `+${(ms / 1000).toFixed(3)}`;
 };
 
-export default function WeekendResultsPage() {
+function WeekendResultsInner() {
     const seasonYear = new Date().getFullYear();
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [races, setRaces] = useState<RaceRow[]>([]);
     const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
@@ -77,6 +83,7 @@ export default function WeekendResultsPage() {
     const [loadingResults, setLoadingResults] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Load the schedule once; pick the week from ?week=, else the current race.
     useEffect(() => {
         (async () => {
             try {
@@ -91,11 +98,20 @@ export default function WeekendResultsPage() {
                     setRaces(list);
                 }
 
-                let defaultWeek = list[0]?.weekNumber ?? null;
-                if (currentRes.status === 'fulfilled' && currentRes.value?.data?.success) {
-                    defaultWeek = currentRes.value.data.data.weekNumber ?? defaultWeek;
+                const urlWeek = parseInt(searchParams.get('week') ?? '', 10);
+                let week: number | null =
+                    Number.isInteger(urlWeek) && list.some((r) => r.weekNumber === urlWeek)
+                        ? urlWeek
+                        : list[0]?.weekNumber ?? null;
+
+                if (
+                    !Number.isInteger(urlWeek) &&
+                    currentRes.status === 'fulfilled' &&
+                    currentRes.value?.data?.success
+                ) {
+                    week = currentRes.value.data.data.weekNumber ?? week;
                 }
-                setSelectedWeek(defaultWeek);
+                setSelectedWeek(week);
             } catch (e) {
                 console.error('Error loading races:', e);
                 setError('Could not load the race schedule.');
@@ -103,7 +119,9 @@ export default function WeekendResultsPage() {
                 setLoadingRaces(false);
             }
         })();
-    }, [seasonYear]);
+        // run once on mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const loadResults = useCallback(
         async (week: number) => {
@@ -114,8 +132,12 @@ export default function WeekendResultsPage() {
                 if (res?.data?.success) {
                     const next = (res.data.data.sessions ?? {}) as Partial<Record<SessionType, SessionEntry[]>>;
                     setSessions(next);
-                    const firstWithData = SESSION_ORDER.find((s) => (next[s]?.length ?? 0) > 0) ?? null;
-                    setActiveTab(firstWithData);
+                    const urlSession = searchParams.get('session');
+                    const want =
+                        isSessionType(urlSession) && (next[urlSession]?.length ?? 0) > 0
+                            ? urlSession
+                            : SESSION_ORDER.find((s) => (next[s]?.length ?? 0) > 0) ?? null;
+                    setActiveTab(want);
                 } else {
                     setSessions({});
                     setActiveTab(null);
@@ -129,12 +151,21 @@ export default function WeekendResultsPage() {
                 setLoadingResults(false);
             }
         },
-        [seasonYear],
+        [seasonYear, searchParams],
     );
 
     useEffect(() => {
         if (selectedWeek != null) loadResults(selectedWeek);
     }, [selectedWeek, loadResults]);
+
+    // Keep the URL in sync so a refresh / shared link restores the same view.
+    useEffect(() => {
+        if (selectedWeek == null) return;
+        const p = new URLSearchParams();
+        p.set('week', String(selectedWeek));
+        if (activeTab) p.set('session', activeTab);
+        router.replace(`/weekend-results?${p.toString()}`, { scroll: false });
+    }, [selectedWeek, activeTab, router]);
 
     const availableTabs = useMemo(
         () => SESSION_ORDER.filter((s) => (sessions[s]?.length ?? 0) > 0),
@@ -267,5 +298,13 @@ export default function WeekendResultsPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function WeekendResultsPage() {
+    return (
+        <Suspense fallback={<div className="page-bg min-h-screen" />}>
+            <WeekendResultsInner />
+        </Suspense>
     );
 }
