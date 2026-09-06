@@ -11,7 +11,7 @@ interface RaceRow {
 }
 
 interface SessionEntry {
-    position: number;
+    position: number | null; // null = entered the session but set no timed lap
     driverId: number;
     driverName: string;
     driverTeam: string;
@@ -189,7 +189,13 @@ export default function WeekendResultsPage() {
                             <tbody className="divide-y divide-gray-100">
                                 {rows.map((row) => (
                                     <tr key={`${row.position}-${row.driverId}`}>
-                                        <td className="py-2 font-semibold text-gray-900">P{row.position}</td>
+                                        <td className="py-2 font-semibold text-gray-900">
+                                            {row.position == null ? (
+                                                <span className="text-gray-400">NT</span>
+                                            ) : (
+                                                `P${row.position}`
+                                            )}
+                                        </td>
                                         <td className="py-2 text-gray-900">{row.driverName}</td>
                                         <td className="py-2 text-gray-500">{row.driverTeam}</td>
                                     </tr>

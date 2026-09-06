@@ -17,7 +17,7 @@ interface DriverSelectionModalProps {
     hasSprint?: boolean; // whether this is a sprint weekend
     eventType: 'race' | 'sprint'; // which event type this modal is for
     // driverId -> that driver's finishing position in each completed weekend session
-    sessionResultsByDriver?: Record<number, { type: string; position: number }[]>;
+    sessionResultsByDriver?: Record<number, { type: string; position: number | null }[]>;
 }
 
 // Compact session labels + display order for the driver-tile badges.
@@ -136,7 +136,7 @@ export const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({
                                                         className="inline-flex items-center rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600"
                                                         title={`${s.type} finishing position`}
                                                     >
-                                                        {SESSION_BADGE[s.type] ?? s.type.toUpperCase()} P{s.position}
+                                                        {SESSION_BADGE[s.type] ?? s.type.toUpperCase()} {s.position == null ? 'NT' : `P${s.position}`}
                                                     </span>
                                                 ))}
                                             </div>

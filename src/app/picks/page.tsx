@@ -61,7 +61,7 @@ function PicksV2Form() {
     const [modalEventType, setModalEventType] = useState<'race' | 'sprint'>('race');
     // driverId -> that driver's finishing position in each completed weekend session
     const [driverSessionResults, setDriverSessionResults] = useState<
-        Record<number, { type: string; position: number }[]>
+        Record<number, { type: string; position: number | null }[]>
     >({});
 
     useEffect(() => {
@@ -213,9 +213,9 @@ function PicksV2Form() {
                 if (cancelled || !res?.data?.success) return;
                 const sessions = (res.data.data.sessions ?? {}) as Record<
                     string,
-                    { position: number; driverId: number }[]
+                    { position: number | null; driverId: number }[]
                 >;
-                const byDriver: Record<number, { type: string; position: number }[]> = {};
+                const byDriver: Record<number, { type: string; position: number | null }[]> = {};
                 for (const [type, entries] of Object.entries(sessions)) {
                     for (const e of entries) {
                         (byDriver[e.driverId] = byDriver[e.driverId] || []).push({ type, position: e.position });

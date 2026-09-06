@@ -20,7 +20,7 @@ const SESSION_OPTIONS: { value: SessionType; label: string; sprintOnly?: boolean
 ];
 
 interface DiffEntry {
-    position: number;
+    position: number | null;
     driverId: number;
     driverName: string;
     driverTeam: string;
@@ -245,7 +245,7 @@ function SessionColumn({ title, rows }: { title: string; rows: DiffEntry[] }) {
                     <tbody className="divide-y divide-gray-100">
                         {rows.map((r) => (
                             <tr key={`${r.position}-${r.driverId}`}>
-                                <td className="w-10 py-1.5 font-semibold text-gray-900">P{r.position}</td>
+                                <td className="w-10 py-1.5 font-semibold text-gray-900">{r.position == null ? 'NT' : `P${r.position}`}</td>
                                 <td className="py-1.5 text-gray-900">{r.driverName}</td>
                                 <td className="py-1.5 text-gray-500">{r.driverTeam}</td>
                             </tr>
