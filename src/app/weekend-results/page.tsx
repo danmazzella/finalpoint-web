@@ -19,6 +19,7 @@ interface SessionEntry {
     bestLapMs: number | null;
     gapToLeaderMs: number | null;
     lapsCompleted: number | null;
+    lapsDown: number | null; // race/sprint: laps behind the winner when not on the lead lap
 }
 
 type SessionType =
@@ -247,6 +248,8 @@ function WeekendResultsInner() {
                                             subFigure = lap;
                                         } else if (lap != null) {
                                             mainFigure = lap;
+                                        } else if (row.lapsDown != null) {
+                                            mainFigure = `+${row.lapsDown} lap${row.lapsDown === 1 ? '' : 's'}`;
                                         } else if (isLeader || row.position != null) {
                                             mainFigure = null;
                                         } else {
