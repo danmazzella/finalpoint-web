@@ -47,7 +47,7 @@ export default function Navigation() {
             href: '/weekend-results',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6h13M9 11V5h13M4 6h.01M4 12h.01M4 18h.01M9 17h13" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 20h18M7 20v-7M12 20V6m5 14v-9" />
                 </svg>
             )
         },
