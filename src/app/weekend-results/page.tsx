@@ -150,8 +150,8 @@ export default function WeekendResultsPage() {
             <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 mb-20">
                 <h1 className="text-2xl font-bold text-gray-900">Weekend Results</h1>
                 <p className="mt-1 text-sm text-gray-500">
-                    Every session&apos;s order for a race weekend — practice and qualifying with best lap and
-                    gap, sprint and Grand Prix finishing order.
+                    Every session&apos;s order for a race weekend. Practice and qualifying show best lap and
+                    gap; sprint and Grand Prix show finishing order.
                 </p>
 
                 <div className="mt-4">
@@ -164,7 +164,7 @@ export default function WeekendResultsPage() {
                     >
                         {races.map((r) => (
                             <option key={r.weekNumber} value={r.weekNumber}>
-                                Week {r.weekNumber} — {r.raceName}
+                                Week {r.weekNumber}: {r.raceName}
                                 {r.hasSprint ? ' (sprint)' : ''}
                             </option>
                         ))}
@@ -217,7 +217,7 @@ export default function WeekendResultsPage() {
                                             >
                                                 <span className="w-8 shrink-0 text-center text-sm font-bold tabular-nums text-gray-900">
                                                     {row.position == null ? (
-                                                        <span className="text-gray-400">–</span>
+                                                        <span className="text-gray-400">-</span>
                                                     ) : (
                                                         row.position
                                                     )}

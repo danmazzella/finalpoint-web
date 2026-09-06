@@ -129,7 +129,7 @@ export default function AdminSessionResultsPage() {
                 <h1 className="text-2xl font-bold text-gray-900">Session Results Import</h1>
                 <p className="mt-1 text-sm text-gray-600">
                     Pull practice, sprint qualifying and qualifying finishing order from OpenF1.
-                    Informational only &mdash; this never scores leagues.
+                    Informational only. This never scores leagues.
                 </p>
             </div>
 
@@ -163,7 +163,7 @@ export default function AdminSessionResultsPage() {
                     >
                         {races.map((r) => (
                             <option key={r.weekNumber} value={r.weekNumber}>
-                                Week {r.weekNumber} — {r.raceName}{r.hasSprint ? ' (sprint)' : ''}
+                                Week {r.weekNumber}: {r.raceName}{r.hasSprint ? ' (sprint)' : ''}
                             </option>
                         ))}
                     </select>
