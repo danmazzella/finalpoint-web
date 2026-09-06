@@ -246,6 +246,12 @@ export const adminAPI = {
     apiService.post('/admin/lock-race-results', { weekNumber, eventType, locked, seasonYear }),
   getResultsImportStatus: (seasonYear?: number | null) =>
     apiService.get('/admin/results-import-status', { params: seasonYear != null ? { seasonYear } : {} }),
+  importSessionResults: (
+    weekNumber: number,
+    sessionType: 'fp1' | 'fp2' | 'fp3' | 'sprint_qualifying' | 'qualifying',
+    mode: 'diff' | 'apply',
+    seasonYear?: number | null,
+  ) => apiService.post('/admin/import-session-results', { weekNumber, sessionType, mode, seasonYear }),
   releaseResultNotifications: (weekNumber: number, eventType: 'race' | 'sprint', seasonYear?: number | null) =>
     apiService.post('/admin/release-result-notifications', { weekNumber, eventType, seasonYear }),
   getAppSettings: () => apiService.get('/admin/app-settings'),
@@ -448,6 +454,10 @@ export const f1racesAPI = {
   getAllRaces: (seasonYear = 2025) => apiService.get(`/f1races/all?seasonYear=${seasonYear}`),
   getRaceByWeek: (weekNumber: number, seasonYear = 2025) =>
     apiService.get(`/f1races/week/${weekNumber}?seasonYear=${seasonYear}`),
+  getSessionResults: (weekNumber: number, seasonYear?: number) =>
+    apiService.get(`/f1races/week/${weekNumber}/session-results`, {
+      params: seasonYear != null ? { seasonYear } : {},
+    }),
   populateSeason: () => apiService.post('/f1races/populate-season'),
 };
 
