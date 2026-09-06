@@ -15,6 +15,9 @@ interface SessionEntry {
     driverId: number;
     driverName: string;
     driverTeam: string;
+    bestLapMs: number | null;
+    gapToLeaderMs: number | null;
+    lapsCompleted: number | null;
 }
 
 type SessionType =
@@ -45,6 +48,22 @@ const SESSION_LABEL: Record<SessionType, string> = {
     sprint: 'Sprint',
     qualifying: 'Qualifying',
     race: 'Grand Prix',
+};
+
+// 71163 -> "1:11.163"
+const fmtLap = (ms: number | null): string | null => {
+    if (ms == null) return null;
+    const s = ms / 1000;
+    const m = Math.floor(s / 60);
+    const rem = (s % 60).toFixed(3);
+    return m > 0 ? `${m}:${rem.padStart(6, '0')}` : rem;
+};
+
+// 102 -> "+0.102" ; big gaps -> "+1:02.345" ; leader -> null
+const fmtGap = (ms: number | null): string | null => {
+    if (ms == null || ms === 0) return null;
+    if (ms >= 60000) return `+${fmtLap(ms)}`;
+    return `+${(ms / 1000).toFixed(3)}`;
 };
 
 export default function WeekendResultsPage() {
@@ -124,12 +143,14 @@ export default function WeekendResultsPage() {
 
     const selectedRace = races.find((r) => r.weekNumber === selectedWeek) ?? null;
     const rows = activeTab ? sessions[activeTab] ?? [] : [];
+    const timedSession = activeTab != null && activeTab !== 'race' && activeTab !== 'sprint';
 
     return (
         <div className="mx-auto max-w-3xl px-4 py-6">
             <h1 className="text-2xl font-bold text-gray-900">Weekend Results</h1>
             <p className="mt-1 text-sm text-gray-600">
-                Practice, qualifying, sprint and Grand Prix finishing order for each race weekend.
+                Every session&apos;s order for a race weekend — practice and qualifying with best lap and gap,
+                sprint and Grand Prix finishing order.
             </p>
 
             <div className="mt-4">
@@ -178,30 +199,56 @@ export default function WeekendResultsPage() {
                             ))}
                         </div>
 
-                        <table className="mt-4 w-full text-sm">
-                            <thead>
-                                <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
-                                    <th className="w-12 py-2">Pos</th>
-                                    <th className="py-2">Driver</th>
-                                    <th className="py-2">Team</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {rows.map((row) => (
-                                    <tr key={`${row.position}-${row.driverId}`}>
-                                        <td className="py-2 font-semibold text-gray-900">
+                        <ul className="mt-3 divide-y divide-gray-100">
+                            {rows.map((row) => {
+                                const lap = fmtLap(row.bestLapMs);
+                                const gap = fmtGap(row.gapToLeaderMs);
+                                const isLeader = row.gapToLeaderMs === 0;
+                                return (
+                                    <li
+                                        key={`${row.position ?? 'nt'}-${row.driverId}`}
+                                        className="flex items-center gap-3 py-2.5"
+                                    >
+                                        <span className="w-8 shrink-0 text-center text-sm font-bold text-gray-900">
                                             {row.position == null ? (
-                                                <span className="text-gray-400">NT</span>
+                                                <span className="text-gray-400">–</span>
                                             ) : (
-                                                `P${row.position}`
+                                                row.position
                                             )}
-                                        </td>
-                                        <td className="py-2 text-gray-900">{row.driverName}</td>
-                                        <td className="py-2 text-gray-500">{row.driverTeam}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                        </span>
+
+                                        <div className="min-w-0 flex-1">
+                                            <div className="truncate text-sm font-semibold text-gray-900">
+                                                {row.driverName}
+                                            </div>
+                                            <div className="truncate text-xs text-gray-500">
+                                                {row.driverTeam}
+                                                {timedSession && row.lapsCompleted != null && (
+                                                    <> · {row.lapsCompleted} lap{row.lapsCompleted === 1 ? '' : 's'}</>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {timedSession && (
+                                            <div className="shrink-0 text-right tabular-nums">
+                                                {lap == null ? (
+                                                    <span className="text-xs text-gray-400">No time</span>
+                                                ) : isLeader ? (
+                                                    <span className="text-sm font-semibold text-gray-900">{lap}</span>
+                                                ) : (
+                                                    <>
+                                                        <div className="text-sm font-semibold text-gray-900">
+                                                            {gap ?? lap}
+                                                        </div>
+                                                        <div className="text-[11px] text-gray-500">{lap}</div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
                     </>
                 )}
             </div>
