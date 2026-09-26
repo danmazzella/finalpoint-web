@@ -7,17 +7,22 @@ export interface StandingsRow {
   accuracy: number;
   races: number;
   isOwner?: boolean;
+  correctPicks: number;
+  totalPicks: number;
+  gap: number | null;
+  avgDistance: number;
 }
 
 interface LeagueStandingsCardProps {
   leagueName: string;
   seasonYear: number;
   rows: StandingsRow[];
+  detailed?: boolean;
 }
 
 const RANK_COLORS = ['#f59e0b', '#94a3b8', '#cd7f32'];
 
-export default function LeagueStandingsCard({ leagueName, seasonYear, rows }: LeagueStandingsCardProps) {
+export default function LeagueStandingsCard({ leagueName, seasonYear, rows, detailed = false }: LeagueStandingsCardProps) {
   return (
     <LeagueCardFrame
       eyebrow={`${seasonYear} Season`}
@@ -72,10 +77,19 @@ export default function LeagueStandingsCard({ leagueName, seasonYear, rows }: Le
                   )}
                 </div>
                 <span style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>
-                  {row.races} races · {row.accuracy}% accuracy
+                  {detailed
+                    ? `${row.correctPicks}/${row.totalPicks} correct · avg ${row.avgDistance} off · ${row.races} races`
+                    : `${row.races} races · ${row.accuracy}% accuracy`}
                 </span>
               </div>
-              <span style={{ fontSize: 16, color: '#f59e0b', fontWeight: 800 }}>{row.points} pts</span>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 16, color: '#f59e0b', fontWeight: 800 }}>{row.points} pts</div>
+                {detailed && (
+                  <div style={{ fontSize: 11, fontWeight: 700, color: row.gap == null ? '#22c55e' : '#64748b' }}>
+                    {row.gap == null ? 'Leader' : `-${row.gap} to next`}
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

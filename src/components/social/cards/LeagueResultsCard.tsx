@@ -7,6 +7,13 @@ interface ActualResult {
   driverTeam: string | null;
 }
 
+export interface PickDetail {
+  position: number;
+  driverName: string | null;
+  isCorrect: boolean;
+  positionDifference: number | null;
+}
+
 export interface LeaderboardRow {
   rank: number;
   name: string;
@@ -14,6 +21,7 @@ export interface LeaderboardRow {
   correct: number;
   picksMade: number;
   totalPositions: number;
+  picks: PickDetail[];
 }
 
 interface LeagueResultsCardProps {
@@ -24,6 +32,7 @@ interface LeagueResultsCardProps {
   actualResults: ActualResult[];
   hasScoredResults: boolean;
   rows: LeaderboardRow[];
+  detailed?: boolean;
 }
 
 const RANK_COLORS = ['#f59e0b', '#94a3b8', '#cd7f32'];
@@ -36,6 +45,7 @@ export default function LeagueResultsCard({
   actualResults,
   hasScoredResults,
   rows,
+  detailed = false,
 }: LeagueResultsCardProps) {
   return (
     <LeagueCardFrame
@@ -80,13 +90,13 @@ export default function LeagueResultsCard({
           return (
             <div
               key={row.rank}
-              className="flex items-center gap-3"
               style={{
                 padding: '9px 12px',
                 borderRadius: 10,
                 background: row.rank <= 3 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)',
               }}
             >
+              <div className="flex items-center gap-3">
               <div
                 className="flex items-center justify-center flex-shrink-0"
                 style={{
@@ -113,6 +123,33 @@ export default function LeagueResultsCard({
                 <span style={{ fontSize: 12, color: row.picksMade === row.totalPositions ? '#22c55e' : '#f59e0b', fontWeight: 700 }}>
                   {row.picksMade}/{row.totalPositions} picks
                 </span>
+              )}
+              </div>
+              {detailed && hasScoredResults && (
+                <div className="flex flex-wrap gap-1.5" style={{ marginTop: 8, paddingLeft: 36 }}>
+                  {row.picks.map((p) => {
+                    const color = p.isCorrect ? '#22c55e' : p.driverName ? '#f59e0b' : '#475569';
+                    return (
+                      <span
+                        key={p.position}
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: '#cbd5e1',
+                          padding: '2px 8px',
+                          borderRadius: 6,
+                          border: `1px solid ${color}55`,
+                          background: `${color}14`,
+                        }}
+                      >
+                        P{p.position} {p.driverName ?? 'No pick'}
+                        <span style={{ color, fontWeight: 800, marginLeft: 6 }}>
+                          {!p.driverName ? '' : p.isCorrect ? 'exact' : p.positionDifference != null ? `off by ${p.positionDifference}` : ''}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </div>
               )}
             </div>
           );

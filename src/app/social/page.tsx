@@ -88,6 +88,9 @@ interface DetailedStanding {
   totalPoints: number;
   accuracy: number;
   racesParticipated: number;
+  correctPicks: number;
+  totalPicks: number;
+  avgDistance: number;
 }
 
 interface CurrentRace {
@@ -246,6 +249,8 @@ export default function SocialPage() {
   // League results card
   const [leagueResults, setLeagueResults] = useState<RaceResultV2[]>([]);
   const [leagueRequiredPositions, setLeagueRequiredPositions] = useState<number[]>([10]);
+
+  const [showDetails, setShowDetails] = useState(false);
 
   // League standings card
   const [leagueStandings, setLeagueStandings] = useState<DetailedStanding[]>([]);
@@ -629,6 +634,14 @@ export default function SocialPage() {
             correct: r.totalCorrect,
             picksMade: r.picks.filter(p => p.driverId !== null).length,
             totalPositions: leagueRequiredPositions.length,
+            picks: [...r.picks]
+              .sort((a, b) => a.position - b.position)
+              .map(p => ({
+                position: p.position,
+                driverName: p.driverName,
+                isCorrect: p.isCorrect,
+                positionDifference: p.positionDifference,
+              })),
           }));
         return (
           <LeagueResultsCard
@@ -639,6 +652,7 @@ export default function SocialPage() {
             actualResults={actualResults}
             hasScoredResults={hasScored}
             rows={rows}
+            detailed={showDetails}
           />
         );
       }
@@ -649,19 +663,24 @@ export default function SocialPage() {
         if (leagueStandings.length === 0) return <EmptyCard message="No standings data for this league yet." />;
         const rows: StandingsRow[] = [...leagueStandings]
           .sort((a, b) => b.totalPoints - a.totalPoints)
-          .map((s, idx) => ({
+          .map((s, idx, arr) => ({
             rank: idx + 1,
             name: s.name,
             points: s.totalPoints,
             accuracy: s.accuracy,
             races: s.racesParticipated,
             isOwner: !!s.isOwner,
+            correctPicks: s.correctPicks,
+            totalPicks: s.totalPicks,
+            gap: idx === 0 ? null : arr[idx - 1].totalPoints - s.totalPoints,
+            avgDistance: s.avgDistance || 0,
           }));
         return (
           <LeagueStandingsCard
             leagueName={league.name}
             seasonYear={league.seasonYear ?? seasonFilter ?? 2025}
             rows={rows}
+            detailed={showDetails}
           />
         );
       }
@@ -920,6 +939,17 @@ export default function SocialPage() {
                   </>
                 ) : (
                   <p className="text-xs text-gray-400">No leagues found. Join a league first.</p>
+                )}
+                {(cardType === 'league-results' || cardType === 'league-standings') && (
+                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showDetails}
+                      onChange={e => setShowDetails(e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                    Show more detail
+                  </label>
                 )}
               </div>
             )}
