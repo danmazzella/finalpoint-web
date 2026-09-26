@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { communityPicksAPI, authAPI, seasonsAPI, f1racesAPI, leaguesAPI } from '@/lib/api';
+import { communityPicksAPI, authAPI, seasonsAPI, f1racesAPI, leaguesAPI, picksAPI, League, RaceResultV2 } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { toPng } from 'html-to-image';
 
 import PickDistributionCard from '@/components/social/cards/PickDistributionCard';
+import LeagueResultsCard, { LeaderboardRow } from '@/components/social/cards/LeagueResultsCard';
+import LeagueStandingsCard, { StandingsRow } from '@/components/social/cards/LeagueStandingsCard';
 import FinalPointCard from '@/components/social/cards/FinalPointCard';
 import AccuracyRevealCard from '@/components/social/cards/AccuracyRevealCard';
 import ChaosRatingCard from '@/components/social/cards/ChaosRatingCard';
@@ -79,6 +81,15 @@ interface UserStats {
   perfectPicksRate?: number;
 }
 
+interface DetailedStanding {
+  id: number;
+  name: string;
+  isOwner: number;
+  totalPoints: number;
+  accuracy: number;
+  racesParticipated: number;
+}
+
 interface CurrentRace {
   weekNumber: number;
   raceName: string;
@@ -110,7 +121,9 @@ type CardType =
   | 'invite'
   | 'brand'
   | 'how-it-works'
-  | 'app-download';
+  | 'app-download'
+  | 'league-results'
+  | 'league-standings';
 
 interface CardConfig {
   id: CardType;
@@ -124,25 +137,30 @@ interface CardConfig {
   needsUserStats: boolean;
   needsStandings: boolean;
   needsAllRaces?: boolean;
+  needsLeague?: boolean;
+  needsCommunityStats?: boolean;
 }
 
 const CARD_TYPES: CardConfig[] = [
   // ── Pre-race ──
-  { id: 'pick-distribution',  label: 'Pick Distribution',   emoji: '📊', timing: 'Pre-race',  needsWeek: true,  needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
-  { id: 'final-point',        label: 'Final Point',         emoji: '🏁', timing: 'Pre-race',  needsWeek: true,  needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
-  { id: 'driver-spotlight',   label: 'Driver Spotlight',    emoji: '🔦', timing: 'Pre-race',  needsWeek: true,  needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
+  { id: 'pick-distribution',  label: 'Pick Distribution',   emoji: '📊', timing: 'Pre-race',  needsWeek: true,  needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsCommunityStats: true },
+  { id: 'final-point',        label: 'Final Point',         emoji: '🏁', timing: 'Pre-race',  needsWeek: true,  needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsCommunityStats: true },
+  { id: 'driver-spotlight',   label: 'Driver Spotlight',    emoji: '🔦', timing: 'Pre-race',  needsWeek: true,  needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsCommunityStats: true },
   { id: 'race-countdown',     label: 'Race Countdown',      emoji: '⏱️', timing: 'Pre-race',  needsWeek: false, needsScored: false, needsRace: true,  needsGlobalStats: false, needsUserStats: false, needsStandings: false },
   // ── Post-race ──
-  { id: 'accuracy-reveal',    label: 'Accuracy Reveal',     emoji: '✅', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
-  { id: 'chaos-rating',       label: 'Chaos Rating',        emoji: '🌀', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
-  { id: 'hardest-pick',       label: 'Hardest Pick',        emoji: '🎯', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
-  { id: 'dark-horse',         label: 'Dark Horse',          emoji: '🐴', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
-  { id: 'consensus-vs-reality',label: 'Crowd vs Reality',  emoji: '🆚', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
+  { id: 'accuracy-reveal',    label: 'Accuracy Reveal',     emoji: '✅', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsCommunityStats: true },
+  { id: 'chaos-rating',       label: 'Chaos Rating',        emoji: '🌀', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsCommunityStats: true },
+  { id: 'hardest-pick',       label: 'Hardest Pick',        emoji: '🎯', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsCommunityStats: true },
+  { id: 'dark-horse',         label: 'Dark Horse',          emoji: '🐴', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsCommunityStats: true },
+  { id: 'consensus-vs-reality',label: 'Crowd vs Reality',  emoji: '🆚', timing: 'Post-race', needsWeek: true,  needsScored: true,  needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsCommunityStats: true },
   // ── Season ──
   { id: 'platform-standings', label: 'Season Standings',    emoji: '🏆', timing: 'Season',    needsWeek: false, needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: true  },
   { id: 'milestone',          label: 'Milestone',           emoji: '🎉', timing: 'Anytime',   needsWeek: false, needsScored: false, needsRace: false, needsGlobalStats: true,  needsUserStats: false, needsStandings: false },
-  { id: 'season-wrapped',     label: 'Season Wrapped',      emoji: '🎁', timing: 'Season',    needsWeek: false, needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: true,  needsStandings: false },
+  { id: 'season-wrapped',     label: 'Season Wrapped',      emoji: '🎁', timing: 'Season',    needsWeek: false, needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: true,  needsStandings: false, needsLeague: true },
   { id: 'season-progress',    label: 'Season Progress',     emoji: '📅', timing: 'Season',    needsWeek: false, needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsAllRaces: true },
+  // ── Your league ──
+  { id: 'league-results',     label: 'League Results',      emoji: '🥇', timing: 'Post-race', needsWeek: true,  needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsLeague: true },
+  { id: 'league-standings',   label: 'League Standings',    emoji: '📋', timing: 'Season',    needsWeek: false, needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false, needsLeague: true },
   // ── Marketing ──
   { id: 'invite',             label: 'Invite Card',         emoji: '📨', timing: 'Anytime',   needsWeek: false, needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
   { id: 'brand',              label: 'About FinalPoint',    emoji: '✨', timing: 'Anytime',   needsWeek: false, needsScored: false, needsRace: false, needsGlobalStats: false, needsUserStats: false, needsStandings: false },
@@ -154,6 +172,7 @@ const CARD_GROUPS = [
   { label: 'Pre-race',  ids: ['pick-distribution', 'final-point', 'driver-spotlight', 'race-countdown'] },
   { label: 'Post-race', ids: ['accuracy-reveal', 'chaos-rating', 'hardest-pick', 'dark-horse', 'consensus-vs-reality'] },
   { label: 'Season',    ids: ['platform-standings', 'milestone', 'season-wrapped', 'season-progress'] },
+  { label: 'Your League', ids: ['league-results', 'league-standings'] },
   { label: 'Marketing', ids: ['invite', 'brand', 'how-it-works', 'app-download'] },
 ];
 
@@ -179,6 +198,8 @@ const CARD_HASHTAGS: Record<CardType, string[]> = {
   'brand':               ['#F1Fantasy', '#F1Community', '#FinalPoint', '#F1Picks'],
   'how-it-works':        ['#F1Fantasy', '#F1Community', '#F1Picks', '#HowToPlay'],
   'app-download':        ['#F1App', '#F1Fantasy', '#F1Community', '#FreeToPlay'],
+  'league-results':      ['#F1League', '#F1Fantasy', '#F1Community', '#GrandPrix'],
+  'league-standings':    ['#F1League', '#F1Standings', '#F1Fantasy', '#F1Community'],
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -213,12 +234,21 @@ export default function SocialPage() {
   // Driver spotlight selector
   const [spotlightDriver, setSpotlightDriver] = useState<string>('');
 
+  // Shared league selector (season wrapped, league results, league standings)
+  const [leagueOptions, setLeagueOptions] = useState<League[]>([]);
+  const [selectedLeagueId, setSelectedLeagueId] = useState<number | null>(null);
+
   // Season wrapped player selector
-  const [wrappedLeagues, setWrappedLeagues] = useState<{ id: number; name: string }[]>([]);
-  const [wrappedLeagueId, setWrappedLeagueId] = useState<number | null>(null);
   const [wrappedMembers, setWrappedMembers] = useState<{ id: number; name: string }[]>([]);
   const [wrappedPlayerId, setWrappedPlayerId] = useState<number | null>(null);
   const [wrappedPlayerStats, setWrappedPlayerStats] = useState<UserStats | null>(null);
+
+  // League results card
+  const [leagueResults, setLeagueResults] = useState<RaceResultV2[]>([]);
+  const [leagueRequiredPositions, setLeagueRequiredPositions] = useState<number[]>([10]);
+
+  // League standings card
+  const [leagueStandings, setLeagueStandings] = useState<DetailedStanding[]>([]);
 
   // Invite card custom inputs
   const [inviteLeagueName, setInviteLeagueName] = useState('');
@@ -253,7 +283,7 @@ export default function SocialPage() {
 
   // Community stats
   useEffect(() => {
-    if (!cfg.needsWeek || !selectedWeek || !seasonFilter) return;
+    if (!cfg.needsCommunityStats || !selectedWeek || !seasonFilter) return;
     setDataLoading(true);
     communityPicksAPI.getStats(selectedWeek, eventType, seasonFilter).then(res => {
       if (res.data?.success) {
@@ -262,7 +292,7 @@ export default function SocialPage() {
         setSelectedPositions(new Set(data.positions.map(p => p.position)));
       }
     }).catch(() => setCommunityStats(null)).finally(() => setDataLoading(false));
-  }, [cfg.needsWeek, selectedWeek, eventType, seasonFilter]);
+  }, [cfg.needsCommunityStats, selectedWeek, eventType, seasonFilter]);
 
   // Platform standings
   useEffect(() => {
@@ -316,22 +346,22 @@ export default function SocialPage() {
     }
   }, [communityStats]);
 
-  // Season wrapped — load leagues
+  // Load leagues for any card that needs a league selector
   useEffect(() => {
-    if (cardType !== 'season-wrapped') return;
+    if (!cfg.needsLeague) return;
     leaguesAPI.getLeagues().then(res => {
       if (res.data?.success) {
-        const leagues = res.data.data.map((l: { id: number; name: string }) => ({ id: l.id, name: l.name }));
-        setWrappedLeagues(leagues);
-        if (leagues.length > 0 && !wrappedLeagueId) setWrappedLeagueId(leagues[0].id);
+        const leagues: League[] = res.data.data;
+        setLeagueOptions(leagues);
+        if (leagues.length > 0) setSelectedLeagueId(prev => prev ?? leagues[0].id);
       }
     }).catch(() => {});
-  }, [cardType]);
+  }, [cfg.needsLeague]);
 
   // Season wrapped — load members when league changes
   useEffect(() => {
-    if (!wrappedLeagueId) return;
-    leaguesAPI.getLeagueMembers(wrappedLeagueId).then(res => {
+    if (cardType !== 'season-wrapped' || !selectedLeagueId) return;
+    leaguesAPI.getLeagueMembers(selectedLeagueId).then(res => {
       if (res.data?.success) {
         const members = res.data.data.map((m: { id: number; name: string }) => ({ id: m.id, name: m.name }));
         setWrappedMembers(members);
@@ -340,7 +370,7 @@ export default function SocialPage() {
         setWrappedPlayerId(meInList ? meInList.id : members[0]?.id ?? null);
       }
     }).catch(() => {});
-  }, [wrappedLeagueId]);
+  }, [cardType, selectedLeagueId, user?.id]);
 
   // Season wrapped — load stats for selected player
   useEffect(() => {
@@ -349,6 +379,28 @@ export default function SocialPage() {
       if (res.data?.success) setWrappedPlayerStats(res.data.data);
     }).catch(() => setWrappedPlayerStats(null));
   }, [wrappedPlayerId, seasonFilter]);
+
+  // League results — load picks/results for selected league + week + event type
+  useEffect(() => {
+    if (cardType !== 'league-results' || !selectedLeagueId || !selectedWeek) return;
+    setDataLoading(true);
+    Promise.all([
+      picksAPI.getRaceResultsV2(selectedLeagueId, selectedWeek, eventType),
+      picksAPI.getLeaguePositionsForWeek(selectedLeagueId, selectedWeek),
+    ]).then(([resultsRes, positionsRes]) => {
+      if (resultsRes.data?.success) setLeagueResults(resultsRes.data.data.results || []);
+      if (positionsRes.data?.success) setLeagueRequiredPositions(positionsRes.data.data.positions || [10]);
+    }).catch(() => setLeagueResults([])).finally(() => setDataLoading(false));
+  }, [cardType, selectedLeagueId, selectedWeek, eventType]);
+
+  // League standings — load detailed standings for selected league
+  useEffect(() => {
+    if (cardType !== 'league-standings' || !selectedLeagueId) return;
+    setDataLoading(true);
+    leaguesAPI.getDetailedLeagueStandings(selectedLeagueId).then(res => {
+      if (res.data?.success) setLeagueStandings(res.data.data);
+    }).catch(() => setLeagueStandings([])).finally(() => setDataLoading(false));
+  }, [cardType, selectedLeagueId]);
 
   const scoredWarning = cfg.needsScored && selectedWeekData && !selectedWeekData.isScored;
 
@@ -553,6 +605,67 @@ export default function SocialPage() {
         );
       }
 
+      case 'league-results': {
+        const league = leagueOptions.find(l => l.id === selectedLeagueId);
+        if (!league) return <EmptyCard message="Select a league." />;
+        if (leagueResults.length === 0) return <EmptyCard message="No picks found for this league/week yet." />;
+        const hasScored = leagueResults.some(r => r.picks.some(p => p.actualDriverName));
+        const actualResults: { position: number; driverName: string | null; driverTeam: string | null }[] =
+          leagueRequiredPositions.map(position => {
+            const positionResult = leagueResults.find(r => r.picks.some(p => p.position === position && p.actualDriverName));
+            const pick = positionResult?.picks.find(p => p.position === position);
+            return {
+              position,
+              driverName: pick?.actualDriverName ?? null,
+              driverTeam: pick?.actualDriverTeam ?? null,
+            };
+          });
+        const rows: LeaderboardRow[] = [...leagueResults]
+          .sort((a, b) => b.totalPoints - a.totalPoints || b.totalCorrect - a.totalCorrect)
+          .map((r, idx) => ({
+            rank: idx + 1,
+            name: r.userName,
+            points: r.totalPoints,
+            correct: r.totalCorrect,
+            picksMade: r.picks.filter(p => p.driverId !== null).length,
+            totalPositions: leagueRequiredPositions.length,
+          }));
+        return (
+          <LeagueResultsCard
+            leagueName={league.name}
+            raceName={raceName}
+            eventType={eventType}
+            weekNumber={selectedWeek ?? 0}
+            actualResults={actualResults}
+            hasScoredResults={hasScored}
+            rows={rows}
+          />
+        );
+      }
+
+      case 'league-standings': {
+        const league = leagueOptions.find(l => l.id === selectedLeagueId);
+        if (!league) return <EmptyCard message="Select a league." />;
+        if (leagueStandings.length === 0) return <EmptyCard message="No standings data for this league yet." />;
+        const rows: StandingsRow[] = [...leagueStandings]
+          .sort((a, b) => b.totalPoints - a.totalPoints)
+          .map((s, idx) => ({
+            rank: idx + 1,
+            name: s.name,
+            points: s.totalPoints,
+            accuracy: s.accuracy,
+            races: s.racesParticipated,
+            isOwner: !!s.isOwner,
+          }));
+        return (
+          <LeagueStandingsCard
+            leagueName={league.name}
+            seasonYear={league.seasonYear ?? seasonFilter ?? 2025}
+            rows={rows}
+          />
+        );
+      }
+
       case 'invite':
         return <InviteCard leagueName={inviteLeagueName} seasonYear={seasonFilter ?? undefined} />;
 
@@ -696,7 +809,7 @@ export default function SocialPage() {
             )}
 
             {/* Position picker */}
-            {cfg.needsWeek && communityStats && communityStats.positions.length > 0 && (
+            {cfg.needsCommunityStats && communityStats && communityStats.positions.length > 0 && (
               <div className="glass-card p-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Positions</p>
@@ -776,23 +889,23 @@ export default function SocialPage() {
               </div>
             )}
 
-            {/* Season wrapped — league + player picker */}
-            {cardType === 'season-wrapped' && (
+            {/* League picker — season wrapped, league results, league standings */}
+            {cfg.needsLeague && (
               <div className="glass-card p-4 flex flex-col gap-3">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Player</p>
-                {wrappedLeagues.length > 0 ? (
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">League</p>
+                {leagueOptions.length > 0 ? (
                   <>
                     <div>
                       <label className="text-xs text-gray-500 mb-1 block">League</label>
                       <select
-                        value={wrappedLeagueId ?? ''}
-                        onChange={e => setWrappedLeagueId(Number(e.target.value))}
+                        value={selectedLeagueId ?? ''}
+                        onChange={e => setSelectedLeagueId(Number(e.target.value))}
                         className="input-field text-sm py-1.5 w-full"
                       >
-                        {wrappedLeagues.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                        {leagueOptions.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                       </select>
                     </div>
-                    {wrappedMembers.length > 0 && (
+                    {cardType === 'season-wrapped' && wrappedMembers.length > 0 && (
                       <div>
                         <label className="text-xs text-gray-500 mb-1 block">Player</label>
                         <select
@@ -814,7 +927,7 @@ export default function SocialPage() {
             {/* Scored warning */}
             {scoredWarning && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-700 font-medium">
-                ⚠️ This week hasn't been scored yet. Post-race cards need results first.
+                ⚠️ This week hasn&apos;t been scored yet. Post-race cards need results first.
               </div>
             )}
 
