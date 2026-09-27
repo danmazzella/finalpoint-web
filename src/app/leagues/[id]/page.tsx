@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import PageTitle from '@/components/PageTitle';
 import { ComprehensiveNotificationPrompt } from '@/components/ComprehensiveNotificationPrompt';
+import PositionPicker from '@/components/PositionPicker';
 import { Activity } from '@/lib/api';
 
 interface CurrentRace {
@@ -812,33 +813,12 @@ export default function LeagueDetailPage() {
                             ? 'Select the positions that league members must predict for each race.'
                             : 'Select 1-2 positions that league members must predict for each race.'}
                         </p>
-                        <div className="grid grid-cols-5 gap-2">
-                          {Array.from({ length: 22 }, (_, i) => i + 1).map((position) => {
-                            const isSelected = editingPositions.includes(position);
-                            const atLimit = !isMultiPositionPicksEnabled && editingPositions.length >= 2 && !isSelected;
-                            return (
-                              <label
-                                key={position}
-                                className={`flex items-center justify-center p-2 border rounded-md transition-colors ${isSelected
-                                  ? 'bg-blue-600 text-white border-blue-600'
-                                  : atLimit
-                                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer'
-                                  }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isSelected}
-                                  onChange={() => handlePositionToggle(position)}
-                                  disabled={atLimit}
-                                  className="sr-only"
-                                />
-                                <span className="text-sm font-medium">P{position}</span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">
+                        <PositionPicker
+                          selected={editingPositions}
+                          maxSelections={isMultiPositionPicksEnabled ? 10 : 2}
+                          onToggle={handlePositionToggle}
+                        />
+                        <p className="text-xs text-gray-500">
                           Current: P{league?.requiredPositions?.join(', P') || 'None selected'}
                         </p>
                         <button

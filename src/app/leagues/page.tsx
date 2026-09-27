@@ -6,6 +6,7 @@ import { useChatFeature, useMultiPositionPicks } from '@/contexts/FeatureFlagCon
 import { leaguesAPI, League, chatAPI, seasonsAPI } from '@/lib/api';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle';
+import PositionPicker from '@/components/PositionPicker';
 import { useSearchParams } from 'next/navigation';
 
 export default function LeaguesPage() {
@@ -486,24 +487,11 @@ export default function LeaguesPage() {
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                   Required Positions
                 </label>
-                <div className="grid grid-cols-5 gap-2">
-                  {Array.from({ length: 22 }, (_, i) => i + 1).map((position) => (
-                    <button
-                      key={position}
-                      type="button"
-                      onClick={() => handlePositionToggle(position)}
-                      className={`py-2 text-xs font-semibold rounded-lg border-2 transition-all ${selectedPositions.includes(position)
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                        : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600'
-                        }`}
-                    >
-                      P{position}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-1.5 text-xs text-gray-400">
-                  Select 1-2 positions that league members must predict
-                </p>
+                <PositionPicker
+                  selected={selectedPositions}
+                  maxSelections={isMultiPositionPicksEnabled ? 10 : 2}
+                  onToggle={handlePositionToggle}
+                />
               </div>
 
               <div className="flex gap-3 pt-1">
