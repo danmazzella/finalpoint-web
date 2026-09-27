@@ -487,7 +487,7 @@ export default function LeaguesPage() {
                   Required Positions
                 </label>
                 <div className="grid grid-cols-5 gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((position) => (
+                  {Array.from({ length: 22 }, (_, i) => i + 1).map((position) => (
                     <button
                       key={position}
                       type="button"

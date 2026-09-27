@@ -44,7 +44,7 @@ function StatsPageContent() {
         const positionParam = searchParams.get('position');
         if (positionParam) {
             const position = parseInt(positionParam, 10);
-            if (position >= 1 && position <= 20) {
+            if (position >= 1 && position <= 22) {
                 setSelectedPosition(position);
             }
         }
@@ -119,7 +119,7 @@ function StatsPageContent() {
                         Select a position to see how many times each driver has finished there.
                     </p>
                     <div className="grid grid-cols-5 sm:flex sm:flex-wrap gap-1.5">
-                        {Array.from({ length: 20 }, (_, i) => i + 1).map((position) => (
+                        {Array.from({ length: 22 }, (_, i) => i + 1).map((position) => (
                             <button
                                 key={position}
                                 onClick={() => handlePositionChange(position)}

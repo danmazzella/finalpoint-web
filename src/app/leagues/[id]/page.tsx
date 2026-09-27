@@ -813,7 +813,7 @@ export default function LeagueDetailPage() {
                             : 'Select 1-2 positions that league members must predict for each race.'}
                         </p>
                         <div className="grid grid-cols-5 gap-2">
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((position) => {
+                          {Array.from({ length: 22 }, (_, i) => i + 1).map((position) => {
                             const isSelected = editingPositions.includes(position);
                             const atLimit = !isMultiPositionPicksEnabled && editingPositions.length >= 2 && !isSelected;
                             return (
