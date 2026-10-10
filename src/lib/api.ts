@@ -241,7 +241,8 @@ export const adminAPI = {
     mode: 'diff' | 'apply',
     seasonYear?: number | null,
     force?: boolean,
-  ) => apiService.post('/admin/import-race-results', { weekNumber, eventType, mode, seasonYear, force }),
+    source?: 'jolpica' | 'openf1',
+  ) => apiService.post('/admin/import-race-results', { weekNumber, eventType, mode, seasonYear, force, source }),
   lockRaceResults: (weekNumber: number, eventType: 'race' | 'sprint', locked: boolean, seasonYear?: number | null) =>
     apiService.post('/admin/lock-race-results', { weekNumber, eventType, locked, seasonYear }),
   getResultsImportStatus: (seasonYear?: number | null) =>

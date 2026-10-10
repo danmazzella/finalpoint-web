@@ -29,6 +29,7 @@ interface ImportPreview {
     weekNumber: number;
     seasonYear: number;
     eventType: 'race' | 'sprint';
+    source: 'jolpica' | 'openf1';
     raceName: string;
     feedRound: string | null;
     feedRaceName: string | null;
@@ -38,6 +39,7 @@ interface ImportPreview {
     unmatched: string[];
     ambiguous: string[];
     mappingError: string | null;
+    classifiedCount: number | null;
     state: { source: 'manual' | 'imported'; locked: boolean; notificationsPending: boolean } | null;
 }
 
@@ -70,6 +72,7 @@ export default function ResultsImportModal({
     const [info, setInfo] = useState<string | null>(null);
     const [preview, setPreview] = useState<ImportPreview | null>(null);
     const [needsForce, setNeedsForce] = useState(false);
+    const [source, setSource] = useState<'jolpica' | 'openf1'>('jolpica');
 
     const loadDiff = useCallback(async () => {
         setLoading(true);
@@ -77,7 +80,7 @@ export default function ResultsImportModal({
         setInfo(null);
         setNeedsForce(false);
         try {
-            const res = await adminAPI.importRaceResults(weekNumber, eventType, 'diff', seasonYear);
+            const res = await adminAPI.importRaceResults(weekNumber, eventType, 'diff', seasonYear, false, source);
             setPreview(res.data.data as ImportPreview);
         } catch (e) {
             setError(errText(e, 'Failed to load feed results'));
@@ -85,7 +88,7 @@ export default function ResultsImportModal({
         } finally {
             setLoading(false);
         }
-    }, [weekNumber, eventType, seasonYear]);
+    }, [weekNumber, eventType, seasonYear, source]);
 
     useEffect(() => {
         if (isOpen) loadDiff();
@@ -101,7 +104,7 @@ export default function ResultsImportModal({
         setError(null);
         setInfo(null);
         try {
-            const res = await adminAPI.importRaceResults(weekNumber, eventType, 'apply', seasonYear, force);
+            const res = await adminAPI.importRaceResults(weekNumber, eventType, 'apply', seasonYear, force, source);
             setInfo(res.data.message || 'Results applied.');
             onApplied();
         } catch (e) {
@@ -137,6 +140,9 @@ export default function ResultsImportModal({
                             <p className="text-sm text-gray-500">
                                 {preview.raceName}
                                 {preview.feedRound ? ` · feed round ${preview.feedRound}` : ''}
+                                {preview.source === 'openf1' && preview.classifiedCount != null
+                                    ? ` · ${preview.classifiedCount} classified, ${preview.feedResults.length - preview.classifiedCount} retired`
+                                    : ''}
                                 {preview.state ? ` · currently: ${preview.state.source}${preview.state.locked ? ' (locked)' : ''}` : ''}
                             </p>
                         )}
@@ -144,6 +150,29 @@ export default function ResultsImportModal({
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Close">
                         ✕
                     </button>
+                </div>
+
+                <div className="flex items-center gap-2 border-b border-gray-200 px-6 py-3">
+                    <span className="text-sm font-medium text-gray-700">Source:</span>
+                    {(['jolpica', 'openf1'] as const).map((s) => (
+                        <button
+                            key={s}
+                            disabled={loading || applying}
+                            onClick={() => setSource(s)}
+                            className={`rounded-full px-3 py-1 text-sm font-medium transition-colors disabled:opacity-50 ${
+                                source === s
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            {s === 'jolpica' ? 'Jolpica (Ergast)' : 'OpenF1'}
+                        </button>
+                    ))}
+                    <span className="ml-1 text-xs text-gray-400">
+                        {source === 'jolpica'
+                            ? 'Scored results, name/team matched. Can lag hours after the flag.'
+                            : 'Faster, car-number matched. May 401 while any real F1 session is live.'}
+                    </span>
                 </div>
 
                 <div className="max-h-[70vh] overflow-y-auto px-6 py-4">
