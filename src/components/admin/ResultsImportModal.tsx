@@ -55,7 +55,10 @@ interface Props {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const errText = (e: any, fallback: string) =>
-    e?.response?.data?.message || e?.response?.data?.error?.message || (e instanceof Error ? e.message : fallback);
+    e?.response?.data?.message ||
+    e?.response?.data?.error?.message ||
+    e?.response?.data?.errors?.[0]?.message || // ErrorClass().addServerError(...) shape
+    (e instanceof Error ? e.message : fallback);
 
 export default function ResultsImportModal({
     isOpen,
